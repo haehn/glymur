@@ -20,7 +20,8 @@ import glymur
 
 from .fixtures import opj_data_file, OPJ_DATA_ROOT
 
-@unittest.skipIf(sys.platform.startswith('linux'), 'warnings failing on linux')
+@unittest.skipIf(sys.hexversion < 0x03030000,
+                 "assertWarn methods introduced in 3.x")
 @unittest.skipIf(OPJ_DATA_ROOT is None,
                  "OPJ_DATA_ROOT environment variable not set")
 class TestCodestreamOpjDataWarnings(unittest.TestCase):
@@ -29,39 +30,26 @@ class TestCodestreamOpjDataWarnings(unittest.TestCase):
     def test_bad_rsiz(self):
         """Should warn if RSIZ is bad.  Issue196"""
         filename = opj_data_file('input/nonregression/edf_c2_1002767.jp2')
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter('always')
+        with self.assertWarnsRegex(UserWarning, 'Invalid profile'):
             j = Jp2k(filename)
-            self.assertEqual(len(w), 3)
-            self.assertTrue(issubclass(w[0].category, UserWarning))
-            self.assertTrue('Invalid profile' in str(w[0].message))
 
     def test_bad_wavelet_transform(self):
         """Should warn if wavelet transform is bad.  Issue195"""
         filename = opj_data_file('input/nonregression/edf_c2_10025.jp2')
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter('always')
+        with self.assertWarnsRegex(UserWarning, 'Invalid wavelet transform'):
             j = Jp2k(filename)
-            self.assertTrue(issubclass(w[0].category, UserWarning))
-            self.assertTrue('Invalid wavelet transform' in str(w[0].message))
 
     def test_invalid_progression_order(self):
         """Should still be able to parse even if prog order is invalid."""
         jfile = opj_data_file('input/nonregression/2977.pdf.asan.67.2198.jp2')
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter('always')
+        with self.assertWarnsRegex(UserWarning, 'Invalid progression order'):
             Jp2k(jfile)
-            self.assertTrue(issubclass(w[0].category, UserWarning))
-            self.assertTrue('Invalid progression order' in str(w[0].message))
 
     def test_tile_height_is_zero(self):
         """Zero tile height should not cause an exception."""
         filename = opj_data_file('input/nonregression/2539.pdf.SIGFPE.706.1712.jp2')
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter('always')
+        with self.assertWarnsRegex(UserWarning, 'Invalid tile dimensions'):
             Jp2k(filename)
-            self.assertTrue(issubclass(w[0].category, UserWarning))
-            self.assertTrue('Invalid tile dimensions' in str(w[0].message))
 
     @unittest.skipIf(os.name == "nt", "Temporary file issue on window.")
     def test_unknown_marker_segment(self):
@@ -84,12 +72,9 @@ class TestCodestreamOpjDataWarnings(unittest.TestCase):
                 read_buffer = ifile.read()
                 tfile.write(read_buffer)
                 tfile.flush()
-
-                with warnings.catch_warnings(record=True) as w:
-                    warnings.simplefilter('always')
+ 
+                with self.assertWarnsRegex(UserWarning, 'Unrecognized marker'):
                     codestream = Jp2k(tfile.name).get_codestream()
-                    self.assertTrue(issubclass(w[0].category, UserWarning))
-                    self.assertTrue('Unrecognized marker' in str(w[0].message))
 
                 self.assertEqual(codestream.segment[2].marker_id, '0xff79')
                 self.assertEqual(codestream.segment[2].length, 3)
