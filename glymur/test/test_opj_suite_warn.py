@@ -42,6 +42,8 @@ from .fixtures import OPJ_DATA_ROOT
 from .fixtures import mse, peak_tolerance, read_pgx, opj_data_file
 
 
+@unittest.skipIf(sys.hexversion < 0x03030000,
+                 "assertWarn methods introduced in 3.x")
 @unittest.skipIf(OPJ_DATA_ROOT is None,
                  "OPJ_DATA_ROOT environment variable not set")
 class TestSuiteDumpWarnings(unittest.TestCase):
@@ -54,8 +56,7 @@ class TestSuiteDumpWarnings(unittest.TestCase):
 
     def test_NR_broken_jp2_dump(self):
         jfile = opj_data_file('input/nonregression/broken.jp2')
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter('ignore')
+        with self.assertWarnsRegex(UserWarning, 'incorrect box length'):
             # colr box has bad length.
             jp2 = Jp2k(jfile)
 
@@ -180,8 +181,8 @@ class TestSuiteDumpWarnings(unittest.TestCase):
     def test_NR_broken2_jp2_dump(self):
         # Invalid marker ID on codestream.
         jfile = opj_data_file('input/nonregression/broken2.jp2')
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter('ignore')
+        msg = 'Invalid marker id encountered at byte'
+        with self.assertWarnsRegex(UserWarning, msg):
             jp2 = Jp2k(jfile)
 
         self.assertEqual(jp2.box[-1].main_header.segment[-1].marker_id, 'QCC')
@@ -195,8 +196,8 @@ class TestSuiteDumpWarnings(unittest.TestCase):
         length of over 1GB.  Don't run it on 32-bit platforms.
         """
         jfile = opj_data_file('input/nonregression/broken3.jp2')
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter('ignore')
+        msg = r'box has incorrect box length \(\d+\)'
+        with self.assertWarnsRegex(UserWarning, msg):
             jp2 = Jp2k(jfile)
 
         ids = [box.box_id for box in jp2.box]
@@ -320,8 +321,8 @@ class TestSuiteDumpWarnings(unittest.TestCase):
     def test_NR_broken4_jp2_dump(self):
         # Has an invalid marker in the main header
         jfile = opj_data_file('input/nonregression/broken4.jp2')
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter('ignore')
+        regex = r'Invalid marker id encountered at byte \d+ in codestream'
+        with self.assertWarnsRegex(UserWarning, regex):
             jp2 = Jp2k(jfile)
 
         self.assertEqual(jp2.box[-1].main_header.segment[-1].marker_id, 'QCC')
@@ -330,15 +331,20 @@ class TestSuiteDumpWarnings(unittest.TestCase):
         lst = ['input', 'nonregression',
                'gdal_fuzzer_assert_in_opj_j2k_read_SQcd_SQcc.patch.jp2']
         jfile = opj_data_file('/'.join(lst))
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter('ignore')
+        regex = re.compile(r"""Invalid\scomponent\snumber\s\(\d+\),\s
+                               number\sof\scomponents\sis\sonly\s\d+""",
+                           re.VERBOSE)
+        with self.assertWarnsRegex(UserWarning, regex):
             Jp2k(jfile)
 
     def test_NR_gdal_fuzzer_check_comp_dx_dy_jp2_dump(self):
         lst = ['input', 'nonregression', 'gdal_fuzzer_check_comp_dx_dy.jp2']
         jfile = opj_data_file('/'.join(lst))
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter('ignore')
+        regex = re.compile(r"""Invalid\ssubsampling\svalue\sfor\scomponent\s
+                               \d+:\s+
+                               dx=\d+,\s*dy=\d+""",
+                           re.VERBOSE)
+        with self.assertWarnsRegex(UserWarning, regex):
             Jp2k(jfile)
 
     def test_NR_gdal_fuzzer_check_number_of_tiles(self):
@@ -346,8 +352,10 @@ class TestSuiteDumpWarnings(unittest.TestCase):
         lst = ['input', 'nonregression',
                'gdal_fuzzer_check_number_of_tiles.jp2']
         jfile = opj_data_file('/'.join(lst))
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter('ignore')
+        regex = re.compile(r"""Invalid\snumber\sof\stiles\s
+                               \(\d+\)\.""",
+                           re.VERBOSE)
+        with self.assertWarnsRegex(UserWarning, regex):
             Jp2k(jfile)
 
     def test_NR_gdal_fuzzer_unchecked_numresolutions_dump(self):
@@ -355,8 +363,10 @@ class TestSuiteDumpWarnings(unittest.TestCase):
         lst = ['input', 'nonregression',
                'gdal_fuzzer_unchecked_numresolutions.jp2']
         jfile = opj_data_file('/'.join(lst))
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter('ignore')
+        regex = re.compile(r"""Invalid\snumber\sof\sresolutions\s
+                               \(\d+\)\.""",
+                           re.VERBOSE)
+        with self.assertWarnsRegex(UserWarning, regex):
             Jp2k(jfile)
 
     @unittest.skipIf(re.match("1.5|2.0.0", glymur.version.openjpeg_version),
@@ -366,8 +376,9 @@ class TestSuiteDumpWarnings(unittest.TestCase):
         # really does deserve a warning.
         relpath = 'input/nonregression/issue188_beach_64bitsbox.jp2'
         jfile = opj_data_file(relpath)
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter('ignore')
+        regex = re.compile(r"""Unrecognized\sbox\s\(b'XML\s'\)\sencountered.""",
+                           re.VERBOSE)
+        with self.assertWarnsRegex(UserWarning, regex):
             j = Jp2k(jfile)
         d = j.read()
 
