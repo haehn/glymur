@@ -28,6 +28,70 @@ from .fixtures import opj_data_file, OPJ_DATA_ROOT
 class TestWarnings(unittest.TestCase):
     """Test suite for warnings issued by glymur."""
 
+    def test_NR_DEC_issue188_beach_64bitsbox_jp2_41_decode(self):
+        """
+        Has an 'XML ' box instead of 'xml '.  Yes that is pedantic, but it
+        really does deserve a warning.
+        """
+        relpath = 'input/nonregression/issue188_beach_64bitsbox.jp2'
+        jfile = opj_data_file(relpath)
+        regex = re.compile(r"""Unrecognized\sbox\s\(b'XML\s'\)\sencountered.""",
+                           re.VERBOSE)
+        with self.assertWarnsRegex(UserWarning, regex):
+            Jp2k(jfile)
+
+
+    def test_NR_gdal_fuzzer_unchecked_numresolutions_dump(self):
+        """
+        Has an invalid number of resolutions.
+        """
+        lst = ['input', 'nonregression',
+               'gdal_fuzzer_unchecked_numresolutions.jp2']
+        jfile = opj_data_file('/'.join(lst))
+        regex = re.compile(r"""Invalid\snumber\sof\sresolutions\s
+                               \(\d+\)\.""",
+                           re.VERBOSE)
+        with self.assertWarnsRegex(UserWarning, regex):
+            Jp2k(jfile)
+
+    @unittest.skipIf(re.match("1.5|2.0.0", glymur.version.openjpeg_version),
+                     "Test not passing on 1.5.x, not introduced until 2.x")
+    def test_NR_gdal_fuzzer_check_number_of_tiles(self):
+        """
+        Has an impossible tiling setup.
+        """
+        lst = ['input', 'nonregression',
+               'gdal_fuzzer_check_number_of_tiles.jp2']
+        jfile = opj_data_file('/'.join(lst))
+        regex = re.compile(r"""Invalid\snumber\sof\stiles\s
+                               \(\d+\)\.""",
+                           re.VERBOSE)
+        with self.assertWarnsRegex(UserWarning, regex):
+            Jp2k(jfile)
+
+    def test_NR_gdal_fuzzer_check_comp_dx_dy_jp2_dump(self):
+        """
+        Invalid subsampling value.
+        """
+        lst = ['input', 'nonregression', 'gdal_fuzzer_check_comp_dx_dy.jp2']
+        jfile = opj_data_file('/'.join(lst))
+        regex = re.compile(r"""Invalid\ssubsampling\svalue\sfor\scomponent\s
+                               \d+:\s+
+                               dx=\d+,\s*dy=\d+""",
+                           re.VERBOSE)
+        with self.assertWarnsRegex(UserWarning, regex):
+            Jp2k(jfile)
+
+    def test_NR_gdal_fuzzer_assert_in_opj_j2k_read_SQcd_SQcc_patch_jp2(self):
+        lst = ['input', 'nonregression',
+               'gdal_fuzzer_assert_in_opj_j2k_read_SQcd_SQcc.patch.jp2']
+        jfile = opj_data_file('/'.join(lst))
+        regex = re.compile(r"""Invalid\scomponent\snumber\s\(\d+\),\s
+                               number\sof\scomponents\sis\sonly\s\d+""",
+                           re.VERBOSE)
+        with self.assertWarnsRegex(UserWarning, regex):
+            Jp2k(jfile)
+
     def test_NR_broken_jp2_dump(self):
         """
         The colr box has a ridiculously incorrect box length.
@@ -48,19 +112,42 @@ class TestWarnings(unittest.TestCase):
                                \d+\sin\scodestream:\s*"0x[a-fA-F0-9]{4}"''', 
                            re.VERBOSE)
         with self.assertWarnsRegex(UserWarning, regex):
+            Jp2k(jfile)
+
+    def test_NR_broken4_jp2_dump(self):
+        """
+        Has an invalid marker in the main header
+        """
+        jfile = opj_data_file('input/nonregression/broken4.jp2')
+        regex = r'Invalid marker id encountered at byte \d+ in codestream'
+        with self.assertWarnsRegex(UserWarning, regex):
             jp2 = Jp2k(jfile)
+
+    @unittest.skipIf(sys.maxsize < 2**32, 'Do not run on 32-bit platforms')
+    def test_NR_broken3_jp2_dump(self):
+        """
+        Has an impossibly large box length.
+
+        The file in question here has a colr box with an erroneous box
+        length of over 1GB.  Don't run it on 32-bit platforms.
+        """
+        jfile = opj_data_file('input/nonregression/broken3.jp2')
+        regex = re.compile(r'''b'colr'\sbox\shas\sincorrect\sbox\slength\s
+                               \(\d+\)''', re.VERBOSE)
+        with self.assertWarnsRegex(UserWarning, regex):
+            Jp2k(jfile)
 
     def test_bad_rsiz(self):
         """Should warn if RSIZ is bad.  Issue196"""
         filename = opj_data_file('input/nonregression/edf_c2_1002767.jp2')
         with self.assertWarnsRegex(UserWarning, 'Invalid profile'):
-            j = Jp2k(filename)
+            Jp2k(filename)
 
     def test_bad_wavelet_transform(self):
         """Should warn if wavelet transform is bad.  Issue195"""
         filename = opj_data_file('input/nonregression/edf_c2_10025.jp2')
         with self.assertWarnsRegex(UserWarning, 'Invalid wavelet transform'):
-            j = Jp2k(filename)
+            Jp2k(filename)
 
     def test_invalid_progression_order(self):
         """Should still be able to parse even if prog order is invalid."""
@@ -98,10 +185,6 @@ class TestWarnings(unittest.TestCase):
  
                 with self.assertWarnsRegex(UserWarning, 'Unrecognized marker'):
                     codestream = Jp2k(tfile.name).get_codestream()
-
-                self.assertEqual(codestream.segment[2].marker_id, '0xff79')
-                self.assertEqual(codestream.segment[2].length, 3)
-                self.assertEqual(codestream.segment[2].data, b'\x00')
 
 
 if __name__ == "__main__":
