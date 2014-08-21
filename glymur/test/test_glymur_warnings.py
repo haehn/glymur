@@ -28,6 +28,25 @@ from .fixtures import opj_data_file, OPJ_DATA_ROOT
 class TestWarnings(unittest.TestCase):
     """Test suite for warnings issued by glymur."""
 
+    def test_exceeded_box_length(self):
+        """
+        should warn if reading past end of a box
+
+        Verify that a warning is issued if we read past the end of a box
+        This file has a palette (pclr) box whose length is impossibly
+        short.
+        """
+        infile = os.path.join(OPJ_DATA_ROOT,
+                              'input/nonregression/mem-b2ace68c-1381.jp2')
+        regex = re.compile(r'''Encountered\san\sunrecoverable\sValueError\s
+                               while\sparsing\sa\spclr\sbox\sat\sbyte\soffset\s
+                               \d+\.\s+The\soriginal\serror\smessage\swas\s
+                               "total\ssize\sof\snew\sarray\smust\sbe\s
+                               unchanged"''',
+                           re.VERBOSE)
+        with self.assertWarnsRegex(UserWarning, regex):
+            Jp2k(infile)
+
     def test_NR_DEC_issue188_beach_64bitsbox_jp2_41_decode(self):
         """
         Has an 'XML ' box instead of 'xml '.  Yes that is pedantic, but it
