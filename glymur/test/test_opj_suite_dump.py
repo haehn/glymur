@@ -52,6 +52,18 @@ class TestSuiteDump(unittest.TestCase):
     def tearDown(self):
         pass
 
+    def test_NR_broken2_jp2_dump(self):
+        """
+        Invalid marker ID in the codestream.
+        """
+        jfile = opj_data_file('input/nonregression/broken2.jp2')
+        with warnings.catch_warnings():
+            # Invalid marker ID on codestream.
+            warnings.simplefilter("ignore")
+            jp2 = Jp2k(jfile)
+        
+        self.assertEqual(jp2.box[-1].main_header.segment[-1].marker_id, 'QCC')
+
     def test_NR_file409752(self):
         jfile = opj_data_file('input/nonregression/file409752.jp2')
         jp2 = Jp2k(jfile)
@@ -4594,8 +4606,7 @@ class TestSuiteDump(unittest.TestCase):
         lst = ['input', 'nonregression', 'issue188_beach_64bitsbox.jp2']
         jfile = opj_data_file('/'.join(lst))
         with warnings.catch_warnings():
-            # There's a warning for an unknown box.  We explicitly test for
-            # that down below.
+            # There's a warning for an unknown box.  
             warnings.simplefilter("ignore")
             jp2 = Jp2k(jfile)
 

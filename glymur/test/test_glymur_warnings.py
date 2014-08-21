@@ -1,5 +1,5 @@
 """
-Test suite for codestream parsing.
+Test suite for warnings issued by glymur.
 """
 
 # unittest doesn't work well with R0904.
@@ -9,6 +9,7 @@ Test suite for codestream parsing.
 # pylint: disable=E1101
 
 import os
+import re
 import struct
 import sys
 import tempfile
@@ -24,8 +25,30 @@ from .fixtures import opj_data_file, OPJ_DATA_ROOT
                  "assertWarn methods introduced in 3.x")
 @unittest.skipIf(OPJ_DATA_ROOT is None,
                  "OPJ_DATA_ROOT environment variable not set")
-class TestCodestreamOpjDataWarnings(unittest.TestCase):
-    """Test suite for unusual codestream cases.  Uses OPJ_DATA_ROOT"""
+class TestWarnings(unittest.TestCase):
+    """Test suite for warnings issued by glymur."""
+
+    def test_NR_broken_jp2_dump(self):
+        """
+        The colr box has a ridiculously incorrect box length.
+        """
+        jfile = opj_data_file('input/nonregression/broken.jp2')
+        regex = re.compile(r'''b'colr'\sbox\shas\sincorrect\sbox\slength\s
+                               \(\d+\)''',
+                           re.VERBOSE)
+        with self.assertWarnsRegex(UserWarning, regex):
+            jp2 = Jp2k(jfile)
+
+    def test_NR_broken2_jp2_dump(self):
+        """
+        Invalid marker ID on codestream.
+        """
+        jfile = opj_data_file('input/nonregression/broken2.jp2')
+        regex = re.compile(r'''Invalid\smarker\sid\sencountered\sat\sbyte\s
+                               \d+\sin\scodestream:\s*"0x[a-fA-F0-9]{4}"''', 
+                           re.VERBOSE)
+        with self.assertWarnsRegex(UserWarning, regex):
+            jp2 = Jp2k(jfile)
 
     def test_bad_rsiz(self):
         """Should warn if RSIZ is bad.  Issue196"""

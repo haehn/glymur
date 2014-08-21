@@ -11,6 +11,7 @@
 # pylint: disable=R0904
 
 import os
+import re
 import struct
 import sys
 import tempfile
@@ -70,6 +71,8 @@ class TestPrinting(unittest.TestCase):
 
         self.assertTrue(True)
 
+    @unittest.skipIf(sys.hexversion < 0x03030000,
+                     "assertWarn methods introduced in 3.x")
     def test_unknown_superbox(self):
         """Verify that we can handle an unknown superbox."""
         with tempfile.NamedTemporaryFile(suffix='.jpx') as tfile:
@@ -86,10 +89,10 @@ class TestPrinting(unittest.TestCase):
             tfile.write(write_buffer)
             tfile.flush()
 
-            with warnings.catch_warnings(record=True) as w:
-                warnings.simplefilter('always')
+            regex = re.compile(r'''Unrecognized\sbox\s\(b'grp\s'\)\s
+                                   encountered.''', re.VERBOSE)
+            with self.assertWarnsRegex(UserWarning, regex):
                 jpx = Jp2k(tfile.name)
-                self.assertTrue(len(w), 1)
 
             glymur.set_printoptions(short=True)
             with patch('sys.stdout', new=StringIO()) as fake_out:
@@ -725,8 +728,6 @@ class TestPrintingOpjDataRoot(unittest.TestCase):
         # Reset printoptions for every test.
         glymur.set_printoptions(short=False, xml=True, codestream=True)
 
-        warnings.resetwarnings()
-
     def tearDown(self):
         pass
 
@@ -744,33 +745,43 @@ class TestPrintingOpjDataRoot(unittest.TestCase):
         """An invalid colorspace shouldn't cause an error."""
         filename = opj_data_file('input/nonregression/edf_c2_1103421.jp2')
         with warnings.catch_warnings():
+            # Bad compatibility list item and bad colorspace warnings.  Just
+            # suppress the warnings.
             warnings.simplefilter("ignore")
             jp2 = Jp2k(filename)
         with patch('sys.stdout', new=StringIO()) as fake_out:
             print(jp2)
 
+    @unittest.skipIf(sys.hexversion < 0x03030000,
+                     "assertWarn methods introduced in 3.x")
     def test_bad_rsiz(self):
         """Should still be able to print if rsiz is bad, issue196"""
         filename = opj_data_file('input/nonregression/edf_c2_1002767.jp2')
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
+        regex = re.compile(r'''Invalid\sprofile:\s\(Rsiz=\d+\)\.''', re.VERBOSE)
+        with self.assertWarnsRegex(UserWarning, regex):
             j = Jp2k(filename)
         with patch('sys.stdout', new=StringIO()) as fake_out:
             print(j)
 
+    @unittest.skipIf(sys.hexversion < 0x03030000,
+                     "assertWarn methods introduced in 3.x")
     def test_bad_wavelet_transform(self):
         """Should still be able to print if wavelet xform is bad, issue195"""
         filename = opj_data_file('input/nonregression/edf_c2_10025.jp2')
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
+        regex = re.compile(r'''Invalid\swavelet\stransform\sin\sCOD\ssegment:\s
+                               \d+\.''', re.VERBOSE)
+        with self.assertWarnsRegex(UserWarning, regex):
             j = Jp2k(filename)
         with patch('sys.stdout', new=StringIO()) as fake_out:
             print(j)
 
+    @unittest.skipIf(sys.hexversion < 0x03030000,
+                     "assertWarn methods introduced in 3.x")
     def test_invalid_progression_order(self):
         """Should still be able to print even if prog order is invalid."""
         jfile = opj_data_file('input/nonregression/2977.pdf.asan.67.2198.jp2')
         with warnings.catch_warnings():
+            # Multiple warnings, actually.
             warnings.simplefilter("ignore")
             jp2 = Jp2k(jfile)
             codestream = jp2.get_codestream()
@@ -1058,10 +1069,7 @@ class TestPrintingOpjDataRoot(unittest.TestCase):
     def test_uuid(self):
         """verify printing of UUID box"""
         filename = opj_data_file('input/nonregression/text_GBR.jp2')
-        with warnings.catch_warnings():
-            # brand is 'jp2 ', but has any icc profile.
-            warnings.simplefilter("ignore")
-            jp2 = Jp2k(filename)
+        jp2 = Jp2k(filename)
 
         with patch('sys.stdout', new=StringIO()) as fake_out:
             print(jp2.box[4])
