@@ -71,15 +71,13 @@ class TestPrinting(unittest.TestCase):
 
         self.assertTrue(True)
 
-    @unittest.skipIf(sys.hexversion < 0x03030000,
-                     "assertWarn methods introduced in 3.x")
     def test_unknown_superbox(self):
         """Verify that we can handle an unknown superbox."""
         with tempfile.NamedTemporaryFile(suffix='.jpx') as tfile:
             with open(self.jpxfile, 'rb') as ifile:
                 tfile.write(ifile.read())
             
-            # Add the header for an unknwon superbox.
+            # Add the header for an unknown superbox.
             write_buffer = struct.pack('>I4s', 20, 'grp '.encode())
             tfile.write(write_buffer)
 
@@ -89,9 +87,9 @@ class TestPrinting(unittest.TestCase):
             tfile.write(write_buffer)
             tfile.flush()
 
-            regex = re.compile(r'''Unrecognized\sbox\s\(b'grp\s'\)\s
-                                   encountered.''', re.VERBOSE)
-            with self.assertWarnsRegex(UserWarning, regex):
+            with warnings.catch_warnings():
+                # Suppress the warning about the unrecognized box.
+                warnings.simplefilter("ignore")
                 jpx = Jp2k(tfile.name)
 
             glymur.set_printoptions(short=True)
@@ -752,31 +750,24 @@ class TestPrintingOpjDataRoot(unittest.TestCase):
         with patch('sys.stdout', new=StringIO()) as fake_out:
             print(jp2)
 
-    @unittest.skipIf(sys.hexversion < 0x03030000,
-                     "assertWarn methods introduced in 3.x")
     def test_bad_rsiz(self):
         """Should still be able to print if rsiz is bad, issue196"""
         filename = opj_data_file('input/nonregression/edf_c2_1002767.jp2')
-        regex = re.compile(r'''Invalid\sprofile:\s\(Rsiz=\d+\)\.''', re.VERBOSE)
-        with self.assertWarnsRegex(UserWarning, regex):
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
             j = Jp2k(filename)
         with patch('sys.stdout', new=StringIO()) as fake_out:
             print(j)
 
-    @unittest.skipIf(sys.hexversion < 0x03030000,
-                     "assertWarn methods introduced in 3.x")
     def test_bad_wavelet_transform(self):
         """Should still be able to print if wavelet xform is bad, issue195"""
         filename = opj_data_file('input/nonregression/edf_c2_10025.jp2')
-        regex = re.compile(r'''Invalid\swavelet\stransform\sin\sCOD\ssegment:\s
-                               \d+\.''', re.VERBOSE)
-        with self.assertWarnsRegex(UserWarning, regex):
-            j = Jp2k(filename)
-        with patch('sys.stdout', new=StringIO()) as fake_out:
-            print(j)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            jp2 = Jp2k(filename)
+            with patch('sys.stdout', new=StringIO()) as fake_out:
+                print(jp2)
 
-    @unittest.skipIf(sys.hexversion < 0x03030000,
-                     "assertWarn methods introduced in 3.x")
     def test_invalid_progression_order(self):
         """Should still be able to print even if prog order is invalid."""
         jfile = opj_data_file('input/nonregression/2977.pdf.asan.67.2198.jp2')
