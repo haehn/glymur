@@ -74,24 +74,11 @@ class TestSliceProtocol(unittest.TestCase):
         with self.assertRaises(IndexError):
             self.j2k[::3, ::3]
 
-    def test_start_and_resolution_stride_not_allowed_at_same_time(self):
-        with self.assertRaises(IndexError):
-            self.j2k[2::2, 2::2]
-
-    def test_stop_and_resolution_stride_not_allowed_at_same_time(self):
-        with self.assertRaises(IndexError):
-            self.j2k[:8:2, :8:2]
-
     def test_integer_index_in_3d(self):
 
-        d = self.j2k[:,:,0]
-        np.testing.assert_array_equal(self.j2k_data[:,:,0], d)
-
-        d = self.j2k[:,:,1]
-        np.testing.assert_array_equal(self.j2k_data[:,:,1], d)
-
-        d = self.j2k[:,:,2]
-        np.testing.assert_array_equal(self.j2k_data[:,:,2], d)
+        for j in [0, 1, 2]:
+            band = self.j2k[:, :, j]
+            np.testing.assert_array_equal(self.j2k_data[:, :, j], band)
 
     def test_slice_in_third_dimension(self):
         actual = self.j2k[:,:,1:3]
@@ -103,13 +90,15 @@ class TestSliceProtocol(unittest.TestCase):
         all = self.j2k.read(rlevel=1)
         np.testing.assert_array_equal(all[:,:,1:3], d)
 
-    def test_full_resolution_slicing_by_quarters(self):
-        # upper left
-        np.testing.assert_array_equal(self.jp2_data[:728, :1296],
-                                      self.jp2[:728, :1296])
-        # lower left
-        np.testing.assert_array_equal(self.jp2_data[728:, :1296],
-                                      self.jp2[728:, :1296])
+    def test_full_resolution_slicing_by_quarters_upper_left(self):
+        actual = self.jp2[:728, :1296]
+        expected = self.jp2_data[:728, :1296]
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_full_resolution_slicing_by_quarters_lower_left(self):
+        actual = self.jp2[728:, :1296]
+        expected = self.jp2_data[728:, :1296]
+        np.testing.assert_array_equal(actual, expected)
 
     def test_full_resolution_slicing_by_quarters_upper_right(self):
         actual = self.jp2[:728, 1296:]
