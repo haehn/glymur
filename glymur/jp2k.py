@@ -761,6 +761,7 @@ class Jp2k(Jp2kBox):
 
     def __getitem__(self, *pargs):
         """
+        Slicing protocol.
         """
         if isinstance(pargs[0], slice):
             # Should have a slice object where start = stop = step = None
@@ -778,10 +779,11 @@ class Jp2k(Jp2kBox):
         # Assuming tuple from now on.
         ridx = pargs[0][0]
         cidx = pargs[0][1]
+        bidx = pargs[0][2]
 
         if ((ridx.step is None) and (cidx.step is None)):
             # Slicing with full resolution.
-            return self.read()[ridx, cidx]
+            return self.read()[ridx, cidx, bidx]
 
         if ((ridx.start is not None) or
                 (ridx.stop is not None) or
