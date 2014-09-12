@@ -52,74 +52,92 @@ def load_tests(loader, tests, ignore):
     return tests
 
 
-class TestJp2k(unittest.TestCase):
-    """These tests should be run by just about all configuration."""
-
+class TestSliceProtocol(unittest.TestCase):
+    """
+    Test slice protocol, i.e. when using [ ] to read image data.
+    """
     def setUp(self):
         self.jp2file = glymur.data.nemo()
-        self.j2kfile = glymur.data.goodstuff()
+        self.j2k = Jp2k(glymur.data.goodstuff())
         self.jpxfile = glymur.data.jpxfile()
 
     def tearDown(self):
         pass
 
-    def test_slice_protocol_negative(self):
-        """
-        """
-        j = Jp2k(self.j2kfile)
-
+    def test_resolution_strides_cannot_differ(self):
         with self.assertRaises(IndexError):
             # Strides in x/y directions cannot differ.
-            d = j[::2, ::3]
+            self.j2k[::2, ::3]
 
+    def test_resolution_strides_must_be_powers_of_two(self):
         with self.assertRaises(IndexError):
-            # Strides in x/y direction must be powers of 2.
-            d = j[::3, ::3]
+            self.j2k[::3, ::3]
 
-        # start and stop are not supported when slicing on Jp2k object
+    def test_start_and_resolution_stride_not_allowed_at_same_time(self):
         with self.assertRaises(IndexError):
-            d = j[2::2, 2::2]
-        with self.assertRaises(IndexError):
-            d = j[:8:2, :8:2]
-        with self.assertRaises(IndexError):
-            d = j[2:8:2, 2:8:2]
+            self.j2k[2::2, 2::2]
 
-    def test_slice_protocol_3d(self):
-        """
-        """
-        j = Jp2k(self.j2kfile)
-        all = j.read()
+    def test_stop_and_resolution_stride_not_allowed_at_same_time(self):
+        with self.assertRaises(IndexError):
+            self.j2k[:8:2, :8:2]
 
-        d = j[:,:,0]
+    def test_integer_index_in_3d(self):
+        all = self.j2k.read()
+
+        d = self.j2k[:,:,0]
         np.testing.assert_array_equal(all[:,:,0], d)
 
-        d = j[:,:,1]
+        d = self.j2k[:,:,1]
         np.testing.assert_array_equal(all[:,:,1], d)
 
-        d = j[:,:,2]
+        d = self.j2k[:,:,2]
         np.testing.assert_array_equal(all[:,:,2], d)
 
-        d = j[:,:,1:3]
+    def test_slice_in_third_dimension(self):
+        all = self.j2k.read()
+
+        d = self.j2k[:,:,1:3]
         np.testing.assert_array_equal(all[:,:,1:3], d)
 
-        d = j[::2, ::2, 1:3]
+    def test_reduce_resolution_and_slice_in_third_dimension(self):
+        d = self.j2k[::2, ::2, 1:3]
         all = j.read(rlevel=1)
         np.testing.assert_array_equal(all[:,:,1:3], d)
 
-    def test_slice_protocol_2d(self):
-        """
+    def test_full_resolution_upper_left_quarter(self):
+        all = self.jp2[:]
 
-        """
-        j = Jp2k(self.j2kfile)
+        d = j[:728, :1296]
+        np.testing.assert_array_equal(all[:728, :1296], d)
 
-        d = j[:]
+    def test_full_resolution_lower_left_quarter(self):
+        all = self.jp2[:]
+
+        d = j[728:, :1296]
+        np.testing.assert_array_equal(all[728:, :1296], d)
+
+    def test_full_resolution_upper_right_quarter(self):
+        """
+        Slice protocol should work when not reducing resolution.
+        """
+        all = j[:]
+
+        d = j[:728, 1296:]
+        np.testing.assert_array_equal(all[:728, 1296:], d)
+
+    def test_full_resolution_lower_right_quarter(self):
+        all = j[:]
+
+        d = j[728:, 1296:]
+        np.testing.assert_array_equal(all[728:, :1296:], d)
+
+    def test_slice_protocol_2d_reduce_resolution(self):
+        d = self.j2k[:]
         self.assertEqual(d.shape, (800, 480, 3))
 
-        # Stride of one.
         d = j[::1, ::1]
         self.assertEqual(d.shape, (800, 480, 3))
 
-        # Stride of 2.
         d = j[::2, ::2]
         self.assertEqual(d.shape, (400, 240, 3))
 
@@ -134,6 +152,18 @@ class TestJp2k(unittest.TestCase):
 
         d = j[::32, ::32]
         self.assertEqual(d.shape, (25, 15, 3))
+
+class TestJp2k(unittest.TestCase):
+    """These tests should be run by just about all configuration."""
+
+    def setUp(self):
+        self.jp2file = glymur.data.nemo()
+        self.j2kfile = glymur.data.goodstuff()
+        self.jpxfile = glymur.data.jpxfile()
+
+    def tearDown(self):
+        pass
+
 
     @unittest.skipIf(os.name == "nt", "Unexplained failure on windows")
     def test_irreversible(self):
