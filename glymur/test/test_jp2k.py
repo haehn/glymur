@@ -52,6 +52,106 @@ def load_tests(loader, tests, ignore):
     return tests
 
 
+class TestSliceProtocol(unittest.TestCase):
+    """
+    Test slice protocol, i.e. when using [ ] to read image data.
+    """
+    @classmethod
+    def setUpClass(self):
+
+        self.jp2 = Jp2k(glymur.data.nemo())
+        self.jp2_data = self.jp2.read()
+
+        self.j2k = Jp2k(glymur.data.goodstuff())
+        self.j2k_data = self.j2k.read()
+
+    def test_resolution_strides_cannot_differ(self):
+        with self.assertRaises(IndexError):
+            # Strides in x/y directions cannot differ.
+            self.j2k[::2, ::3]
+
+    def test_resolution_strides_must_be_powers_of_two(self):
+        with self.assertRaises(IndexError):
+            self.j2k[::3, ::3]
+
+    def test_integer_index_in_3d(self):
+
+        for j in [0, 1, 2]:
+            band = self.j2k[:, :, j]
+            np.testing.assert_array_equal(self.j2k_data[:, :, j], band)
+
+    def test_slice_in_third_dimension(self):
+        actual = self.j2k[:,:,1:3]
+        expected = self.j2k_data[:,:,1:3]
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_reduce_resolution_and_slice_in_third_dimension(self):
+        d = self.j2k[::2, ::2, 1:3]
+        all = self.j2k.read(rlevel=1)
+        np.testing.assert_array_equal(all[:,:,1:3], d)
+
+    def test_full_resolution_slicing_by_quarters_upper_left(self):
+        actual = self.jp2[:728, :1296]
+        expected = self.jp2_data[:728, :1296]
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_full_resolution_slicing_by_quarters_lower_left(self):
+        actual = self.jp2[728:, :1296]
+        expected = self.jp2_data[728:, :1296]
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_full_resolution_slicing_by_quarters_upper_right(self):
+        actual = self.jp2[:728, 1296:]
+        expected = self.jp2_data[:728, 1296:]
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_full_resolution_slicing_by_quarters_lower_right(self):
+        actual = self.jp2[728:, 1296:]
+        expected = self.jp2_data[728:, 1296:]
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_full_resolution_slicing_by_halves_left(self):
+        actual = self.jp2[:, :1296]
+        expected = self.jp2_data[:, :1296]
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_full_resolution_slicing_by_right_half(self):
+        actual = self.jp2[:, 1296:]
+        expected = self.jp2_data[:, 1296:]
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_full_resolution_slicing_by_top_half(self):
+        actual = self.jp2[:728, :]
+        expected = self.jp2_data[:728, :]
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_full_resolution_slicing_by_bottom_half(self):
+        actual = self.jp2[728:, :]
+        expected = self.jp2_data[728:, :]
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_slice_protocol_2d_reduce_resolution(self):
+        d = self.j2k[:]
+        self.assertEqual(d.shape, (800, 480, 3))
+
+        d = self.j2k[::1, ::1]
+        self.assertEqual(d.shape, (800, 480, 3))
+
+        d = self.j2k[::2, ::2]
+        self.assertEqual(d.shape, (400, 240, 3))
+
+        d = self.j2k[::4, ::4]
+        self.assertEqual(d.shape, (200, 120, 3))
+
+        d = self.j2k[::8, ::8]
+        self.assertEqual(d.shape, (100, 60, 3))
+
+        d = self.j2k[::16, ::16]
+        self.assertEqual(d.shape, (50, 30, 3))
+
+        d = self.j2k[::32, ::32]
+        self.assertEqual(d.shape, (25, 15, 3))
+
 class TestJp2k(unittest.TestCase):
     """These tests should be run by just about all configuration."""
 
@@ -63,77 +163,6 @@ class TestJp2k(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def test_slice_protocol_negative(self):
-        """
-        """
-        j = Jp2k(self.j2kfile)
-
-        with self.assertRaises(IndexError):
-            # Strides in x/y directions cannot differ.
-            d = j[::2, ::3]
-
-        with self.assertRaises(IndexError):
-            # Strides in x/y direction must be powers of 2.
-            d = j[::3, ::3]
-
-        # start and stop are not supported when slicing on Jp2k object
-        with self.assertRaises(IndexError):
-            d = j[2::2, 2::2]
-        with self.assertRaises(IndexError):
-            d = j[:8:2, :8:2]
-        with self.assertRaises(IndexError):
-            d = j[2:8:2, 2:8:2]
-
-    def test_slice_protocol_3d(self):
-        """
-        """
-        j = Jp2k(self.j2kfile)
-        all = j.read()
-
-        d = j[:,:,0]
-        np.testing.assert_array_equal(all[:,:,0], d)
-
-        d = j[:,:,1]
-        np.testing.assert_array_equal(all[:,:,1], d)
-
-        d = j[:,:,2]
-        np.testing.assert_array_equal(all[:,:,2], d)
-
-        d = j[:,:,1:3]
-        np.testing.assert_array_equal(all[:,:,1:3], d)
-
-        d = j[::2, ::2, 1:3]
-        all = j.read(rlevel=1)
-        np.testing.assert_array_equal(all[:,:,1:3], d)
-
-    def test_slice_protocol_2d(self):
-        """
-
-        """
-        j = Jp2k(self.j2kfile)
-
-        d = j[:]
-        self.assertEqual(d.shape, (800, 480, 3))
-
-        # Stride of one.
-        d = j[::1, ::1]
-        self.assertEqual(d.shape, (800, 480, 3))
-
-        # Stride of 2.
-        d = j[::2, ::2]
-        self.assertEqual(d.shape, (400, 240, 3))
-
-        d = j[::4, ::4]
-        self.assertEqual(d.shape, (200, 120, 3))
-
-        d = j[::8, ::8]
-        self.assertEqual(d.shape, (100, 60, 3))
-
-        d = j[::16, ::16]
-        self.assertEqual(d.shape, (50, 30, 3))
-
-        d = j[::32, ::32]
-        self.assertEqual(d.shape, (25, 15, 3))
 
     @unittest.skipIf(os.name == "nt", "Unexplained failure on windows")
     def test_irreversible(self):

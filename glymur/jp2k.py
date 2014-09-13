@@ -759,49 +759,51 @@ class Jp2k(Jp2kBox):
 
         return boxes
 
-    def __getitem__(self, *pargs):
+    def __getitem__(self, pargs):
         """
+        Slicing protocol.
         """
-        if isinstance(pargs[0], slice):
+        if isinstance(pargs, slice):
+            # Case of jp2[:]
+            #
             # Should have a slice object where start = stop = step = None
-            slc = pargs[0]
+            slc = pargs
             if slc.start is None and slc.stop is None and slc.step is None:
                 return self.read()
             else:
                 raise IndexError("Illegal syntax.")
 
-        if isinstance(pargs[0], tuple):
-            ridx = pargs[0][0]
-            cidx = pargs[0][1]
+        # Assuming pargs is a tuple from now on.  
+        rows = pargs[0]
+        cols = pargs[1]
+        if len(pargs) == 2:
+            bands = slice(None, None, None)
+        else:
+            bands = pargs[2]
 
-            if ((ridx.start is not None) or
-                    (ridx.stop is not None) or
-                    (cidx.start is not None) or
-                    (cidx.stop is not None)):
-                msg = "Only strides are supported when slicing a Jp2k object."
-                raise IndexError(msg)
+        if ((rows.step is None) and (cols.step is None)):
+            # Slicing with full resolution.
+            # This can be improved to take advantage of tiling.
+            return self.read()[rows, cols, bands]
 
-            if ridx.step is None and cidx.step is None:
-                step = 1
-            elif ridx.step != cidx.step:
-                msg = "Row and column strides must be the same."
-                raise IndexError(msg)
-            else:
-                step = ridx.step
-        
-            if np.log2(step) != np.floor(np.log2(step)):
-                msg = "Row and column strides must be powers of 2."
-                raise IndexError(msg)
+        if rows.step != cols.step:
+            msg = "Row and column strides must be the same."
+            raise IndexError(msg)
 
-            data = self.read(rlevel=np.int(np.log2(step)))
-            if len(pargs[0]) == 2:
-                return data
+        # Ok, reduce layer step is the same in both xy directions, so just take
+        # one of them.
+        step = rows.step
+    
+        if np.log2(step) != np.floor(np.log2(step)):
+            msg = "Row and column strides must be powers of 2."
+            raise IndexError(msg)
 
-            # Ok, 3 arguments in pargs.
-            if isinstance(pargs[0][2], slice):
-                return data[:,:,pargs[0][2]]
-            elif isinstance(pargs[0][2], int):
-                return data[:,:,pargs[0][2]]
+        data = self.read(rlevel=np.int(np.log2(step)))
+        if len(pargs) == 2:
+            return data
+
+        # Ok, 3 arguments in pargs.
+        return data[:, :, bands]
 
 
     def read(self, **kwargs):
