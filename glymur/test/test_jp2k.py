@@ -70,6 +70,11 @@ class TestSliceProtocol(unittest.TestCase):
             # Strides in x/y directions cannot differ.
             self.j2k[::2, ::3]
 
+    def test_resolution_strides_cannot_differ(self):
+        with self.assertRaises(IndexError):
+            # Strides in x/y directions cannot differ.
+            self.j2k[::2, ::3]
+
     def test_resolution_strides_must_be_powers_of_two(self):
         with self.assertRaises(IndexError):
             self.j2k[::3, ::3]
@@ -89,6 +94,11 @@ class TestSliceProtocol(unittest.TestCase):
         d = self.j2k[::2, ::2, 1:3]
         all = self.j2k.read(rlevel=1)
         np.testing.assert_array_equal(all[:,:,1:3], d)
+
+    def test_retrieve_single_row(self):
+        actual = self.jp2[0]
+        expected = self.jp2_data[0]
+        np.testing.assert_array_equal(actual, expected)
 
     def test_full_resolution_slicing_by_quarters_upper_left(self):
         actual = self.jp2[:728, :1296]
@@ -110,6 +120,11 @@ class TestSliceProtocol(unittest.TestCase):
         expected = self.jp2_data[728:, 1296:]
         np.testing.assert_array_equal(actual, expected)
 
+    def test_full_resolution_slicing_by_quarters_center(self):
+        actual = self.jp2[364:1092, 648:1942]
+        expected = self.jp2_data[364:1092, 648:1942]
+        np.testing.assert_array_equal(actual, expected)
+
     def test_full_resolution_slicing_by_halves_left(self):
         actual = self.jp2[:, :1296]
         expected = self.jp2_data[:, :1296]
@@ -128,6 +143,26 @@ class TestSliceProtocol(unittest.TestCase):
     def test_full_resolution_slicing_by_bottom_half(self):
         actual = self.jp2[728:, :]
         expected = self.jp2_data[728:, :]
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_region_rlevel1(self):
+        actual = self.jp2[0:201:2, 0:201:2]
+        expected = self.jp2.read(area=(0, 0, 201, 201), rlevel=1)
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_region_rlevel1_slice_start_is_none(self):
+        actual = self.jp2[:201:2, :201:2]
+        expected = self.jp2.read(area=(0, 0, 201, 201), rlevel=1)
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_region_rlevel1_slice_stop_is_none(self):
+        actual = self.jp2[201::2, 201::2]
+        expected = self.jp2.read(area=(201, 201, 1456, 2592), rlevel=1)
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_region_rlevel1(self):
+        actual = self.jp2[0:202:2, 0:202:2]
+        expected = self.jp2.read(area=(0, 0, 202, 202), rlevel=1)
         np.testing.assert_array_equal(actual, expected)
 
     def test_slice_protocol_2d_reduce_resolution(self):

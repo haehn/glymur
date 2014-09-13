@@ -763,6 +763,15 @@ class Jp2k(Jp2kBox):
         """
         Slicing protocol.
         """
+        codestream = self.get_codestream(header_only=True)
+        if isinstance(pargs, int):
+            # Not a very good use of this protocol, but technically legal.
+            row = pargs
+            area = (row, 0, row + 1, codestream.segment[1].xsiz)
+
+            # Take out the singleton row dimension.
+            return self.read(area=area).squeeze()
+
         if isinstance(pargs, slice):
             # Case of jp2[:]
             #
@@ -781,24 +790,50 @@ class Jp2k(Jp2kBox):
         else:
             bands = pargs[2]
 
-        if ((rows.step is None) and (cols.step is None)):
-            # Slicing with full resolution.
-            # This can be improved to take advantage of tiling.
-            return self.read()[rows, cols, bands]
+        if rows.step is None:
+            rows_step = 1
+        else:
+            rows_step = rows.step
 
-        if rows.step != cols.step:
+        if cols.step is None:
+            cols_step = 1
+        else:
+            cols_step = cols.step
+
+        if rows_step != cols_step:
             msg = "Row and column strides must be the same."
             raise IndexError(msg)
 
         # Ok, reduce layer step is the same in both xy directions, so just take
         # one of them.
-        step = rows.step
+        step = rows_step
     
         if np.log2(step) != np.floor(np.log2(step)):
             msg = "Row and column strides must be powers of 2."
             raise IndexError(msg)
 
-        data = self.read(rlevel=np.int(np.log2(step)))
+        if rows.start is None:
+            rows_start = 0
+        else:
+            rows_start = rows.start
+
+        if rows.stop is None:
+            rows_stop = codestream.segment[1].ysiz
+        else:
+            rows_stop = rows.stop
+        
+        if cols.start is None:
+            cols_start = 0
+        else:
+            cols_start = cols.start
+
+        if cols.stop is None:
+            cols_stop = codestream.segment[1].xsiz
+        else:
+            cols_stop = cols.stop
+        
+        area = (rows_start, cols_start, rows_stop, cols_stop)
+        data = self.read(area=area, rlevel=np.int(np.log2(step)))
         if len(pargs) == 2:
             return data
 
