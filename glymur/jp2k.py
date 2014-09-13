@@ -766,6 +766,7 @@ class Jp2k(Jp2kBox):
         codestream = self.get_codestream(header_only=True)
         if isinstance(pargs, int):
             # Not a very good use of this protocol, but technically legal.
+            # This retrieves a single row.
             row = pargs
             area = (row, 0, row + 1, codestream.segment[1].xsiz)
 
@@ -773,16 +774,25 @@ class Jp2k(Jp2kBox):
             return self.read(area=area).squeeze()
 
         if isinstance(pargs, slice):
-            # Case of jp2[:]
+            # Case of jp2[:], i.e. retrieve the entire image.
             #
             # Should have a slice object where start = stop = step = None
-            slc = pargs
-            if slc.start is None and slc.stop is None and slc.step is None:
-                return self.read()
-            else:
-                raise IndexError("Illegal syntax.")
+            return self.read()
 
-        # Assuming pargs is a tuple from now on.  
+        if isinstance(pargs, tuple) and all(isinstance(x, int) for x in pargs):
+            # Retrieve a single pixel.
+            # Something like jp2[r, c]
+            row = pargs[0]
+            col = pargs[1]
+            area = (row, col, row + 1, col + 1)
+            pixel = self.read(area=area).squeeze()
+            
+            if len(pargs) == 2:
+                return pixel
+            elif len(pargs) == 3:
+                return pixel[pargs[2]]
+
+        # Assuming pargs is a tuple of slices from now on.  
         rows = pargs[0]
         cols = pargs[1]
         if len(pargs) == 2:

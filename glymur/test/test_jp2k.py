@@ -100,6 +100,16 @@ class TestSliceProtocol(unittest.TestCase):
         expected = self.jp2_data[0]
         np.testing.assert_array_equal(actual, expected)
 
+    def test_retrieve_single_pixel(self):
+        actual = self.jp2[0,0]
+        expected = self.jp2_data[0, 0]
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_retrieve_single_component(self):
+        actual = self.jp2[20,20,2]
+        expected = self.jp2_data[20, 20, 2]
+        np.testing.assert_array_equal(actual, expected)
+
     def test_full_resolution_slicing_by_quarters_upper_left(self):
         actual = self.jp2[:728, :1296]
         expected = self.jp2_data[:728, :1296]
