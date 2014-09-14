@@ -52,6 +52,8 @@ def load_tests(loader, tests, ignore):
     return tests
 
 
+@unittest.skipIf(glymur.version.openjpeg_version[0] == '1',
+                 "Slice protocol not supported in version 1.x")
 class TestSliceProtocol(unittest.TestCase):
     """
     Test slice protocol, i.e. when using [ ] to read image data.

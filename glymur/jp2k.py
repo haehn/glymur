@@ -763,14 +763,17 @@ class Jp2k(Jp2kBox):
         """
         Slicing protocol.
         """
+        if re.match("1.", version.openjpeg_version):
+            msg = "Not implemented for version 1.x of OpenJPEG.  Use the read "
+            msg += "method instead."
+            raise NotImplementedError(msg)
+
         codestream = self.get_codestream(header_only=True)
         if isinstance(pargs, int):
             # Not a very good use of this protocol, but technically legal.
             # This retrieves a single row.
             row = pargs
             area = (row, 0, row + 1, codestream.segment[1].xsiz)
-
-            # Take out the singleton row dimension.
             return self.read(area=area).squeeze()
 
         if isinstance(pargs, slice):
