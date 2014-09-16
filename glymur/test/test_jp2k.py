@@ -1069,7 +1069,6 @@ class TestParsing(unittest.TestCase):
     def tearDown(self):
         pass
 
-    @unittest.skipIf(sys.platform.startswith('linux'), 'Failing on linux')
     def test_bad_rsiz(self):
         """Should not warn if RSIZ when parsing is turned off."""
         # Actually there are three warning triggered by this codestream.
@@ -1131,7 +1130,6 @@ class TestJp2kOpjDataRootWarnings(unittest.TestCase):
             self.assertTrue(issubclass(w[0].category, UserWarning))
             self.assertTrue('Invalid approximation' in str(w[0].message))
 
-    @unittest.skipIf(sys.platform.startswith('linux'), 'Failing on linux')
     def test_invalid_colorspace(self):
         """Should warn in case of invalid colorspace."""
         filename = opj_data_file('input/nonregression/edf_c2_1103421.jp2')
