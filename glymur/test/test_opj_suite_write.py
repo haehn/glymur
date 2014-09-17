@@ -27,45 +27,7 @@ from . import fixtures
 from glymur import Jp2k
 import glymur
 
-@unittest.skipIf(NO_SKIMAGE_FREEIMAGE_SUPPORT,
-                 "Cannot read input image without scikit-image/freeimage")
-@unittest.skipIf(os.name == "nt", "no write support on windows, period")
-@unittest.skipIf(re.match(r'''(1|2.0.0)''',
-                          glymur.version.openjpeg_version) is not None,
-                 "Uses features not supported until 2.0.1")
-@unittest.skipIf(OPJ_DATA_ROOT is None,
-                 "OPJ_DATA_ROOT environment variable not set")
-class TestSuiteWriteCinema(unittest.TestCase):
-    """Tests for writing with openjp2 backend.
-
-    These tests either roughly correspond with those tests with similar names
-    in the OpenJPEG test suite or are closely associated.
-    """
-    def setUp(self):
-        pass
-
-    def tearDown(self):
-        pass
-
-    def test_cinema2K_with_others(self):
-        """Can't specify cinema2k with any other options."""
-        relfile = 'input/nonregression/X_5_2K_24_235_CBR_STEM24_000.tif'
-        infile = opj_data_file(relfile)
-        data = skimage.io.imread(infile)
-        with tempfile.NamedTemporaryFile(suffix='.j2k') as tfile:
-            j = Jp2k(tfile.name, 'wb')
-            with self.assertRaises(IOError):
-                j.write(data, cinema2k=48, cratios=[200, 100, 50])
-
-    def test_cinema4K_with_others(self):
-        """Can't specify cinema4k with any other options."""
-        relfile = 'input/nonregression/ElephantDream_4K.tif'
-        infile = opj_data_file(relfile)
-        data = skimage.io.imread(infile)
-        with tempfile.NamedTemporaryFile(suffix='.j2k') as tfile:
-            j = Jp2k(tfile.name, 'wb')
-            with self.assertRaises(IOError):
-                j.write(data, cinema4k=True, cratios=[200, 100, 50])
+class CinemaBase(unittest.TestCase):
 
     def check_cinema4k_codestream(self, codestream, image_size):
         """Common out for cinema2k tests."""
@@ -151,7 +113,57 @@ class TestSuiteWriteCinema(unittest.TestCase):
 
 
 
-    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
+@unittest.skipIf(NO_SKIMAGE_FREEIMAGE_SUPPORT,
+                 "Cannot read input image without scikit-image/freeimage")
+@unittest.skipIf(os.name == "nt", "no write support on windows, period")
+@unittest.skipIf(re.match(r'''(1|2.0.0)''',
+                          glymur.version.openjpeg_version) is not None,
+                 "Uses features not supported until 2.0.1")
+@unittest.skipIf(OPJ_DATA_ROOT is None,
+                 "OPJ_DATA_ROOT environment variable not set")
+class WriteCinema(CinemaBase):
+    """Tests for writing with openjp2 backend.
+
+    These tests either roughly correspond with those tests with similar names
+    in the OpenJPEG test suite or are closely associated.
+    """
+    def test_cinema2K_with_others(self):
+        """Can't specify cinema2k with any other options."""
+        relfile = 'input/nonregression/X_5_2K_24_235_CBR_STEM24_000.tif'
+        infile = opj_data_file(relfile)
+        data = skimage.io.imread(infile)
+        with tempfile.NamedTemporaryFile(suffix='.j2k') as tfile:
+            j = Jp2k(tfile.name, 'wb')
+            with self.assertRaises(IOError):
+                j.write(data, cinema2k=48, cratios=[200, 100, 50])
+
+    def test_cinema4K_with_others(self):
+        """Can't specify cinema4k with any other options."""
+        relfile = 'input/nonregression/ElephantDream_4K.tif'
+        infile = opj_data_file(relfile)
+        data = skimage.io.imread(infile)
+        with tempfile.NamedTemporaryFile(suffix='.j2k') as tfile:
+            j = Jp2k(tfile.name, 'wb')
+            with self.assertRaises(IOError):
+                j.write(data, cinema4k=True, cratios=[200, 100, 50])
+
+
+@unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
+@unittest.skipIf(NO_SKIMAGE_FREEIMAGE_SUPPORT,
+                 "Cannot read input image without scikit-image/freeimage")
+@unittest.skipIf(os.name == "nt", "no write support on windows, period")
+@unittest.skipIf(re.match(r'''(1|2.0.0)''',
+                          glymur.version.openjpeg_version) is not None,
+                 "Uses features not supported until 2.0.1")
+@unittest.skipIf(OPJ_DATA_ROOT is None,
+                 "OPJ_DATA_ROOT environment variable not set")
+class WriteCinemaWarns(CinemaBase):
+    """Tests for writing with openjp2 backend.
+
+    These tests either roughly correspond with those tests with similar names
+    in the OpenJPEG test suite or are closely associated.  These tests issue
+    warnings.
+    """
     def test_NR_ENC_ElephantDream_4K_tif_21_encode(self):
         relfile = 'input/nonregression/ElephantDream_4K.tif'
         infile = opj_data_file(relfile)
@@ -166,8 +178,6 @@ class TestSuiteWriteCinema(unittest.TestCase):
             codestream = j.get_codestream()
             self.check_cinema4k_codestream(codestream, (4096, 2160))
 
-
-    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_NR_ENC_X_5_2K_24_235_CBR_STEM24_000_tif_19_encode(self):
         relfile = 'input/nonregression/X_5_2K_24_235_CBR_STEM24_000.tif'
         infile = opj_data_file(relfile)
@@ -180,8 +190,6 @@ class TestSuiteWriteCinema(unittest.TestCase):
             codestream = j.get_codestream()
             self.check_cinema2k_codestream(codestream, (2048, 857))
 
-
-    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_NR_ENC_X_6_2K_24_FULL_CBR_CIRCLE_000_tif_20_encode(self):
         relfile = 'input/nonregression/X_6_2K_24_FULL_CBR_CIRCLE_000.tif'
         infile = opj_data_file(relfile)
@@ -194,8 +202,6 @@ class TestSuiteWriteCinema(unittest.TestCase):
             codestream = j.get_codestream()
             self.check_cinema2k_codestream(codestream, (2048, 1080))
 
-
-    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_NR_ENC_X_6_2K_24_FULL_CBR_CIRCLE_000_tif_17_encode(self):
         relfile = 'input/nonregression/X_6_2K_24_FULL_CBR_CIRCLE_000.tif'
         infile = opj_data_file(relfile)
@@ -208,8 +214,6 @@ class TestSuiteWriteCinema(unittest.TestCase):
             codestream = j.get_codestream()
             self.check_cinema2k_codestream(codestream, (2048, 1080))
 
-
-    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_NR_ENC_X_5_2K_24_235_CBR_STEM24_000_tif_16_encode(self):
         relfile = 'input/nonregression/X_5_2K_24_235_CBR_STEM24_000.tif'
         infile = opj_data_file(relfile)
@@ -224,8 +228,6 @@ class TestSuiteWriteCinema(unittest.TestCase):
             codestream = j.get_codestream()
             self.check_cinema2k_codestream(codestream, (2048, 857))
 
-
-    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_NR_ENC_X_4_2K_24_185_CBR_WB_000_tif_18_encode(self):
         relfile = 'input/nonregression/X_4_2K_24_185_CBR_WB_000.tif'
         infile = opj_data_file(relfile)
@@ -240,6 +242,7 @@ class TestSuiteWriteCinema(unittest.TestCase):
 
             codestream = j.get_codestream()
             self.check_cinema2k_codestream(codestream, (1998, 1080))
+
 
 @unittest.skipIf(NO_SKIMAGE_FREEIMAGE_SUPPORT,
                  "Cannot read input image without scikit-image/freeimage")
