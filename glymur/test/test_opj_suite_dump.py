@@ -31,8 +31,6 @@ import re
 import sys
 import unittest
 
-import warnings
-
 import numpy as np
 
 from glymur import Jp2k
@@ -44,7 +42,7 @@ from .fixtures import mse, peak_tolerance, read_pgx, opj_data_file
 
 @unittest.skipIf(OPJ_DATA_ROOT is None,
                  "OPJ_DATA_ROOT environment variable not set")
-class TestSuiteDump(unittest.TestCase):
+class TestSuite(unittest.TestCase):
 
     def setUp(self):
         pass
@@ -112,8 +110,7 @@ class TestSuiteDump(unittest.TestCase):
         """
         relpath = 'input/nonregression/issue188_beach_64bitsbox.jp2'
         jfile = opj_data_file(relpath)
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
+        with self.assertWarns(UserWarning):
             j = Jp2k(jfile)
         d = j.read()
         self.assertTrue(True)
@@ -121,8 +118,7 @@ class TestSuiteDump(unittest.TestCase):
 
     def test_NR_broken4_jp2_dump(self):
         jfile = opj_data_file('input/nonregression/broken4.jp2')
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
+        with self.assertWarns(UserWarning):
             jp2 = Jp2k(jfile)
 
         self.assertEqual(jp2.box[-1].main_header.segment[-1].marker_id, 'QCC')
@@ -136,9 +132,8 @@ class TestSuiteDump(unittest.TestCase):
         length of over 1GB.  Don't run it on 32-bit platforms.
         """
         jfile = opj_data_file('input/nonregression/broken3.jp2')
-        with warnings.catch_warnings():
+        with self.assertWarns(UserWarning):
             # Bad box length.
-            warnings.simplefilter("ignore")
             jp2 = Jp2k(jfile)
 
         ids = [box.box_id for box in jp2.box]
@@ -232,9 +227,8 @@ class TestSuiteDump(unittest.TestCase):
         Invalid marker ID in the codestream.
         """
         jfile = opj_data_file('input/nonregression/broken2.jp2')
-        with warnings.catch_warnings():
+        with self.assertWarns(UserWarning):
             # Invalid marker ID on codestream.
-            warnings.simplefilter("ignore")
             jp2 = Jp2k(jfile)
         
         self.assertEqual(jp2.box[-1].main_header.segment[-1].marker_id, 'QCC')
@@ -2467,9 +2461,8 @@ class TestSuiteDump(unittest.TestCase):
 
     def test_NR_file1_dump(self):
         jfile = opj_data_file('input/conformance/file1.jp2')
-        with warnings.catch_warnings():
+        with self.assertWarns(UserWarning):
             # Bad compatibility list item.
-            warnings.simplefilter("ignore")
             jp2 = Jp2k(jfile)
 
         ids = [box.box_id for box in jp2.box]
@@ -2503,7 +2496,8 @@ class TestSuiteDump(unittest.TestCase):
 
     def test_NR_file2_dump(self):
         jfile = opj_data_file('input/conformance/file2.jp2')
-        jp2 = Jp2k(jfile)
+        with self.assertWarns(UserWarning):
+            jp2 = Jp2k(jfile)
 
         ids = [box.box_id for box in jp2.box]
         self.assertEqual(ids, ['jP  ', 'ftyp', 'jp2h', 'jp2c'])
@@ -2533,7 +2527,8 @@ class TestSuiteDump(unittest.TestCase):
         # vertical directions. The components are stored in the standard
         # order.
         jfile = opj_data_file('input/conformance/file3.jp2')
-        jp2 = Jp2k(jfile)
+        with self.assertWarns(UserWarning):
+            jp2 = Jp2k(jfile)
 
         ids = [box.box_id for box in jp2.box]
         self.assertEqual(ids, ['jP  ', 'ftyp', 'jp2h', 'jp2c'])
@@ -2564,7 +2559,8 @@ class TestSuiteDump(unittest.TestCase):
     def test_NR_file4_dump(self):
         # One 8-bit component in the sRGB-grey colourspace.
         jfile = opj_data_file('input/conformance/file4.jp2')
-        jp2 = Jp2k(jfile)
+        with self.assertWarns(UserWarning):
+            jp2 = Jp2k(jfile)
 
         ids = [box.box_id for box in jp2.box]
         self.assertEqual(ids, ['jP  ', 'ftyp', 'jp2h', 'jp2c'])
@@ -2589,10 +2585,9 @@ class TestSuiteDump(unittest.TestCase):
         # profile and using the JPX-defined enumerated code for the ROMM-RGB
         # colourspace.
         jfile = opj_data_file('input/conformance/file5.jp2')
-        with warnings.catch_warnings():
+        with self.assertWarns(UserWarning):
             # There's a warning for an unknown compatibility entry.
             # Ignore it here.
-            warnings.simplefilter("ignore")
             jp2 = Jp2k(jfile)
 
         ids = [box.box_id for box in jp2.box]
@@ -2615,7 +2610,8 @@ class TestSuiteDump(unittest.TestCase):
 
     def test_NR_file6_dump(self):
         jfile = opj_data_file('input/conformance/file6.jp2')
-        jp2 = Jp2k(jfile)
+        with self.assertWarns(UserWarning):
+            jp2 = Jp2k(jfile)
 
         ids = [box.box_id for box in jp2.box]
         self.assertEqual(ids, ['jP  ', 'ftyp', 'jp2h', 'jp2c'])
@@ -2642,7 +2638,8 @@ class TestSuiteDump(unittest.TestCase):
         # profile and using the JPX-defined enumerated code for the e-sRGB
         # colourspace.
         jfile = opj_data_file('input/conformance/file7.jp2')
-        jp2 = Jp2k(jfile)
+        with self.assertWarns(UserWarning):
+            jp2 = Jp2k(jfile)
 
         ids = [box.box_id for box in jp2.box]
         self.assertEqual(ids, ['jP  ', 'ftyp', 'rreq', 'jp2h', 'jp2c'])
@@ -2670,7 +2667,8 @@ class TestSuiteDump(unittest.TestCase):
         # One 8-bit component in a gamma 1.8 space. The colourspace is
         # specified using a Restricted ICC profile.
         jfile = opj_data_file('input/conformance/file8.jp2')
-        jp2 = Jp2k(jfile)
+        with self.assertWarns(UserWarning):
+            jp2 = Jp2k(jfile)
 
         ids = [box.box_id for box in jp2.box]
         self.assertEqual(ids, ['jP  ', 'ftyp', 'jp2h', 'xml ', 'jp2c',
@@ -2712,7 +2710,8 @@ class TestSuiteDump(unittest.TestCase):
     def test_NR_file9_dump(self):
         # Colormap
         jfile = opj_data_file('input/conformance/file9.jp2')
-        jp2 = Jp2k(jfile)
+        with self.assertWarns(UserWarning):
+            jp2 = Jp2k(jfile)
 
         ids = [box.box_id for box in jp2.box]
         self.assertEqual(ids, ['jP  ', 'ftyp', 'jp2h', 'jp2c'])
@@ -3955,9 +3954,8 @@ class TestSuiteDump(unittest.TestCase):
     def test_NR_issue188_beach_64bitsbox(self):
         lst = ['input', 'nonregression', 'issue188_beach_64bitsbox.jp2']
         jfile = opj_data_file('/'.join(lst))
-        with warnings.catch_warnings():
+        with self.assertWarns(UserWarning):
             # There's a warning for an unknown box.  
-            warnings.simplefilter("ignore")
             jp2 = Jp2k(jfile)
 
         ids = [box.box_id for box in jp2.box]
@@ -4350,9 +4348,8 @@ class TestSuiteDump(unittest.TestCase):
 
     def test_NR_orb_blue10_lin_jp2_dump(self):
         jfile = opj_data_file('input/nonregression/orb-blue10-lin-jp2.jp2')
-        with warnings.catch_warnings():
+        with self.assertWarns(UserWarning):
             # This file has an invalid ICC profile
-            warnings.simplefilter("ignore")
             jp2 = Jp2k(jfile)
 
         ids = [box.box_id for box in jp2.box]
@@ -4426,9 +4423,8 @@ class TestSuiteDump(unittest.TestCase):
 
     def test_NR_orb_blue10_win_jp2_dump(self):
         jfile = opj_data_file('input/nonregression/orb-blue10-win-jp2.jp2')
-        with warnings.catch_warnings():
+        with self.assertWarns(UserWarning):
             # This file has an invalid ICC profile
-            warnings.simplefilter("ignore")
             jp2 = Jp2k(jfile)
 
         ids = [box.box_id for box in jp2.box]

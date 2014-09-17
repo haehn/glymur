@@ -9,7 +9,6 @@ import datetime
 import os
 import sys
 import unittest
-import warnings
 
 import numpy as np
 
@@ -31,9 +30,8 @@ class TestICC(unittest.TestCase):
     def test_file5(self):
         """basic ICC profile"""
         filename = opj_data_file('input/conformance/file5.jp2')
-        with warnings.catch_warnings():
+        with self.assertWarns(UserWarning):
             # The file has a bad compatibility list entry.  Not important here.
-            warnings.simplefilter("ignore")
             j = Jp2k(filename)
         profile = j.box[3].box[1].icc_profile
         self.assertEqual(profile['Size'], 546)

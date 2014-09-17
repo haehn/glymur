@@ -31,8 +31,6 @@ import re
 import sys
 import unittest
 
-import warnings
-
 import numpy as np
 
 from glymur import Jp2k
@@ -206,16 +204,16 @@ class TestSuite(unittest.TestCase):
 
     def test_ETS_JP2_file1(self):
         jfile = opj_data_file('input/conformance/file1.jp2')
-        with warnings.catch_warnings():
+        with self.assertWarns(UserWarning):
             # Bad compatibility list item.
-            warnings.simplefilter("ignore")
             jp2k = Jp2k(jfile)
         jpdata = jp2k.read()
         self.assertEqual(jpdata.shape, (512, 768, 3))
 
     def test_ETS_JP2_file2(self):
         jfile = opj_data_file('input/conformance/file2.jp2')
-        jp2k = Jp2k(jfile)
+        with self.assertWarns(UserWarning):
+            jp2k = Jp2k(jfile)
         jpdata = jp2k.read()
         self.assertEqual(jpdata.shape, (640, 480, 3))
 
@@ -223,7 +221,8 @@ class TestSuite(unittest.TestCase):
                      "Functionality not implemented for 1.x")
     def test_ETS_JP2_file3(self):
         jfile = opj_data_file('input/conformance/file3.jp2')
-        jp2k = Jp2k(jfile)
+        with self.assertWarns(UserWarning):
+            jp2k = Jp2k(jfile)
         jpdata = jp2k.read_bands()
         self.assertEqual(jpdata[0].shape, (640, 480))
         self.assertEqual(jpdata[1].shape, (320, 240))
@@ -231,50 +230,53 @@ class TestSuite(unittest.TestCase):
 
     def test_ETS_JP2_file4(self):
         jfile = opj_data_file('input/conformance/file4.jp2')
-        jp2k = Jp2k(jfile)
+        with self.assertWarns(UserWarning):
+            jp2k = Jp2k(jfile)
         jpdata = jp2k.read()
         self.assertEqual(jpdata.shape, (512, 768))
 
     def test_ETS_JP2_file5(self):
         jfile = opj_data_file('input/conformance/file5.jp2')
-        with warnings.catch_warnings():
+        with self.assertWarns(UserWarning):
             # There's a warning for an unknown compatibility entry.
             # Ignore it here.
-            warnings.simplefilter("ignore")
             jp2k = Jp2k(jfile)
         jpdata = jp2k.read()
         self.assertEqual(jpdata.shape, (512, 768, 3))
 
     def test_ETS_JP2_file6(self):
         jfile = opj_data_file('input/conformance/file6.jp2')
-        jp2k = Jp2k(jfile)
+        with self.assertWarns(UserWarning):
+            jp2k = Jp2k(jfile)
         jpdata = jp2k.read()
         self.assertEqual(jpdata.shape, (512, 768))
 
     def test_ETS_JP2_file7(self):
         jfile = opj_data_file('input/conformance/file7.jp2')
-        jp2k = Jp2k(jfile)
+        with self.assertWarns(UserWarning):
+            jp2k = Jp2k(jfile)
         jpdata = jp2k.read()
         self.assertEqual(jpdata.shape, (640, 480, 3))
 
     def test_ETS_JP2_file8(self):
         jfile = opj_data_file('input/conformance/file8.jp2')
-        jp2k = Jp2k(jfile)
+        with self.assertWarns(UserWarning):
+            jp2k = Jp2k(jfile)
         jpdata = jp2k.read()
         self.assertEqual(jpdata.shape, (400, 700))
 
     def test_ETS_JP2_file9(self):
         jfile = opj_data_file('input/conformance/file9.jp2')
-        jp2k = Jp2k(jfile)
+        with self.assertWarns(UserWarning):
+            jp2k = Jp2k(jfile)
         jpdata = jp2k.read()
         self.assertEqual(jpdata.shape, (512, 768, 3))
 
     def test_NR_broken_jp2_dump(self):
         jfile = opj_data_file('input/nonregression/broken.jp2')
 
-        with warnings.catch_warnings():
+        with self.assertWarns(UserWarning):
             # colr box has bad length.
-            warnings.simplefilter("ignore")
             jp2 = Jp2k(jfile)
 
         ids = [box.box_id for box in jp2.box]
@@ -476,15 +478,15 @@ class TestSuite(unittest.TestCase):
 
     def test_NR_DEC_orb_blue_lin_jp2_25_decode(self):
         jfile = opj_data_file('input/nonregression/orb-blue10-lin-jp2.jp2')
-        with warnings.catch_warnings():
+        with self.assertWarns(UserWarning):
             # This file has an invalid ICC profile
-            warnings.simplefilter("ignore")
             Jp2k(jfile).read()
         self.assertTrue(True)
 
     def test_NR_DEC_orb_blue_win_jp2_26_decode(self):
         jfile = opj_data_file('input/nonregression/orb-blue10-win-jp2.jp2')
-        Jp2k(jfile).read()
+        with self.assertWarns(UserWarning):
+            Jp2k(jfile).read()
         self.assertTrue(True)
 
     def test_NR_DEC_relax_jp2_27_decode(self):
@@ -634,18 +636,16 @@ class TestSuite2point0(unittest.TestCase):
         # Null pointer access
         jfile = opj_data_file('input/nonregression/broken2.jp2')
         with self.assertRaises(IOError):
-            with warnings.catch_warnings():
+            with self.assertWarns(UserWarning):
                 # Invalid marker ID.
-                warnings.simplefilter("ignore")
                 Jp2k(jfile).read()
         self.assertTrue(True)
 
     def test_NR_DEC_broken4_jp2_7_decode(self):
         jfile = opj_data_file('input/nonregression/broken4.jp2')
         with self.assertRaises(IOError):
-            with warnings.catch_warnings():
+            with self.assertWarns(UserWarning):
                 # invalid number of subbands, bad marker ID
-                warnings.simplefilter("ignore")
                 Jp2k(jfile).read()
         self.assertTrue(True)
 
@@ -655,9 +655,8 @@ class TestSuite2point0(unittest.TestCase):
         relpath = 'input/nonregression/kakadu_v4-4_openjpegv2_broken.j2k'
         jfile = opj_data_file(relpath)
         if glymur.version.openjpeg_version_tuple[0] < 2:
-            with warnings.catch_warnings():
+            with self.assertWarns(UserWarning):
                 # Incorrect warning issued about tile parts.
-                warnings.simplefilter("ignore")
                 Jp2k(jfile).read()
         else:
             Jp2k(jfile).read()

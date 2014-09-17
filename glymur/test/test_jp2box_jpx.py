@@ -9,7 +9,6 @@ import struct
 import sys
 import tempfile
 import unittest
-import warnings
 
 import lxml.etree as ET
 
@@ -311,11 +310,8 @@ class TestJPXWrap(unittest.TestCase):
         boxes = [jp2.box[idx] for idx in [0, 1, 2, 4]]
 
         ftyp = glymur.jp2box.FileTypeBox()
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter('always')
+        with self.assertWarns(UserWarning):
             dref = glymur.jp2box.DataReferenceBox([ftyp])
-            self.assertEqual(len(w), 1)
-            self.assertTrue(issubclass(w[0].category, UserWarning))
 
         # Try to get around it by appending the ftyp box after creation.
         dref = glymur.jp2box.DataReferenceBox()
@@ -438,8 +434,7 @@ class TestJPX(unittest.TestCase):
         offset = [89]
         length = [1132288]
         reference = [0, 0]
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
+        with self.assertWarns(UserWarning):
             flst = glymur.jp2box.FragmentListBox(offset, length, reference)
         with self.assertRaises(IOError):
             with tempfile.TemporaryFile() as tfile:
@@ -450,8 +445,7 @@ class TestJPX(unittest.TestCase):
         offset = [0]
         length = [1132288]
         reference = [0]
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
+        with self.assertWarns(UserWarning):
             flst = glymur.jp2box.FragmentListBox(offset, length, reference)
         with self.assertRaises((IOError, OSError)):
             with tempfile.TemporaryFile() as tfile:
@@ -462,8 +456,7 @@ class TestJPX(unittest.TestCase):
         offset = [89]
         length = [0]
         reference = [0]
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
+        with self.assertWarns(UserWarning):
             flst = glymur.jp2box.FragmentListBox(offset, length, reference)
         with self.assertRaises(IOError):
             with tempfile.TemporaryFile() as tfile:
@@ -471,9 +464,7 @@ class TestJPX(unittest.TestCase):
 
     def test_ftbl_boxes_empty(self):
         """A fragment table box must have at least one child box."""
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            ftbl = glymur.jp2box.FragmentTableBox()
+        ftbl = glymur.jp2box.FragmentTableBox()
         with self.assertRaises(IOError):
             with tempfile.TemporaryFile() as tfile:
                 ftbl.write(tfile)

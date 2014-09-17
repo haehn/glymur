@@ -21,8 +21,6 @@ import unittest
 import uuid
 from xml.etree import cElementTree as ET
 
-import warnings
-
 import numpy as np
 import pkg_resources
 
@@ -1044,8 +1042,7 @@ class TestJp2k_2_1(unittest.TestCase):
                 tfile.write(data[offset+59:])
                 #tfile.write(data[3186:])
                 tfile.flush()
-                with warnings.catch_warnings():
-                    warnings.simplefilter("ignore")
+                with self.assertWarns(UserWarning):
                     j = Jp2k(tfile.name)
                 regexp = re.compile(r'''OpenJPEG\slibrary\serror:\s+
                                         Invalid\svalues\sfor\scomp\s=\s0\s+
@@ -1074,9 +1071,7 @@ class TestParsing(unittest.TestCase):
         """Should not warn if RSIZ when parsing is turned off."""
         filename = opj_data_file('input/nonregression/edf_c2_1002767.jp2')
         glymur.set_parseoptions(codestream=False)
-        with warnings.catch_warnings(record=True) as w:
-            j = Jp2k(filename)
-            self.assertEqual(len(w), 0)
+        j = Jp2k(filename)
 
         glymur.set_parseoptions(codestream=True)
         with self.assertWarnsRegex(UserWarning, 'Invalid profile'):
@@ -1194,9 +1189,8 @@ class TestJp2kOpjDataRoot(unittest.TestCase):
         # This file has the components physically reversed.  The cmap box
         # tells the decoder how to order them, but this flag prevents that.
         filename = opj_data_file('input/conformance/file2.jp2')
-        with warnings.catch_warnings():
+        with self.assertWarns(UserWarning):
             # The file has a bad compatibility list entry.  Not important here.
-            warnings.simplefilter("ignore")
             j = Jp2k(filename)
         ycbcr = j.read()
         crcby = j.read(ignore_pclr_cmap_cdef=True)

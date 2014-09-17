@@ -17,7 +17,6 @@ import struct
 import sys
 import tempfile
 import uuid
-import warnings
 
 if sys.hexversion < 0x02070000:
     import unittest2 as unittest
@@ -107,12 +106,8 @@ class TestUUIDExif(unittest.TestCase):
             tfile.write(struct.pack('<HHI4s', 171, 2, 3, b'HTC\x00'))
             tfile.flush()
 
-            with warnings.catch_warnings(record=True) as w:
-                warnings.simplefilter('always')
+            with self.assertWarnsRegex(UserWarning, 'Unrecognized Exif tag'):
                 j = glymur.Jp2k(tfile.name)
-                self.assertTrue(issubclass(w[0].category, UserWarning))
-                msg = 'Unrecognized Exif tag'
-                self.assertTrue(msg in str(w[0].message))
 
     def test_bad_tag_datatype(self):
         """Only certain datatypes are allowable"""
@@ -136,12 +131,8 @@ class TestUUIDExif(unittest.TestCase):
             tfile.write(struct.pack('<HHI4s', 271, 2000, 3, b'HTC\x00'))
             tfile.flush()
 
-            with warnings.catch_warnings(record=True) as w:
-                warnings.simplefilter('always')
+            with self.assertWarnsRegex(UserWarning, 'Invalid TIFF tag'):
                 j = glymur.Jp2k(tfile.name)
-                self.assertTrue(issubclass(w[0].category, UserWarning))
-                msg = 'Invalid TIFF tag'
-                self.assertTrue(msg in str(w[0].message))
 
             self.assertEqual(j.box[-1].box_id, 'uuid')
 
@@ -167,20 +158,11 @@ class TestUUIDExif(unittest.TestCase):
             tfile.write(struct.pack('<HHI4s', 271, 2, 3, b'HTC\x00'))
             tfile.flush()
 
-            with warnings.catch_warnings(record=True) as w:
-                warnings.simplefilter('always')
-                j = glymur.Jp2k(tfile.name)
-                self.assertTrue(issubclass(w[0].category, UserWarning))
-                msg = 'The byte order indication in the TIFF header '
-                if sys.hexversion < 0x03000000:
-                    msg += "(JI) is invalid.  "
-                    msg += "It should be either [73, 73] or [77, 77]."
-                else:
-                    msg += "(b'JI') is invalid.  "
-                    msg += "It should be either b'II' or b'MM'."
-                self.assertTrue(msg in str(w[0].message))
+            regex = 'The byte order indication in the TIFF header '
+            with self.assertWarnsRegex(UserWarning, regex):
+                jp2 = glymur.Jp2k(tfile.name)
 
-            self.assertEqual(j.box[-1].box_id, 'uuid')
+            self.assertEqual(jp2.box[-1].box_id, 'uuid')
 
     def test_big_endian(self):
         """Verify read of big-endian IFD."""

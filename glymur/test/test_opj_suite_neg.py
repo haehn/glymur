@@ -13,7 +13,6 @@ import re
 import sys
 import tempfile
 import unittest
-import warnings
 
 import numpy as np
 try:
@@ -81,8 +80,7 @@ class TestSuiteNegative(unittest.TestCase):
         relpath = 'input/nonregression/illegalcolortransform.j2k'
         jfile = opj_data_file(relpath)
         jp2k = Jp2k(jfile)
-        with warnings.catch_warnings():
-            warnings.simplefilter('ignore')
+        with self.assertWarns(UserWarning):
             codestream = jp2k.get_codestream(header_only=False)
 
         # Verify that the last segment returned in the codestream is SOD,

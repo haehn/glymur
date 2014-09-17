@@ -12,7 +12,6 @@ import struct
 import sys
 import tempfile
 import unittest
-import warnings
 
 import six
 

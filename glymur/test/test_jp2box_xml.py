@@ -20,7 +20,6 @@ import struct
 import sys
 import tempfile
 import unittest
-import warnings
 
 if sys.hexversion < 0x03000000:
     from StringIO import StringIO
@@ -269,8 +268,7 @@ class TestBadButRecoverableXmlFile(unittest.TestCase):
 
     def test_recover_from_bad_xml(self):
         """Should be able to recover info from xml box with bad xml."""
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
+        with self.assertWarns(UserWarning):
             jp2 = Jp2k(self._bad_xml_file)
 
         self.assertEqual(jp2.box[3].box_id, 'xml ')

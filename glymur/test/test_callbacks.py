@@ -11,7 +11,6 @@ import os
 import re
 import sys
 import tempfile
-import warnings
 
 import unittest
 
@@ -41,8 +40,7 @@ class TestCallbacks(unittest.TestCase):
     def test_info_callback_on_write(self):
         """Verify messages printed when writing an image in verbose mode."""
         j = glymur.Jp2k(self.jp2file)
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
+        with self.assertWarns(UserWarning):
             tiledata = j.read(tile=0)
         with tempfile.NamedTemporaryFile(suffix='.jp2') as tfile:
             j = glymur.Jp2k(tfile.name, 'wb')

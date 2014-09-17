@@ -31,8 +31,6 @@ import re
 import sys
 import unittest
 
-import warnings
-
 import numpy as np
 
 from glymur import Jp2k
@@ -58,9 +56,8 @@ class TestSuite2point1(unittest.TestCase):
 
     def test_NR_DEC_text_GBR_jp2_29_decode(self):
         jfile = opj_data_file('input/nonregression/text_GBR.jp2')
-        with warnings.catch_warnings():
+        with self.assertWarns(UserWarning):
             # brand is 'jp2 ', but has any icc profile.
-            warnings.simplefilter("ignore")
             jp2 = Jp2k(jfile)
         jp2.read()
         self.assertTrue(True)
@@ -88,9 +85,8 @@ class TestSuite2point1(unittest.TestCase):
     def test_NR_DEC_gdal_fuzzer_unchecked_num_resolutions_jp2_36_decode(self):
         f = 'input/nonregression/gdal_fuzzer_unchecked_numresolutions.jp2'
         jfile = opj_data_file(f)
-        with warnings.catch_warnings():
+        with self.assertWarns(UserWarning):
             # Invalid number of resolutions.
-            warnings.simplefilter("ignore")
             j = Jp2k(jfile)
             with self.assertRaises(IOError):
                 j.read()
@@ -98,9 +94,8 @@ class TestSuite2point1(unittest.TestCase):
     def test_NR_DEC_gdal_fuzzer_check_number_of_tiles_jp2_38_decode(self):
         relpath = 'input/nonregression/gdal_fuzzer_check_number_of_tiles.jp2'
         jfile = opj_data_file(relpath)
-        with warnings.catch_warnings():
+        with self.assertWarns(UserWarning):
             # Invalid number of tiles.
-            warnings.simplefilter("ignore")
             j = Jp2k(jfile)
             with self.assertRaises(IOError):
                 j.read()
@@ -108,9 +103,8 @@ class TestSuite2point1(unittest.TestCase):
     def test_NR_DEC_gdal_fuzzer_check_comp_dx_dy_jp2_39_decode(self):
         relpath = 'input/nonregression/gdal_fuzzer_check_comp_dx_dy.jp2'
         jfile = opj_data_file(relpath)
-        with warnings.catch_warnings():
+        with self.assertWarns(UserWarning):
             # Invalid subsampling value
-            warnings.simplefilter("ignore")
             with self.assertRaises(IOError):
                 Jp2k(jfile).read()
 
@@ -157,9 +151,8 @@ class TestSuite2point1(unittest.TestCase):
                'nonregression',
                'gdal_fuzzer_assert_in_opj_j2k_read_SQcd_SQcc.patch.jp2')
         jfile = opj_data_file('/'.join(lst))
-        with warnings.catch_warnings():
+        with self.assertWarns(UserWarning):
             # Invalid component number.
-            warnings.simplefilter("ignore")
             j = Jp2k(jfile)
             with self.assertRaises(IOError):
                 j.read()

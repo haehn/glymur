@@ -13,7 +13,6 @@ import struct
 import sys
 import tempfile
 import unittest
-import warnings
 
 from glymur import Jp2k
 import glymur
