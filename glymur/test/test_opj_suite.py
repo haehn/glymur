@@ -41,9 +41,6 @@ from .fixtures import WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG
 from .fixtures import mse, peak_tolerance, read_pgx, opj_data_file
 
 
-@unittest.skipIf(glymur.lib.openjp2.OPENJP2 is None and
-                 glymur.lib.openjpeg.OPENJPEG is None,
-                 "Missing openjpeg libraries.")
 @unittest.skipIf(OPJ_DATA_ROOT is None,
                  "OPJ_DATA_ROOT environment variable not set")
 class TestSuite(unittest.TestCase):
@@ -203,7 +200,115 @@ class TestSuite(unittest.TestCase):
         self.assertTrue(peak_tolerance(jpdata, pgxdata) < 624)
         self.assertTrue(mse(jpdata, pgxdata) < 3080)
 
-    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
+    def test_NR_DEC_Bretagne2_j2k_1_decode(self):
+        jfile = opj_data_file('input/nonregression/Bretagne2.j2k')
+        jp2 = Jp2k(jfile)
+        jp2.read()
+        self.assertTrue(True)
+
+    def test_NR_DEC__00042_j2k_2_decode(self):
+        jfile = opj_data_file('input/nonregression/_00042.j2k')
+        jp2 = Jp2k(jfile)
+        jp2.read()
+        self.assertTrue(True)
+
+    def test_NR_DEC_buxI_j2k_9_decode(self):
+        jfile = opj_data_file('input/nonregression/buxI.j2k')
+        Jp2k(jfile).read()
+        self.assertTrue(True)
+
+    def test_NR_DEC_buxR_j2k_10_decode(self):
+        jfile = opj_data_file('input/nonregression/buxR.j2k')
+        Jp2k(jfile).read()
+        self.assertTrue(True)
+
+    def test_NR_DEC_Cannotreaddatawithnosizeknown_j2k_11_decode(self):
+        relpath = 'input/nonregression/Cannotreaddatawithnosizeknown.j2k'
+        jfile = opj_data_file(relpath)
+        Jp2k(jfile).read()
+        self.assertTrue(True)
+
+    def test_NR_DEC_cthead1_j2k_12_decode(self):
+        jfile = opj_data_file('input/nonregression/cthead1.j2k')
+        Jp2k(jfile).read()
+        self.assertTrue(True)
+
+    def test_NR_DEC_CT_Phillips_JPEG2K_Decompr_Problem_j2k_13_decode(self):
+        relpath = 'input/nonregression/CT_Phillips_JPEG2K_Decompr_Problem.j2k'
+        jfile = opj_data_file(relpath)
+        Jp2k(jfile).read()
+        self.assertTrue(True)
+
+    def test_NR_DEC_j2k32_j2k_15_decode(self):
+        jfile = opj_data_file('input/nonregression/j2k32.j2k')
+        Jp2k(jfile).read()
+        self.assertTrue(True)
+
+    def test_NR_DEC_MarkerIsNotCompliant_j2k_17_decode(self):
+        jfile = opj_data_file('input/nonregression/MarkerIsNotCompliant.j2k')
+        Jp2k(jfile).read()
+        self.assertTrue(True)
+
+    def test_NR_DEC_Marrin_jp2_18_decode(self):
+        jfile = opj_data_file('input/nonregression/Marrin.jp2')
+        Jp2k(jfile).read()
+        self.assertTrue(True)
+
+    def test_NR_DEC_movie_00000_j2k_20_decode(self):
+        jfile = opj_data_file('input/nonregression/movie_00000.j2k')
+        Jp2k(jfile).read()
+        self.assertTrue(True)
+
+    def test_NR_DEC_movie_00001_j2k_21_decode(self):
+        jfile = opj_data_file('input/nonregression/movie_00001.j2k')
+        Jp2k(jfile).read()
+        self.assertTrue(True)
+
+    def test_NR_DEC_movie_00002_j2k_22_decode(self):
+        jfile = opj_data_file('input/nonregression/movie_00002.j2k')
+        Jp2k(jfile).read()
+        self.assertTrue(True)
+
+    def test_NR_DEC_orb_blue_lin_j2k_j2k_23_decode(self):
+        jfile = opj_data_file('input/nonregression/orb-blue10-lin-j2k.j2k')
+        Jp2k(jfile).read()
+        self.assertTrue(True)
+
+    def test_NR_DEC_orb_blue_win_j2k_j2k_24_decode(self):
+        jfile = opj_data_file('input/nonregression/orb-blue10-win-j2k.j2k')
+        Jp2k(jfile).read()
+        self.assertTrue(True)
+
+    def test_NR_DEC_relax_jp2_27_decode(self):
+        jfile = opj_data_file('input/nonregression/relax.jp2')
+        Jp2k(jfile).read()
+        self.assertTrue(True)
+
+    def test_NR_DEC_test_lossless_j2k_28_decode(self):
+        jfile = opj_data_file('input/nonregression/test_lossless.j2k')
+        Jp2k(jfile).read()
+        self.assertTrue(True)
+
+    def test_NR_DEC_pacs_ge_j2k_30_decode(self):
+        jfile = opj_data_file('input/nonregression/pacs.ge.j2k')
+        Jp2k(jfile).read()
+        self.assertTrue(True)
+
+
+@unittest.skipIf(OPJ_DATA_ROOT is None,
+                 "OPJ_DATA_ROOT environment variable not set")
+@unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
+class TestSuiteWarns(unittest.TestCase):
+    """
+    Identical setup to above, but these tests issue warnings.
+    """
+
+    def setUp(self):
+        pass
+
+    def tearDown(self):
+        pass
+
     def test_ETS_JP2_file1(self):
         jfile = opj_data_file('input/conformance/file1.jp2')
         with self.assertWarns(UserWarning):
@@ -212,7 +317,6 @@ class TestSuite(unittest.TestCase):
         jpdata = jp2k.read()
         self.assertEqual(jpdata.shape, (512, 768, 3))
 
-    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_ETS_JP2_file2(self):
         jfile = opj_data_file('input/conformance/file2.jp2')
         with self.assertWarns(UserWarning):
@@ -220,7 +324,6 @@ class TestSuite(unittest.TestCase):
         jpdata = jp2k.read()
         self.assertEqual(jpdata.shape, (640, 480, 3))
 
-    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     @unittest.skipIf(glymur.version.openjpeg_version_tuple[0] < 2,
                      "Functionality not implemented for 1.x")
     def test_ETS_JP2_file3(self):
@@ -232,7 +335,6 @@ class TestSuite(unittest.TestCase):
         self.assertEqual(jpdata[1].shape, (320, 240))
         self.assertEqual(jpdata[2].shape, (320, 240))
 
-    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_ETS_JP2_file4(self):
         jfile = opj_data_file('input/conformance/file4.jp2')
         with self.assertWarns(UserWarning):
@@ -240,7 +342,6 @@ class TestSuite(unittest.TestCase):
         jpdata = jp2k.read()
         self.assertEqual(jpdata.shape, (512, 768))
 
-    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_ETS_JP2_file5(self):
         jfile = opj_data_file('input/conformance/file5.jp2')
         with self.assertWarns(UserWarning):
@@ -250,7 +351,6 @@ class TestSuite(unittest.TestCase):
         jpdata = jp2k.read()
         self.assertEqual(jpdata.shape, (512, 768, 3))
 
-    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_ETS_JP2_file6(self):
         jfile = opj_data_file('input/conformance/file6.jp2')
         with self.assertWarns(UserWarning):
@@ -258,7 +358,6 @@ class TestSuite(unittest.TestCase):
         jpdata = jp2k.read()
         self.assertEqual(jpdata.shape, (512, 768))
 
-    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_ETS_JP2_file7(self):
         jfile = opj_data_file('input/conformance/file7.jp2')
         with self.assertWarns(UserWarning):
@@ -266,7 +365,6 @@ class TestSuite(unittest.TestCase):
         jpdata = jp2k.read()
         self.assertEqual(jpdata.shape, (640, 480, 3))
 
-    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_ETS_JP2_file8(self):
         jfile = opj_data_file('input/conformance/file8.jp2')
         with self.assertWarns(UserWarning):
@@ -274,7 +372,6 @@ class TestSuite(unittest.TestCase):
         jpdata = jp2k.read()
         self.assertEqual(jpdata.shape, (400, 700))
 
-    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_ETS_JP2_file9(self):
         jfile = opj_data_file('input/conformance/file9.jp2')
         with self.assertWarns(UserWarning):
@@ -282,7 +379,6 @@ class TestSuite(unittest.TestCase):
         jpdata = jp2k.read()
         self.assertEqual(jpdata.shape, (512, 768, 3))
 
-    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_NR_broken_jp2_dump(self):
         jfile = opj_data_file('input/nonregression/broken.jp2')
 
@@ -408,86 +504,6 @@ class TestSuite(unittest.TestCase):
         self.assertEqual(c.segment[6].exponent,
                          [8] + [9, 9, 10] * 5)
 
-    def test_NR_DEC_Bretagne2_j2k_1_decode(self):
-        jfile = opj_data_file('input/nonregression/Bretagne2.j2k')
-        jp2 = Jp2k(jfile)
-        jp2.read()
-        self.assertTrue(True)
-
-    def test_NR_DEC__00042_j2k_2_decode(self):
-        jfile = opj_data_file('input/nonregression/_00042.j2k')
-        jp2 = Jp2k(jfile)
-        jp2.read()
-        self.assertTrue(True)
-
-    def test_NR_DEC_buxI_j2k_9_decode(self):
-        jfile = opj_data_file('input/nonregression/buxI.j2k')
-        Jp2k(jfile).read()
-        self.assertTrue(True)
-
-    def test_NR_DEC_buxR_j2k_10_decode(self):
-        jfile = opj_data_file('input/nonregression/buxR.j2k')
-        Jp2k(jfile).read()
-        self.assertTrue(True)
-
-    def test_NR_DEC_Cannotreaddatawithnosizeknown_j2k_11_decode(self):
-        relpath = 'input/nonregression/Cannotreaddatawithnosizeknown.j2k'
-        jfile = opj_data_file(relpath)
-        Jp2k(jfile).read()
-        self.assertTrue(True)
-
-    def test_NR_DEC_cthead1_j2k_12_decode(self):
-        jfile = opj_data_file('input/nonregression/cthead1.j2k')
-        Jp2k(jfile).read()
-        self.assertTrue(True)
-
-    def test_NR_DEC_CT_Phillips_JPEG2K_Decompr_Problem_j2k_13_decode(self):
-        relpath = 'input/nonregression/CT_Phillips_JPEG2K_Decompr_Problem.j2k'
-        jfile = opj_data_file(relpath)
-        Jp2k(jfile).read()
-        self.assertTrue(True)
-
-    def test_NR_DEC_j2k32_j2k_15_decode(self):
-        jfile = opj_data_file('input/nonregression/j2k32.j2k')
-        Jp2k(jfile).read()
-        self.assertTrue(True)
-
-    def test_NR_DEC_MarkerIsNotCompliant_j2k_17_decode(self):
-        jfile = opj_data_file('input/nonregression/MarkerIsNotCompliant.j2k')
-        Jp2k(jfile).read()
-        self.assertTrue(True)
-
-    def test_NR_DEC_Marrin_jp2_18_decode(self):
-        jfile = opj_data_file('input/nonregression/Marrin.jp2')
-        Jp2k(jfile).read()
-        self.assertTrue(True)
-
-    def test_NR_DEC_movie_00000_j2k_20_decode(self):
-        jfile = opj_data_file('input/nonregression/movie_00000.j2k')
-        Jp2k(jfile).read()
-        self.assertTrue(True)
-
-    def test_NR_DEC_movie_00001_j2k_21_decode(self):
-        jfile = opj_data_file('input/nonregression/movie_00001.j2k')
-        Jp2k(jfile).read()
-        self.assertTrue(True)
-
-    def test_NR_DEC_movie_00002_j2k_22_decode(self):
-        jfile = opj_data_file('input/nonregression/movie_00002.j2k')
-        Jp2k(jfile).read()
-        self.assertTrue(True)
-
-    def test_NR_DEC_orb_blue_lin_j2k_j2k_23_decode(self):
-        jfile = opj_data_file('input/nonregression/orb-blue10-lin-j2k.j2k')
-        Jp2k(jfile).read()
-        self.assertTrue(True)
-
-    def test_NR_DEC_orb_blue_win_j2k_j2k_24_decode(self):
-        jfile = opj_data_file('input/nonregression/orb-blue10-win-j2k.j2k')
-        Jp2k(jfile).read()
-        self.assertTrue(True)
-
-    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_NR_DEC_orb_blue_lin_jp2_25_decode(self):
         jfile = opj_data_file('input/nonregression/orb-blue10-lin-jp2.jp2')
         with self.assertWarns(UserWarning):
@@ -495,26 +511,10 @@ class TestSuite(unittest.TestCase):
             Jp2k(jfile).read()
         self.assertTrue(True)
 
-    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_NR_DEC_orb_blue_win_jp2_26_decode(self):
         jfile = opj_data_file('input/nonregression/orb-blue10-win-jp2.jp2')
         with self.assertWarns(UserWarning):
             Jp2k(jfile).read()
-        self.assertTrue(True)
-
-    def test_NR_DEC_relax_jp2_27_decode(self):
-        jfile = opj_data_file('input/nonregression/relax.jp2')
-        Jp2k(jfile).read()
-        self.assertTrue(True)
-
-    def test_NR_DEC_test_lossless_j2k_28_decode(self):
-        jfile = opj_data_file('input/nonregression/test_lossless.j2k')
-        Jp2k(jfile).read()
-        self.assertTrue(True)
-
-    def test_NR_DEC_pacs_ge_j2k_30_decode(self):
-        jfile = opj_data_file('input/nonregression/pacs.ge.j2k')
-        Jp2k(jfile).read()
         self.assertTrue(True)
 
 
@@ -522,11 +522,9 @@ class TestSuite(unittest.TestCase):
                  "OPJ_DATA_ROOT environment variable not set")
 @unittest.skipIf(glymur.version.openjpeg_version_tuple[0] == 1,
                  "Feature not supported in glymur until openjpeg 2.0")
-class TestSuite_bands(unittest.TestCase):
-    """Runs tests introduced in version 1.x but only pass in glymur with 2.0
-
-    The deal here is that the feature works with 1.x, but glymur only supports
-    it with version 2.0.
+class TestSuiteBands(unittest.TestCase):
+    """
+    Test the read_bands method.
     """
 
     def setUp(self):
