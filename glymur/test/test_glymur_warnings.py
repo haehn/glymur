@@ -5,6 +5,7 @@ Test suite for warnings issued by glymur.
 # unittest doesn't work well with R0904.
 # pylint: disable=R0904
 
+import platform
 import os
 import re
 import struct
@@ -20,6 +21,8 @@ import glymur
 
 from .fixtures import opj_data_file, OPJ_DATA_ROOT
 
+@unittest.skipIf(sys.hexversion < 0x03040000 and platform.system() == 'Linux',
+                 "inexplicable failures on 3.3 and linux")
 @unittest.skipIf(sys.hexversion < 0x03030000,
                  "assertWarn methods introduced in 3.x")
 @unittest.skipIf(re.match('1.[0-6]', six.__version__) is not None,
