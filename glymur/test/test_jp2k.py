@@ -1069,9 +1069,9 @@ class TestParsing(unittest.TestCase):
     def tearDown(self):
         pass
 
+    @unittest.skipIf(sys.hexversion < 0x03020000, "assertWarns not until 3.2")
     def test_bad_rsiz(self):
         """Should not warn if RSIZ when parsing is turned off."""
-        # Actually there are three warning triggered by this codestream.
         filename = opj_data_file('input/nonregression/edf_c2_1002767.jp2')
         glymur.set_parseoptions(codestream=False)
         with warnings.catch_warnings(record=True) as w:
@@ -1079,10 +1079,8 @@ class TestParsing(unittest.TestCase):
             self.assertEqual(len(w), 0)
 
         glymur.set_parseoptions(codestream=True)
-        with warnings.catch_warnings(record=True) as w:
+        with self.assertWarnsRegex(UserWarning, 'Invalid profile'):
             jp2 = Jp2k(filename)
-            self.assertTrue(issubclass(w[0].category, UserWarning))
-            self.assertTrue('Invalid profile' in str(w[0].message))
 
     def test_main_header(self):
         """Verify that the main header is not loaded when parsing turned off."""
@@ -1094,6 +1092,7 @@ class TestParsing(unittest.TestCase):
         main_header = jp2c.main_header
         self.assertIsNotNone(jp2c._main_header)
 
+@unittest.skipIf(sys.hexversion < 0x03020000, "assertWarns not until 3.2")
 @unittest.skipIf(OPJ_DATA_ROOT is None,
                  "OPJ_DATA_ROOT environment variable not set")
 class TestJp2kOpjDataRootWarnings(unittest.TestCase):
@@ -1102,11 +1101,8 @@ class TestJp2kOpjDataRootWarnings(unittest.TestCase):
     def test_undecodeable_box_id(self):
         """Should warn in case of undecodeable box ID but not error out."""
         filename = opj_data_file('input/nonregression/edf_c2_1013627.jp2')
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter('always')
+        with self.assertWarnsRegex(UserWarning, 'Unrecognized box'):
             jp2 = Jp2k(filename)
-            self.assertTrue(issubclass(w[0].category, UserWarning))
-            self.assertTrue('Unrecognized box' in str(w[0].message))
 
         # Now make sure we got all of the boxes.  Ignore the last, which was
         # bad.
@@ -1116,36 +1112,30 @@ class TestJp2kOpjDataRootWarnings(unittest.TestCase):
     def test_bad_ftyp_brand(self):
         """Should warn in case of bad ftyp brand."""
         filename = opj_data_file('input/nonregression/edf_c2_1000290.jp2')
-        with warnings.catch_warnings(record=True) as w:
-           warnings.simplefilter('always')
+        with self.assertWarns(UserWarning):
            jp2 = Jp2k(filename)
-           self.assertTrue(issubclass(w[0].category, UserWarning))
 
     def test_invalid_approximation(self):
         """Should warn in case of invalid approximation."""
         filename = opj_data_file('input/nonregression/edf_c2_1015644.jp2')
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter('always')
+        with self.assertWarnsRegex(UserWarning, 'Invalid approximation'):
             jp2 = Jp2k(filename)
-            self.assertTrue(issubclass(w[0].category, UserWarning))
-            self.assertTrue('Invalid approximation' in str(w[0].message))
 
     def test_invalid_colorspace(self):
-        """Should warn in case of invalid colorspace."""
+        """
+        Should warn in case of invalid colorspace.
+
+        There are multiple warnings, so there's no good way to regex them all.
+        """
         filename = opj_data_file('input/nonregression/edf_c2_1103421.jp2')
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter('always')
+        with self.assertWarns(UserWarning):
             jp2 = Jp2k(filename)
-            self.assertTrue(issubclass(w[1].category, UserWarning))
-            self.assertTrue('Unrecognized colorspace' in str(w[1].message))
 
     def test_stupid_windows_eol_at_end(self):
         """Garbage characters at the end of the file."""
         filename = opj_data_file('input/nonregression/issue211.jp2')
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter('always')
+        with self.assertWarns(UserWarning):
             jp2 = Jp2k(filename)
-            self.assertTrue(issubclass(w[1].category, UserWarning))
 
 
 @unittest.skipIf(OPJ_DATA_ROOT is None,
