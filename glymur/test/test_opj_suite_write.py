@@ -20,7 +20,7 @@ except ImportError:
 
 from .fixtures import read_image, NO_READ_BACKEND, NO_READ_BACKEND_MSG
 from .fixtures import OPJ_DATA_ROOT, NO_SKIMAGE_FREEIMAGE_SUPPORT
-from .fixtures import opj_data_file
+from .fixtures import opj_data_file, CANNOT_USE_WITH_SIX
 from . import fixtures
 
 from glymur import Jp2k
@@ -150,73 +150,92 @@ class TestSuiteWriteCinema(unittest.TestCase):
 
 
 
+    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
     def test_NR_ENC_ElephantDream_4K_tif_21_encode(self):
         relfile = 'input/nonregression/ElephantDream_4K.tif'
         infile = opj_data_file(relfile)
         data = skimage.io.imread(infile)
         with tempfile.NamedTemporaryFile(suffix='.j2k') as tfile:
             j = Jp2k(tfile.name, 'wb')
-            j.write(data, cinema4k=True)
+            regex = 'OpenJPEG library warning:  JPEG 2000 Profile-3 and 4 '
+            regex += '(2k/4k dc profile) requires'
+            with self.assertWarnsRegex(UserWarning, regex):
+                j.write(data, cinema4k=True)
 
             codestream = j.get_codestream()
             self.check_cinema4k_codestream(codestream, (4096, 2160))
 
 
+    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
     def test_NR_ENC_X_5_2K_24_235_CBR_STEM24_000_tif_19_encode(self):
         relfile = 'input/nonregression/X_5_2K_24_235_CBR_STEM24_000.tif'
         infile = opj_data_file(relfile)
         data = skimage.io.imread(infile)
         with tempfile.NamedTemporaryFile(suffix='.j2k') as tfile:
             j = Jp2k(tfile.name, 'wb')
-            j.write(data, cinema2k=48)
+            with self.assertWarnsRegex(UserWarning, 'OpenJPEG library warning'):
+                j.write(data, cinema2k=48)
 
             codestream = j.get_codestream()
             self.check_cinema2k_codestream(codestream, (2048, 857))
 
 
+    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
     def test_NR_ENC_X_6_2K_24_FULL_CBR_CIRCLE_000_tif_20_encode(self):
         relfile = 'input/nonregression/X_6_2K_24_FULL_CBR_CIRCLE_000.tif'
         infile = opj_data_file(relfile)
         data = skimage.io.imread(infile)
         with tempfile.NamedTemporaryFile(suffix='.j2k') as tfile:
             j = Jp2k(tfile.name, 'wb')
-            j.write(data, cinema2k=48)
+            with self.assertWarnsRegex(UserWarning, 'OpenJPEG library warning'):
+                j.write(data, cinema2k=48)
 
             codestream = j.get_codestream()
             self.check_cinema2k_codestream(codestream, (2048, 1080))
 
 
+    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
     def test_NR_ENC_X_6_2K_24_FULL_CBR_CIRCLE_000_tif_17_encode(self):
         relfile = 'input/nonregression/X_6_2K_24_FULL_CBR_CIRCLE_000.tif'
         infile = opj_data_file(relfile)
         data = skimage.io.imread(infile)
         with tempfile.NamedTemporaryFile(suffix='.j2k') as tfile:
             j = Jp2k(tfile.name, 'wb')
-            j.write(data, cinema2k=24)
+            with self.assertWarnsRegex(UserWarning, 'OpenJPEG library warning'):
+                j.write(data, cinema2k=24)
 
             codestream = j.get_codestream()
             self.check_cinema2k_codestream(codestream, (2048, 1080))
 
 
+    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
     def test_NR_ENC_X_5_2K_24_235_CBR_STEM24_000_tif_16_encode(self):
         relfile = 'input/nonregression/X_5_2K_24_235_CBR_STEM24_000.tif'
         infile = opj_data_file(relfile)
         data = skimage.io.imread(infile)
         with tempfile.NamedTemporaryFile(suffix='.j2k') as tfile:
             j = Jp2k(tfile.name, 'wb')
-            j.write(data, cinema2k=24)
+            with self.assertWarnsRegex(UserWarning, 'OpenJPEG library warning'):
+                # OpenJPEG library warning:  The desired maximum codestream
+                # size has limited at least one of the desired quality layers
+                j.write(data, cinema2k=24)
 
             codestream = j.get_codestream()
             self.check_cinema2k_codestream(codestream, (2048, 857))
 
 
+    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
     def test_NR_ENC_X_4_2K_24_185_CBR_WB_000_tif_18_encode(self):
         relfile = 'input/nonregression/X_4_2K_24_185_CBR_WB_000.tif'
         infile = opj_data_file(relfile)
         data = skimage.io.imread(infile)
         with tempfile.NamedTemporaryFile(suffix='.j2k') as tfile:
             j = Jp2k(tfile.name, 'wb')
-            j.write(data, cinema2k=48)
+            regex = 'OpenJPEG library warning'
+            with self.assertWarnsRegex(UserWarning, regex):
+                # OpenJPEG library warning:  The desired maximum codestream
+                # size has limited at least one of the desired quality layers
+                j.write(data, cinema2k=48)
 
             codestream = j.get_codestream()
             self.check_cinema2k_codestream(codestream, (1998, 1080))

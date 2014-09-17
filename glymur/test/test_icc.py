@@ -13,9 +13,10 @@ import unittest
 import numpy as np
 
 from glymur import Jp2k
-from .fixtures import OPJ_DATA_ROOT, opj_data_file
+from .fixtures import OPJ_DATA_ROOT, opj_data_file, CANNOT_USE_WITH_SIX
 
 
+@unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
 @unittest.skipIf(OPJ_DATA_ROOT is None,
                  "OPJ_DATA_ROOT environment variable not set")
 class TestICC(unittest.TestCase):

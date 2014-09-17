@@ -8,9 +8,14 @@ import textwrap
 import warnings
 
 import numpy as np
+import six
 
 import glymur
 
+# Some versions of "six" on python3 cause problems when verifying warnings.
+# Only use when the version is 1.7 or higher.
+CANNOT_USE_WITH_SIX = ((sys.hexversion >= 0x03000000) and
+                       (re.match('1.[0-6]', six.__version__) is not None))
 
 # The Python XMP Toolkit may be used for XMP UUIDs, but only if available and
 # if the version is at least 2.0.0.

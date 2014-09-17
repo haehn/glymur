@@ -36,7 +36,7 @@ import numpy as np
 from glymur import Jp2k
 import glymur
 
-from .fixtures import OPJ_DATA_ROOT
+from .fixtures import OPJ_DATA_ROOT, CANNOT_USE_WITH_SIX
 from .fixtures import mse, peak_tolerance, read_pgx, opj_data_file
 
 
@@ -54,6 +54,7 @@ class TestSuite2point1(unittest.TestCase):
     def tearDown(self):
         pass
 
+    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
     def test_NR_DEC_text_GBR_jp2_29_decode(self):
         jfile = opj_data_file('input/nonregression/text_GBR.jp2')
         with self.assertWarns(UserWarning):
@@ -82,6 +83,7 @@ class TestSuite2point1(unittest.TestCase):
         Jp2k(jfile).read()
         self.assertTrue(True)
 
+    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
     def test_NR_DEC_gdal_fuzzer_unchecked_num_resolutions_jp2_36_decode(self):
         f = 'input/nonregression/gdal_fuzzer_unchecked_numresolutions.jp2'
         jfile = opj_data_file(f)
@@ -91,6 +93,7 @@ class TestSuite2point1(unittest.TestCase):
             with self.assertRaises(IOError):
                 j.read()
 
+    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
     def test_NR_DEC_gdal_fuzzer_check_number_of_tiles_jp2_38_decode(self):
         relpath = 'input/nonregression/gdal_fuzzer_check_number_of_tiles.jp2'
         jfile = opj_data_file(relpath)
@@ -100,6 +103,7 @@ class TestSuite2point1(unittest.TestCase):
             with self.assertRaises(IOError):
                 j.read()
 
+    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
     def test_NR_DEC_gdal_fuzzer_check_comp_dx_dy_jp2_39_decode(self):
         relpath = 'input/nonregression/gdal_fuzzer_check_comp_dx_dy.jp2'
         jfile = opj_data_file(relpath)
@@ -146,6 +150,7 @@ class TestSuite2point1(unittest.TestCase):
         odata = jp2k.read(rlevel=1)
         np.testing.assert_array_equal(tdata, odata[64:128, 256:320])
 
+    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
     def test_NR_DEC_jp2_36_decode(self):
         lst = ('input',
                'nonregression',

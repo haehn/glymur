@@ -23,6 +23,7 @@ except ImportError:
 from .fixtures import OPJ_DATA_ROOT, opj_data_file, read_image
 from .fixtures import NO_READ_BACKEND, NO_READ_BACKEND_MSG
 from .fixtures import NO_SKIMAGE_FREEIMAGE_SUPPORT
+from .fixtures import CANNOT_USE_WITH_SIX
 
 from glymur import Jp2k
 import glymur
@@ -75,6 +76,7 @@ class TestSuiteNegative(unittest.TestCase):
         jp2k.get_codestream(header_only=False)
         self.assertTrue(True)
 
+    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
     def test_nr_illegalclrtransform(self):
         """EOC marker is bad"""
         relpath = 'input/nonregression/illegalcolortransform.j2k'

@@ -35,7 +35,7 @@ else:
 
 import lxml.etree
 
-from .fixtures import HAS_PYTHON_XMP_TOOLKIT, OPJ_DATA_ROOT
+from .fixtures import HAS_PYTHON_XMP_TOOLKIT, OPJ_DATA_ROOT, CANNOT_USE_WITH_SIX
 if HAS_PYTHON_XMP_TOOLKIT:
     from libxmp import XMPMeta
 
@@ -45,8 +45,8 @@ from .fixtures import OPJ_DATA_ROOT, opj_data_file, SimpleRDF
 
 
 @unittest.skipIf(os.name == "nt", "Unexplained failure on windows")
-class TestUUIDXMP(unittest.TestCase):
-    """Tests for UUIDs of XMP type."""
+class TestSuite(unittest.TestCase):
+    """Tests for XMP, Exif UUIDs."""
 
     def setUp(self):
         self.jp2file = glymur.data.nemo()
@@ -54,7 +54,7 @@ class TestUUIDXMP(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def test_append(self):
+    def test_append_xmp_uuid(self):
         """Should be able to append an XMP UUID box."""
         the_uuid = uuid.UUID('be7acfcb-97a9-42e8-9c71-999491e3afac')
         raw_data = SimpleRDF.encode('utf-8')
@@ -74,16 +74,42 @@ class TestUUIDXMP(unittest.TestCase):
             self.assertTrue(isinstance(jp2.box[-1].data,
                                        lxml.etree._ElementTree))
 
+    def test_big_endian_exif(self):
+        """Verify read of Exif big-endian IFD."""
+        with tempfile.NamedTemporaryFile(suffix='.jp2', mode='wb') as tfile:
+
+            with open(self.jp2file, 'rb') as ifptr:
+                tfile.write(ifptr.read())
+
+            # Write L, T, UUID identifier.
+            tfile.write(struct.pack('>I4s', 52, b'uuid'))
+            tfile.write(b'JpgTiffExif->JP2')
+
+            tfile.write(b'Exif\x00\x00')
+            xbuffer = struct.pack('>BBHI', 77, 77, 42, 8)
+            tfile.write(xbuffer)
+
+            # We will write just a single tag.
+            tfile.write(struct.pack('>H', 1))
+
+            # The "Make" tag is tag no. 271.
+            tfile.write(struct.pack('>HHI4s', 271, 2, 3, b'HTC\x00'))
+            tfile.flush()
+
+            jp2 = glymur.Jp2k(tfile.name)
+            self.assertEqual(jp2.box[-1].data['Make'], "HTC")
+
+@unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
 @unittest.skipIf(os.name == "nt", "Unexplained failure on windows")
-class TestUUIDExif(unittest.TestCase):
-    """Tests for UUIDs of Exif type."""
+class TestSuiteWarns(unittest.TestCase):
+    """Tests for XMP, Exif UUIDs, issues warnings."""
 
     def setUp(self):
         self.jp2file = glymur.data.nemo()
 
     def tearDown(self):
         pass
-
+        
     def test_unrecognized_exif_tag(self):
         """Verify warning in case of unrecognized tag."""
         with tempfile.NamedTemporaryFile(suffix='.jp2', mode='wb') as tfile:
@@ -163,31 +189,6 @@ class TestUUIDExif(unittest.TestCase):
                 jp2 = glymur.Jp2k(tfile.name)
 
             self.assertEqual(jp2.box[-1].box_id, 'uuid')
-
-    def test_big_endian(self):
-        """Verify read of big-endian IFD."""
-        with tempfile.NamedTemporaryFile(suffix='.jp2', mode='wb') as tfile:
-
-            with open(self.jp2file, 'rb') as ifptr:
-                tfile.write(ifptr.read())
-
-            # Write L, T, UUID identifier.
-            tfile.write(struct.pack('>I4s', 52, b'uuid'))
-            tfile.write(b'JpgTiffExif->JP2')
-
-            tfile.write(b'Exif\x00\x00')
-            xbuffer = struct.pack('>BBHI', 77, 77, 42, 8)
-            tfile.write(xbuffer)
-
-            # We will write just a single tag.
-            tfile.write(struct.pack('>H', 1))
-
-            # The "Make" tag is tag no. 271.
-            tfile.write(struct.pack('>HHI4s', 271, 2, 3, b'HTC\x00'))
-            tfile.flush()
-
-            jp2 = glymur.Jp2k(tfile.name)
-            self.assertEqual(jp2.box[-1].data['Make'], "HTC")
 
 if __name__ == "__main__":
     unittest.main()
