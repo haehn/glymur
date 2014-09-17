@@ -36,7 +36,8 @@ import numpy as np
 from glymur import Jp2k
 import glymur
 
-from .fixtures import OPJ_DATA_ROOT, CANNOT_USE_WITH_SIX
+from .fixtures import OPJ_DATA_ROOT
+from .fixtures import WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG
 from .fixtures import mse, peak_tolerance, read_pgx, opj_data_file
 
 
@@ -102,7 +103,7 @@ class TestSuite(unittest.TestCase):
             self.assertIsNone(actual.icc_profile)
         
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     @unittest.skipIf(re.match("1.5|2.0.0", glymur.version.openjpeg_version),
                      "Test not passing on 1.5, 2.0:  not introduced until 2.x")
     def test_NR_DEC_issue188_beach_64bitsbox_jp2_41_decode(self):
@@ -117,7 +118,7 @@ class TestSuite(unittest.TestCase):
         self.assertTrue(True)
 
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_NR_broken4_jp2_dump(self):
         jfile = opj_data_file('input/nonregression/broken4.jp2')
         with self.assertWarns(UserWarning):
@@ -125,7 +126,7 @@ class TestSuite(unittest.TestCase):
 
         self.assertEqual(jp2.box[-1].main_header.segment[-1].marker_id, 'QCC')
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     @unittest.skipIf(sys.maxsize < 2**32, 'Do not run on 32-bit platforms')
     def test_NR_broken3_jp2_dump(self):
         """
@@ -225,7 +226,7 @@ class TestSuite(unittest.TestCase):
         self.assertEqual(c.segment[6].exponent,
                          [8] + [9, 9, 10] * 5)
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_NR_broken2_jp2_dump(self):
         """
         Invalid marker ID in the codestream.
@@ -2463,7 +2464,7 @@ class TestSuite(unittest.TestCase):
         # EOC:  end of codestream
         self.assertEqual(c.segment[-1].marker_id, 'EOC')
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_NR_file1_dump(self):
         jfile = opj_data_file('input/conformance/file1.jp2')
         with self.assertWarns(UserWarning):
@@ -2499,7 +2500,7 @@ class TestSuite(unittest.TestCase):
                                 '{http://www.jpeg.org/jpx/1.0/xml}LOCATION',
                                 '{http://www.jpeg.org/jpx/1.0/xml}EVENT'])
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_NR_file2_dump(self):
         jfile = opj_data_file('input/conformance/file2.jp2')
         with self.assertWarns(UserWarning):
@@ -2527,7 +2528,7 @@ class TestSuite(unittest.TestCase):
         self.assertEqual(jp2.box[2].box[2].channel_type, (0, 0, 0))  # color
         self.assertEqual(jp2.box[2].box[2].association, (3, 2, 1))  # reverse
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_NR_file3_dump(self):
         # Three 8-bit components in the sRGB-YCC colourspace, with the Cb and
         # Cr components being subsampled 2x in both the horizontal and
@@ -2563,7 +2564,7 @@ class TestSuite(unittest.TestCase):
         self.assertEqual(codestream.segment[1].xrsiz[2], 2)
         self.assertEqual(codestream.segment[1].yrsiz[2], 2)
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_NR_file4_dump(self):
         # One 8-bit component in the sRGB-grey colourspace.
         jfile = opj_data_file('input/conformance/file4.jp2')
@@ -2586,7 +2587,7 @@ class TestSuite(unittest.TestCase):
                 colorspace=glymur.core.GREYSCALE, approximation=1)
         self.verifyColourSpecificationBox(jp2.box[2].box[1], colr)
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_NR_file5_dump(self):
         # Three 8-bit components in the ROMM-RGB colourspace, encapsulated in a
         # JPX file. The components have been transformed using
@@ -2617,7 +2618,7 @@ class TestSuite(unittest.TestCase):
         self.verifyColourSpecificationBox(jp2.box[3].box[1], colr)
         self.assertEqual(jp2.box[3].box[1].icc_profile['Size'], 546)
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_NR_file6_dump(self):
         jfile = opj_data_file('input/conformance/file6.jp2')
         with self.assertWarns(UserWarning):
@@ -2641,7 +2642,7 @@ class TestSuite(unittest.TestCase):
                 approximation=1)
         self.verifyColourSpecificationBox(jp2.box[2].box[1], colr)
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_NR_file7_dump(self):
         # Three 16-bit components in the e-sRGB colourspace, encapsulated in a
         # JP2 compatible JPX file. The components have been transformed using
@@ -2674,7 +2675,7 @@ class TestSuite(unittest.TestCase):
         self.verifyColourSpecificationBox(jp2.box[3].box[1], colr)
         self.assertEqual(jp2.box[3].box[1].icc_profile['Size'], 13332)
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_NR_file8_dump(self):
         # One 8-bit component in a gamma 1.8 space. The colourspace is
         # specified using a Restricted ICC profile.
@@ -2719,7 +2720,7 @@ class TestSuite(unittest.TestCase):
                           '{http://www.jpeg.org/jpx/1.0/xml}THING',
                           '{http://www.jpeg.org/jpx/1.0/xml}EVENT'])
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_NR_file9_dump(self):
         # Colormap
         jfile = opj_data_file('input/conformance/file9.jp2')
@@ -3964,7 +3965,7 @@ class TestSuite(unittest.TestCase):
         self.assertEqual(c.segment[3].mantissa, [0] * 16)
         self.assertEqual(c.segment[3].exponent, [8] + [9, 9, 10] * 5)
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_NR_issue188_beach_64bitsbox(self):
         lst = ['input', 'nonregression', 'issue188_beach_64bitsbox.jp2']
         jfile = opj_data_file('/'.join(lst))
@@ -4360,7 +4361,7 @@ class TestSuite(unittest.TestCase):
         podvals = (glymur.core.LRCP, glymur.core.LRCP)
         self.assertEqual(c.segment[4].ppod, podvals)
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_NR_orb_blue10_lin_jp2_dump(self):
         jfile = opj_data_file('input/nonregression/orb-blue10-lin-jp2.jp2')
         with self.assertWarns(UserWarning):
@@ -4436,7 +4437,7 @@ class TestSuite(unittest.TestCase):
         self.assertEqual(c.segment[3].exponent,
                          [8, 9, 9, 10, 9, 9, 10, 9, 9, 10, 9, 9, 10, 9, 9, 10])
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_NR_orb_blue10_win_jp2_dump(self):
         jfile = opj_data_file('input/nonregression/orb-blue10-win-jp2.jp2')
         with self.assertWarns(UserWarning):

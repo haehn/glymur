@@ -13,10 +13,11 @@ import unittest
 import numpy as np
 
 from glymur import Jp2k
-from .fixtures import OPJ_DATA_ROOT, opj_data_file, CANNOT_USE_WITH_SIX
+from .fixtures import OPJ_DATA_ROOT, opj_data_file
+from .fixtures import WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG
 
 
-@unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+@unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
 @unittest.skipIf(OPJ_DATA_ROOT is None,
                  "OPJ_DATA_ROOT environment variable not set")
 class TestICC(unittest.TestCase):
@@ -61,7 +62,6 @@ class TestICC(unittest.TestCase):
 
         self.assertEqual(profile['Creator'], 'JPEG')
 
-    @unittest.skipIf(sys.hexversion < 0x03020000, "assertWarns not until 3.2")
     def test_invalid_profile_header(self):
         """invalid ICC header data should cause UserWarning"""
         jfile = opj_data_file('input/nonregression/orb-blue10-lin-jp2.jp2')

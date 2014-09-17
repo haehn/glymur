@@ -32,7 +32,8 @@ import lxml.etree as ET
 import glymur
 from glymur import Jp2k, command_line
 from . import fixtures
-from .fixtures import OPJ_DATA_ROOT, opj_data_file, CANNOT_USE_WITH_SIX
+from .fixtures import OPJ_DATA_ROOT, opj_data_file
+from .fixtures import WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG
 from .fixtures import text_gbr_27, text_gbr_33, text_gbr_34
 
 
@@ -70,7 +71,7 @@ class TestPrinting(unittest.TestCase):
 
         self.assertTrue(True)
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_unknown_superbox(self):
         """Verify that we can handle an unknown superbox."""
         with tempfile.NamedTemporaryFile(suffix='.jpx') as tfile:
@@ -643,7 +644,7 @@ class TestPrintingOpjDataRoot(unittest.TestCase):
             actual = fake_out.getvalue().strip()
         self.assertEqual(actual, fixtures.cinema2k_profile)
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_invalid_colorspace(self):
         """An invalid colorspace shouldn't cause an error."""
         filename = opj_data_file('input/nonregression/edf_c2_1103421.jp2')
@@ -652,7 +653,7 @@ class TestPrintingOpjDataRoot(unittest.TestCase):
         with patch('sys.stdout', new=StringIO()) as fake_out:
             print(jp2)
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_bad_rsiz(self):
         """Should still be able to print if rsiz is bad, issue196"""
         filename = opj_data_file('input/nonregression/edf_c2_1002767.jp2')
@@ -661,7 +662,7 @@ class TestPrintingOpjDataRoot(unittest.TestCase):
         with patch('sys.stdout', new=StringIO()) as fake_out:
             print(j)
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_bad_wavelet_transform(self):
         """Should still be able to print if wavelet xform is bad, issue195"""
         filename = opj_data_file('input/nonregression/edf_c2_10025.jp2')
@@ -670,7 +671,7 @@ class TestPrintingOpjDataRoot(unittest.TestCase):
             with patch('sys.stdout', new=StringIO()) as fake_out:
                 print(jp2)
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_invalid_progression_order(self):
         """Should still be able to print even if prog order is invalid."""
         jfile = opj_data_file('input/nonregression/2977.pdf.asan.67.2198.jp2')
@@ -832,7 +833,7 @@ class TestPrintingOpjDataRoot(unittest.TestCase):
         expected = '\n'.join(lines)
         self.assertEqual(actual, expected)
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_xml(self):
         """verify printing of XML box"""
         filename = opj_data_file('input/conformance/file1.jp2')
@@ -843,7 +844,7 @@ class TestPrintingOpjDataRoot(unittest.TestCase):
             actual = fake_out.getvalue().strip()
         self.assertEqual(actual, fixtures.file1_xml)
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_channel_definition(self):
         """verify printing of cdef box"""
         filename = opj_data_file('input/conformance/file2.jp2')
@@ -860,7 +861,7 @@ class TestPrintingOpjDataRoot(unittest.TestCase):
         expected = '\n'.join(lines)
         self.assertEqual(actual, expected)
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_component_mapping(self):
         """verify printing of cmap box"""
         filename = opj_data_file('input/conformance/file9.jp2')
@@ -887,7 +888,7 @@ class TestPrintingOpjDataRoot(unittest.TestCase):
         self.assertEqual(newbox.mapping_type, (1, 1, 1))
         self.assertEqual(newbox.palette_index, (0, 1, 2))
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_palette7(self):
         """verify printing of pclr box"""
         filename = opj_data_file('input/conformance/file9.jp2')
@@ -901,7 +902,7 @@ class TestPrintingOpjDataRoot(unittest.TestCase):
         expected = '\n'.join(lines)
         self.assertEqual(actual, expected)
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_rreq(self):
         """verify printing of reader requirements box"""
         filename = opj_data_file('input/nonregression/text_GBR.jp2')
@@ -933,7 +934,7 @@ class TestPrintingOpjDataRoot(unittest.TestCase):
         expected = '\n'.join(lines)
         self.assertEqual(actual, expected)
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_palette_box(self):
         """Verify that palette (pclr) boxes are printed without error."""
         filename = opj_data_file('input/conformance/file9.jp2')
@@ -947,7 +948,7 @@ class TestPrintingOpjDataRoot(unittest.TestCase):
         expected = '\n'.join(lines)
         self.assertEqual(actual, expected)
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_icc_profile(self):
         """verify icc profile printing with a jpx"""
         # ICC profiles may be used in JP2, but the approximation field should
@@ -969,7 +970,7 @@ class TestPrintingOpjDataRoot(unittest.TestCase):
 
         self.assertEqual(actual, expected)
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_uuid(self):
         """verify printing of UUID box"""
         filename = opj_data_file('input/nonregression/text_GBR.jp2')
@@ -986,7 +987,7 @@ class TestPrintingOpjDataRoot(unittest.TestCase):
         expected = '\n'.join(lines)
         self.assertEqual(actual, expected)
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_issue182(self):
         """Should not show the format string in output."""
         # The cmap box is wildly broken, but printing was still wrong.
@@ -1001,7 +1002,7 @@ class TestPrintingOpjDataRoot(unittest.TestCase):
             actual = fake_out.getvalue().strip()
         self.assertEqual(actual, fixtures.issue_182_cmap)
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_issue183(self):
         filename = opj_data_file('input/nonregression/orb-blue10-lin-jp2.jp2')
 
@@ -1013,7 +1014,7 @@ class TestPrintingOpjDataRoot(unittest.TestCase):
             actual = fake_out.getvalue().strip()
         self.assertEqual(actual, fixtures.issue_183_colr)
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_bom(self):
         """Byte order markers are illegal in UTF-8.  Issue 185"""
         filename = opj_data_file(os.path.join('input',

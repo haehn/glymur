@@ -23,7 +23,7 @@ else:
 
 import glymur
 
-from .fixtures import CANNOT_USE_WITH_SIX
+from .fixtures import WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG
 
 @unittest.skipIf(glymur.lib.openjp2.OPENJP2 is None,
                  "Missing openjp2 library.")
@@ -37,7 +37,7 @@ class TestCallbacks(unittest.TestCase):
     def tearDown(self):
         pass
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     @unittest.skipIf(os.name == "nt", "Temporary file issue on window.")
     def test_info_callback_on_write(self):
         """Verify messages printed when writing an image in verbose mode."""

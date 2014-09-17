@@ -35,7 +35,9 @@ else:
 
 import lxml.etree
 
-from .fixtures import HAS_PYTHON_XMP_TOOLKIT, OPJ_DATA_ROOT, CANNOT_USE_WITH_SIX
+from .fixtures import HAS_PYTHON_XMP_TOOLKIT, OPJ_DATA_ROOT
+from .fixtures import WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG
+
 if HAS_PYTHON_XMP_TOOLKIT:
     from libxmp import XMPMeta
 
@@ -99,7 +101,7 @@ class TestSuite(unittest.TestCase):
             jp2 = glymur.Jp2k(tfile.name)
             self.assertEqual(jp2.box[-1].data['Make'], "HTC")
 
-@unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+@unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
 @unittest.skipIf(os.name == "nt", "Unexplained failure on windows")
 class TestSuiteWarns(unittest.TestCase):
     """Tests for XMP, Exif UUIDs, issues warnings."""

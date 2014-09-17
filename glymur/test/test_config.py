@@ -25,7 +25,7 @@ else:
 import glymur
 from glymur import Jp2k
 
-from .fixtures import CANNOT_USE_WITH_SIX
+from .fixtures import WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG
 
 @unittest.skipIf(sys.hexversion < 0x03020000,
                  "TemporaryDirectory introduced in 3.2.")
@@ -70,7 +70,7 @@ class TestSuite(unittest.TestCase):
                     imp.reload(glymur.lib.openjp2)
                     Jp2k(self.jp2file)
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_xdg_env_config_file_is_bad(self):
         """A non-existant library location should be rejected."""
         with tempfile.TemporaryDirectory() as tdir:

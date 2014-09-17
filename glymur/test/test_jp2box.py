@@ -35,7 +35,8 @@ from glymur.jp2box import JPEG2000SignatureBox
 from glymur.core import COLOR, OPACITY
 from glymur.core import RED, GREEN, BLUE, GREY, WHOLE_IMAGE
 
-from .fixtures import opj_data_file, CANNOT_USE_WITH_SIX
+from .fixtures import opj_data_file
+from .fixtures import WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG
 
 try:
     FORMAT_CORPUS_DATA_ROOT = os.environ['FORMAT_CORPUS_DATA_ROOT']
@@ -356,7 +357,7 @@ class TestChannelDefinition(unittest.TestCase):
             with self.assertRaises((IOError, OSError)):
                 j2k.wrap(tfile.name, boxes=boxes)
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_bad_type(self):
         """Channel types are limited to 0, 1, 2, 65535
         Should reject if not all of index, channel_type, association the
@@ -369,7 +370,7 @@ class TestChannelDefinition(unittest.TestCase):
             glymur.jp2box.ChannelDefinitionBox(channel_type=channel_type,
                                                association=association)
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_wrong_lengths(self):
         """Should reject if not all of index, channel_type, association the
         same length.
@@ -390,7 +391,7 @@ class TestFileTypeBox(unittest.TestCase):
     def tearDown(self):
         pass
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_brand_unknown(self):
         """A ftyp box brand must be 'jp2 ' or 'jpx '."""
         with self.assertWarns(UserWarning):
@@ -399,7 +400,7 @@ class TestFileTypeBox(unittest.TestCase):
             with tempfile.TemporaryFile() as tfile:
                 ftyp.write(tfile) 
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_cl_entry_unknown(self):
         """A ftyp box cl list can only contain 'jp2 ', 'jpx ', or 'jpxb'."""
         with self.assertWarns(UserWarning):
@@ -474,7 +475,7 @@ class TestColourSpecificationBox(unittest.TestCase):
         self.assertEqual(colr.colorspace, glymur.core.SRGB)
         self.assertIsNone(colr.icc_profile)
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_colr_with_cspace_and_icc(self):
         """Colour specification boxes can't have both."""
         regex = 'Colorspace and icc_profile cannot both be set'
@@ -484,7 +485,7 @@ class TestColourSpecificationBox(unittest.TestCase):
             glymur.jp2box.ColourSpecificationBox(colorspace=colorspace,
                                                  icc_profile=rawb)
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_colr_with_bad_method(self):
         """colr must have a valid method field"""
         colorspace = glymur.core.SRGB
@@ -494,7 +495,7 @@ class TestColourSpecificationBox(unittest.TestCase):
             glymur.jp2box.ColourSpecificationBox(colorspace=colorspace,
                                                  method=method)
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_colr_with_bad_approx(self):
         """colr should have a valid approximation field"""
         colorspace = glymur.core.SRGB
@@ -525,7 +526,7 @@ class TestPaletteBox(unittest.TestCase):
     def tearDown(self):
         pass
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_mismatched_bitdepth_signed(self):
         """bitdepth and signed arguments must have equal length"""
         palette = np.array([[255, 0, 255], [0, 255, 0]], dtype=np.uint8)
@@ -535,7 +536,7 @@ class TestPaletteBox(unittest.TestCase):
             pclr = glymur.jp2box.PaletteBox(palette, bits_per_component=bps,
                                             signed=signed)
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_mismatched_signed_palette(self):
         """bitdepth and signed arguments must have equal length"""
         palette = np.array([[255, 0, 255], [0, 255, 0]], dtype=np.uint8)

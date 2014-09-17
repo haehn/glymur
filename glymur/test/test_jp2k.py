@@ -27,7 +27,9 @@ import pkg_resources
 import glymur
 from glymur import Jp2k
 
-from .fixtures import HAS_PYTHON_XMP_TOOLKIT, CANNOT_USE_WITH_SIX
+from .fixtures import HAS_PYTHON_XMP_TOOLKIT
+from .fixtures import WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG
+
 if HAS_PYTHON_XMP_TOOLKIT:
     import libxmp
     from libxmp import XMPMeta
@@ -1018,7 +1020,7 @@ class TestJp2k_2_1(unittest.TestCase):
             self.assertEqual(j.box[2].box[0].num_components, 4)
             self.assertEqual(j.box[2].box[1].colorspace, glymur.core.SRGB)
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     @unittest.skipIf(os.name == "nt", "NamedTemporaryFile issue on windows")
     def test_openjpeg_library_message(self):
         """Verify the error message produced by the openjpeg library"""
@@ -1067,8 +1069,7 @@ class TestParsing(unittest.TestCase):
     def tearDown(self):
         pass
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
-    @unittest.skipIf(sys.hexversion < 0x03020000, "assertWarns not until 3.2")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_bad_rsiz(self):
         """Should not warn if RSIZ when parsing is turned off."""
         filename = opj_data_file('input/nonregression/edf_c2_1002767.jp2')
@@ -1089,8 +1090,7 @@ class TestParsing(unittest.TestCase):
         main_header = jp2c.main_header
         self.assertIsNotNone(jp2c._main_header)
 
-@unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
-@unittest.skipIf(sys.hexversion < 0x03020000, "assertWarns not until 3.2")
+@unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
 @unittest.skipIf(OPJ_DATA_ROOT is None,
                  "OPJ_DATA_ROOT environment variable not set")
 class TestJp2kOpjDataRootWarnings(unittest.TestCase):
@@ -1158,7 +1158,7 @@ class TestJp2kOpjDataRoot(unittest.TestCase):
             actdata = j.read()
             self.assertTrue(fixtures.mse(actdata, expdata) < 250)
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_no_cxform_pclr_jp2(self):
         """Indices for pclr jpxfile if no color transform"""
         filename = opj_data_file('input/conformance/file9.jp2')
@@ -1189,7 +1189,7 @@ class TestJp2kOpjDataRoot(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             j.read()
         
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_no_cxform_cmap(self):
         """Bands as physically ordered, not as physically intended"""
         # This file has the components physically reversed.  The cmap box

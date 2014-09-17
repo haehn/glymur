@@ -39,7 +39,8 @@ from glymur.jp2box import ColourSpecificationBox, ContiguousCodestreamBox
 from glymur.jp2box import FileTypeBox, ImageHeaderBox, JP2HeaderBox
 from glymur.jp2box import JPEG2000SignatureBox
 
-from .fixtures import OPJ_DATA_ROOT, opj_data_file, CANNOT_USE_WITH_SIX
+from .fixtures import OPJ_DATA_ROOT, opj_data_file
+from .fixtures import WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG
 
 @unittest.skipIf(os.name == "nt", "Temporary file issue on window.")
 class TestXML(unittest.TestCase):
@@ -206,8 +207,7 @@ class TestJp2kBadXmlFile(unittest.TestCase):
     def tearDown(self):
         pass
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
-    @unittest.skipIf(sys.hexversion < 0x03020000, "assertWarns not until 3.2")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_invalid_xml_box(self):
         """Should be able to recover info from xml box with bad xml."""
         with self.assertWarns(UserWarning):
@@ -260,15 +260,14 @@ class TestBadButRecoverableXmlFile(unittest.TestCase):
     def tearDownClass(cls):
         os.unlink(cls._bad_xml_file)
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
-    @unittest.skipIf(sys.hexversion < 0x03020000, "assertWarns not until 3.2")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_bad_xml_box_warning(self):
         """Should warn in case of bad XML"""
         regex = 'A UnicodeDecodeError was encountered parsing an XML box'
         with self.assertWarnsRegex(UserWarning, regex):
             Jp2k(self._bad_xml_file)
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_recover_from_bad_xml(self):
         """Should be able to recover info from xml box with bad xml."""
         with self.assertWarns(UserWarning):
@@ -281,8 +280,7 @@ class TestBadButRecoverableXmlFile(unittest.TestCase):
                          b'<test>this is a test</test>')
 
 
-@unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
-@unittest.skipIf(sys.hexversion < 0x03020000, "assertWarns not until 3.2")
+@unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
 @unittest.skipIf(OPJ_DATA_ROOT is None,
                  "OPJ_DATA_ROOT environment variable not set")
 class TestXML_OpjDataRoot(unittest.TestCase):

@@ -18,7 +18,7 @@ from glymur.jp2box import DataEntryURLBox, FileTypeBox, JPEG2000SignatureBox
 from glymur.jp2box import DataReferenceBox, FragmentListBox, FragmentTableBox
 from glymur.jp2box import ColourSpecificationBox
 
-from .fixtures import CANNOT_USE_WITH_SIX
+from .fixtures import WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG
 
 @unittest.skipIf(os.name == "nt", "Temporary file issue on window.")
 class TestJPXWrap(unittest.TestCase):
@@ -306,7 +306,7 @@ class TestJPXWrap(unittest.TestCase):
             with self.assertRaises(IOError):
                 jp2.wrap(tfile.name, boxes=boxes)
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_deurl_child_of_dtbl(self):
         """Data reference boxes can only contain data entry url boxes."""
         jp2 = Jp2k(self.jp2file)
@@ -432,7 +432,7 @@ class TestJPX(unittest.TestCase):
     def tearDown(self):
         pass
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_flst_lens_not_the_same(self):
         """A fragment list box items must be the same length."""
         offset = [89]
@@ -444,7 +444,7 @@ class TestJPX(unittest.TestCase):
             with tempfile.TemporaryFile() as tfile:
                 flst.write(tfile)
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_flst_offsets_not_positive(self):
         """A fragment list box offsets must be positive."""
         offset = [0]
@@ -456,7 +456,7 @@ class TestJPX(unittest.TestCase):
             with tempfile.TemporaryFile() as tfile:
                 flst.write(tfile)
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_flst_lengths_not_positive(self):
         """A fragment list box lengths must be positive."""
         offset = [89]

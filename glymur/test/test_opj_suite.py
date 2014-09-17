@@ -36,7 +36,8 @@ import numpy as np
 from glymur import Jp2k
 import glymur
 
-from .fixtures import OPJ_DATA_ROOT, CANNOT_USE_WITH_SIX
+from .fixtures import OPJ_DATA_ROOT
+from .fixtures import WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG
 from .fixtures import mse, peak_tolerance, read_pgx, opj_data_file
 
 
@@ -202,7 +203,7 @@ class TestSuite(unittest.TestCase):
         self.assertTrue(peak_tolerance(jpdata, pgxdata) < 624)
         self.assertTrue(mse(jpdata, pgxdata) < 3080)
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_ETS_JP2_file1(self):
         jfile = opj_data_file('input/conformance/file1.jp2')
         with self.assertWarns(UserWarning):
@@ -211,7 +212,7 @@ class TestSuite(unittest.TestCase):
         jpdata = jp2k.read()
         self.assertEqual(jpdata.shape, (512, 768, 3))
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_ETS_JP2_file2(self):
         jfile = opj_data_file('input/conformance/file2.jp2')
         with self.assertWarns(UserWarning):
@@ -219,7 +220,7 @@ class TestSuite(unittest.TestCase):
         jpdata = jp2k.read()
         self.assertEqual(jpdata.shape, (640, 480, 3))
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     @unittest.skipIf(glymur.version.openjpeg_version_tuple[0] < 2,
                      "Functionality not implemented for 1.x")
     def test_ETS_JP2_file3(self):
@@ -231,7 +232,7 @@ class TestSuite(unittest.TestCase):
         self.assertEqual(jpdata[1].shape, (320, 240))
         self.assertEqual(jpdata[2].shape, (320, 240))
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_ETS_JP2_file4(self):
         jfile = opj_data_file('input/conformance/file4.jp2')
         with self.assertWarns(UserWarning):
@@ -239,7 +240,7 @@ class TestSuite(unittest.TestCase):
         jpdata = jp2k.read()
         self.assertEqual(jpdata.shape, (512, 768))
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_ETS_JP2_file5(self):
         jfile = opj_data_file('input/conformance/file5.jp2')
         with self.assertWarns(UserWarning):
@@ -249,7 +250,7 @@ class TestSuite(unittest.TestCase):
         jpdata = jp2k.read()
         self.assertEqual(jpdata.shape, (512, 768, 3))
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_ETS_JP2_file6(self):
         jfile = opj_data_file('input/conformance/file6.jp2')
         with self.assertWarns(UserWarning):
@@ -257,7 +258,7 @@ class TestSuite(unittest.TestCase):
         jpdata = jp2k.read()
         self.assertEqual(jpdata.shape, (512, 768))
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_ETS_JP2_file7(self):
         jfile = opj_data_file('input/conformance/file7.jp2')
         with self.assertWarns(UserWarning):
@@ -265,7 +266,7 @@ class TestSuite(unittest.TestCase):
         jpdata = jp2k.read()
         self.assertEqual(jpdata.shape, (640, 480, 3))
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_ETS_JP2_file8(self):
         jfile = opj_data_file('input/conformance/file8.jp2')
         with self.assertWarns(UserWarning):
@@ -273,7 +274,7 @@ class TestSuite(unittest.TestCase):
         jpdata = jp2k.read()
         self.assertEqual(jpdata.shape, (400, 700))
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_ETS_JP2_file9(self):
         jfile = opj_data_file('input/conformance/file9.jp2')
         with self.assertWarns(UserWarning):
@@ -281,7 +282,7 @@ class TestSuite(unittest.TestCase):
         jpdata = jp2k.read()
         self.assertEqual(jpdata.shape, (512, 768, 3))
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_NR_broken_jp2_dump(self):
         jfile = opj_data_file('input/nonregression/broken.jp2')
 
@@ -486,7 +487,7 @@ class TestSuite(unittest.TestCase):
         Jp2k(jfile).read()
         self.assertTrue(True)
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_NR_DEC_orb_blue_lin_jp2_25_decode(self):
         jfile = opj_data_file('input/nonregression/orb-blue10-lin-jp2.jp2')
         with self.assertWarns(UserWarning):
@@ -494,7 +495,7 @@ class TestSuite(unittest.TestCase):
             Jp2k(jfile).read()
         self.assertTrue(True)
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_NR_DEC_orb_blue_win_jp2_26_decode(self):
         jfile = opj_data_file('input/nonregression/orb-blue10-win-jp2.jp2')
         with self.assertWarns(UserWarning):
@@ -644,7 +645,7 @@ class TestSuite2point0(unittest.TestCase):
         pgxdata = read_pgx(pgxfile)
         np.testing.assert_array_equal(jpdata[:, :, 2], pgxdata)
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_NR_DEC_broken2_jp2_5_decode(self):
         # Null pointer access
         jfile = opj_data_file('input/nonregression/broken2.jp2')
@@ -654,7 +655,7 @@ class TestSuite2point0(unittest.TestCase):
                 Jp2k(jfile).read()
         self.assertTrue(True)
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_NR_DEC_broken4_jp2_7_decode(self):
         jfile = opj_data_file('input/nonregression/broken4.jp2')
         with self.assertRaises(IOError):
@@ -663,7 +664,7 @@ class TestSuite2point0(unittest.TestCase):
                 Jp2k(jfile).read()
         self.assertTrue(True)
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_NR_DEC_kakadu_v4_4_openjpegv2_broken_j2k_16_decode(self):
         # This test actually passes in 1.5, but produces unpleasant warning
         # messages that cannot be turned off?

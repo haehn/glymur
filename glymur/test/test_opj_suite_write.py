@@ -20,7 +20,8 @@ except ImportError:
 
 from .fixtures import read_image, NO_READ_BACKEND, NO_READ_BACKEND_MSG
 from .fixtures import OPJ_DATA_ROOT, NO_SKIMAGE_FREEIMAGE_SUPPORT
-from .fixtures import opj_data_file, CANNOT_USE_WITH_SIX
+from .fixtures import opj_data_file
+from .fixtures import WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG
 from . import fixtures
 
 from glymur import Jp2k
@@ -150,7 +151,7 @@ class TestSuiteWriteCinema(unittest.TestCase):
 
 
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_NR_ENC_ElephantDream_4K_tif_21_encode(self):
         relfile = 'input/nonregression/ElephantDream_4K.tif'
         infile = opj_data_file(relfile)
@@ -166,7 +167,7 @@ class TestSuiteWriteCinema(unittest.TestCase):
             self.check_cinema4k_codestream(codestream, (4096, 2160))
 
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_NR_ENC_X_5_2K_24_235_CBR_STEM24_000_tif_19_encode(self):
         relfile = 'input/nonregression/X_5_2K_24_235_CBR_STEM24_000.tif'
         infile = opj_data_file(relfile)
@@ -180,7 +181,7 @@ class TestSuiteWriteCinema(unittest.TestCase):
             self.check_cinema2k_codestream(codestream, (2048, 857))
 
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_NR_ENC_X_6_2K_24_FULL_CBR_CIRCLE_000_tif_20_encode(self):
         relfile = 'input/nonregression/X_6_2K_24_FULL_CBR_CIRCLE_000.tif'
         infile = opj_data_file(relfile)
@@ -194,7 +195,7 @@ class TestSuiteWriteCinema(unittest.TestCase):
             self.check_cinema2k_codestream(codestream, (2048, 1080))
 
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_NR_ENC_X_6_2K_24_FULL_CBR_CIRCLE_000_tif_17_encode(self):
         relfile = 'input/nonregression/X_6_2K_24_FULL_CBR_CIRCLE_000.tif'
         infile = opj_data_file(relfile)
@@ -208,7 +209,7 @@ class TestSuiteWriteCinema(unittest.TestCase):
             self.check_cinema2k_codestream(codestream, (2048, 1080))
 
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_NR_ENC_X_5_2K_24_235_CBR_STEM24_000_tif_16_encode(self):
         relfile = 'input/nonregression/X_5_2K_24_235_CBR_STEM24_000.tif'
         infile = opj_data_file(relfile)
@@ -224,7 +225,7 @@ class TestSuiteWriteCinema(unittest.TestCase):
             self.check_cinema2k_codestream(codestream, (2048, 857))
 
 
-    @unittest.skipIf(CANNOT_USE_WITH_SIX, "Cannot use this version of six.")
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_NR_ENC_X_4_2K_24_185_CBR_WB_000_tif_18_encode(self):
         relfile = 'input/nonregression/X_4_2K_24_185_CBR_WB_000.tif'
         infile = opj_data_file(relfile)
