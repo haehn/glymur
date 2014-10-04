@@ -763,10 +763,10 @@ class Jp2k(Jp2kBox):
         """
         Slicing protocol.
         """
-        if isinstance(index, slice) and (
-                index.start == None and
+        if ((isinstance(index, slice) and
+            (index.start == None and
                 index.stop == None and
-                index.step == None):
+                index.step == None)) or (index == ...)):
             # Case of jp2[:] = data, i.e. write the entire image.
             #
             # Should have a slice object where start = stop = step = None
@@ -787,8 +787,8 @@ class Jp2k(Jp2kBox):
             area = (row, 0, row + 1, codestream.segment[1].xsiz)
             return self.read(area=area).squeeze()
 
-        if isinstance(pargs, slice):
-            # Case of jp2[:], i.e. retrieve the entire image.
+        if isinstance(pargs, slice) or pargs is ...:
+            # Case of jp2[:] or jp2[...], i.e. retrieve the entire image.
             #
             # Should have a slice object where start = stop = step = None
             return self.read()
@@ -805,6 +805,20 @@ class Jp2k(Jp2kBox):
                 return pixel
             elif len(pargs) == 3:
                 return pixel[pargs[2]]
+
+        if isinstance(pargs, tuple) and any(x is ... for x in pargs):
+
+            nrows = codestream.segment[1].ysiz
+            ncols = codestream.segment[1].xsiz
+            nbands = codestream.segment[1].Csiz
+            # Reformulate without the ellipsis.
+            if pargs[0] is ...:
+                newindex = (slice(0, nrows), slice(0, ncols), pargs[1])
+            elif pargs[1] is ...:
+                # Assume we have something like (r,...) where r is a scalar.
+                newindex = pargs[0]
+
+            return self.__getitem__(newindex)
 
         # Assuming pargs is a tuple of slices from now on.  
         rows = pargs[0]
