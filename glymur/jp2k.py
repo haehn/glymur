@@ -13,12 +13,13 @@ import sys
 # pylint: disable=E0611
 if sys.hexversion >= 0x03030000:
     from contextlib import ExitStack
+    from itertools import filterfalse
 else:
     from contextlib2 import ExitStack
+    from itertools import ifilterfalse as filterfalse
 
 from collections import Counter
 import ctypes
-import itertools
 import math
 import os
 import re
@@ -29,9 +30,6 @@ import warnings
 import numpy as np
 
 from .codestream import Codestream
-from .core import SRGB, GREYSCALE
-from .core import PROGRESSION_ORDER
-from .core import ENUMERATED_COLORSPACE, RESTRICTED_ICC_PROFILE
 from . import core
 from .jp2box import Jp2kBox
 from .jp2box import JPEG2000SignatureBox, FileTypeBox, JP2HeaderBox
@@ -149,8 +147,8 @@ class Jp2k(Jp2kBox):
             jp2h = [box for box in self.box if box.box_id == 'jp2h'][0]
             colrs = [box for box in jp2h.box if box.box_id == 'colr']
             for colr in colrs:
-                if colr.method not in (ENUMERATED_COLORSPACE,
-                                       RESTRICTED_ICC_PROFILE):
+                if colr.method not in (core.ENUMERATED_COLORSPACE,
+                                       core.RESTRICTED_ICC_PROFILE):
                     msg = "Color Specification box method must specify either "
                     msg += "an enumerated colorspace or a restricted ICC "
                     msg += "profile if the file type box brand is 'jp2 '."
@@ -311,7 +309,7 @@ class Jp2k(Jp2kBox):
 
         if 'prog' in kwargs:
             prog = kwargs['prog'].upper()
-            cparams.prog_order = PROGRESSION_ORDER[prog]
+            cparams.prog_order = core.PROGRESSION_ORDER[prog]
 
         if 'psnr' in kwargs:
             cparams.tcp_numlayers = len(kwargs['psnr'])
@@ -743,11 +741,11 @@ class Jp2k(Jp2kBox):
         width = codestream.segment[1].xsiz
         num_components = len(codestream.segment[1].xrsiz)
         if num_components < 3:
-            colorspace = GREYSCALE
+            colorspace = core.GREYSCALE
         else:
             if len(self.box) == 0:
                 # Best guess is SRGB
-                colorspace = SRGB
+                colorspace = core.SRGB
             else:
                 # Take whatever the first jp2 header / color specification
                 # says.
@@ -767,7 +765,7 @@ class Jp2k(Jp2kBox):
         if ((isinstance(index, slice) and
             (index.start == None and
                 index.stop == None and
-                index.step == None)) or (index == ...)):
+                index.step == None)) or (index is Ellipsis)):
             # Case of jp2[:] = data, i.e. write the entire image.
             #
             # Should have a slice object where start = stop = step = None
@@ -788,7 +786,8 @@ class Jp2k(Jp2kBox):
             area = (row, 0, row + 1, codestream.segment[1].xsiz)
             return self.read(area=area).squeeze()
 
-        if isinstance(pargs, slice) or pargs is ...:
+        #if isinstance(pargs, slice) or pargs is ...:
+        if isinstance(pargs, slice) or pargs is Ellipsis:
             # Case of jp2[:] or jp2[...], i.e. retrieve the entire image.
             #
             # Should have a slice object where start = stop = step = None
@@ -807,17 +806,17 @@ class Jp2k(Jp2kBox):
             elif len(pargs) == 3:
                 return pixel[pargs[2]]
 
-        if isinstance(pargs, tuple) and any(x is ... for x in pargs):
+        if isinstance(pargs, tuple) and any(x is Ellipsis for x in pargs):
             nrows = codestream.segment[1].ysiz
             ncols = codestream.segment[1].xsiz
             nbands = codestream.segment[1].Csiz
             # Reformulate without the ellipsis.
-            if pargs[0] is ...:
+            if pargs[0] is Ellipsis:
                 if len(pargs) == 2:
                     newindex = (slice(0, nrows), slice(0, ncols), pargs[1])
                 else:
                     newindex = (slice(0, nrows), pargs[1], pargs[2])
-            elif pargs[1] is ...:
+            elif pargs[1] is Ellipsis:
                 if len(pargs) == 2:
                     newindex = (pargs[0], slice(0, ncols), slice(0, nbands))
                 else:
@@ -831,7 +830,7 @@ class Jp2k(Jp2kBox):
             # Search out any remaining non-slices and turn them into slices.
             lst = list(pargs)
             predicate = lambda x: not isinstance(x[1], int)
-            g = itertools.filterfalse(predicate, enumerate(pargs))
+            g = filterfalse(predicate, enumerate(pargs))
             idx = list(g)[0][0]
             lst[idx] = slice(pargs[idx], pargs[idx] + 1)
             newindex = tuple(lst)
@@ -1511,14 +1510,14 @@ def _validate_channel_definition(jp2h, colr):
         raise IOError(msg)
     elif len(cdef_lst) == 1:
         cdef = jp2h.box[cdef_lst[0]]
-        if colr.colorspace == SRGB:
+        if colr.colorspace == core.SRGB:
             if any([chan + 1 not in cdef.association
                     or cdef.channel_type[chan] != 0
                     for chan in [0, 1, 2]]):
                 msg = "All color channels must be defined in the "
                 msg += "channel definition box."
                 raise IOError(msg)
-        elif colr.colorspace == GREYSCALE:
+        elif colr.colorspace == core.GREYSCALE:
             if 0 not in cdef.channel_type:
                 msg = "All color channels must be defined in the "
                 msg += "channel definition box."
