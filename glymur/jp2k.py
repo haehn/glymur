@@ -18,6 +18,7 @@ else:
 
 from collections import Counter
 import ctypes
+import itertools
 import math
 import os
 import re
@@ -807,18 +808,39 @@ class Jp2k(Jp2kBox):
                 return pixel[pargs[2]]
 
         if isinstance(pargs, tuple) and any(x is ... for x in pargs):
-
             nrows = codestream.segment[1].ysiz
             ncols = codestream.segment[1].xsiz
             nbands = codestream.segment[1].Csiz
             # Reformulate without the ellipsis.
             if pargs[0] is ...:
-                newindex = (slice(0, nrows), slice(0, ncols), pargs[1])
+                if len(pargs) == 2:
+                    newindex = (slice(0, nrows), slice(0, ncols), pargs[1])
+                else:
+                    newindex = (slice(0, nrows), pargs[1], pargs[2])
             elif pargs[1] is ...:
-                # Assume we have something like (r,...) where r is a scalar.
-                newindex = pargs[0]
+                if len(pargs) == 2:
+                    newindex = (pargs[0], slice(0, ncols), slice(0, nbands))
+                else:
+                    newindex = (pargs[0], slice(0, ncols), pargs[2])
+            else:
+                newindex = (pargs[0], pargs[1], slice(0, nbands))
 
             return self.__getitem__(newindex)
+
+        if isinstance(pargs, tuple) and not all(isinstance(x, slice) for x in pargs):
+            # Search out any remaining non-slices and turn them into slices.
+            lst = list(pargs)
+            predicate = lambda x: not isinstance(x[1], int)
+            g = itertools.filterfalse(predicate, enumerate(pargs))
+            idx = list(g)[0][0]
+            lst[idx] = slice(pargs[idx], pargs[idx] + 1)
+            newindex = tuple(lst)
+
+            data = self.__getitem__(newindex)
+
+            # Reduce dimensionality in the scalar dimension.
+            return np.squeeze(data, axis=idx)
+
 
         # Assuming pargs is a tuple of slices from now on.  
         rows = pargs[0]
