@@ -271,6 +271,11 @@ class TestSliceProtocolRead(SliceProtocolBase):
         expected = self.j2k_data[1, :, :]
         np.testing.assert_array_equal(actual, expected)
 
+    def test_two_ellipsis_and_full_slice(self):
+        actual = self.j2k[..., ..., :]
+        expected = self.j2k_data[:]
+        np.testing.assert_array_equal(actual, expected)
+
     def test_slice_protocol_2d_reduce_resolution(self):
         d = self.j2k[:]
         self.assertEqual(d.shape, (800, 480, 3))
