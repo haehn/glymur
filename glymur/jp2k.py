@@ -793,19 +793,6 @@ class Jp2k(Jp2kBox):
             # Should have a slice object where start = stop = step = None
             return self.read()
 
-        if isinstance(pargs, tuple) and all(isinstance(x, int) for x in pargs):
-            # Retrieve a single pixel.
-            # Something like jp2[r, c]
-            row = pargs[0]
-            col = pargs[1]
-            area = (row, col, row + 1, col + 1)
-            pixel = self.read(area=area).squeeze()
-            
-            if len(pargs) == 2:
-                return pixel
-            elif len(pargs) == 3:
-                return pixel[pargs[2]]
-
         if isinstance(pargs, tuple) and any(x is Ellipsis for x in pargs):
             nrows = codestream.segment[1].ysiz
             ncols = codestream.segment[1].xsiz
