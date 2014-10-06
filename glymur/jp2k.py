@@ -790,19 +790,22 @@ class Jp2k(Jp2kBox):
             area = (row, 0, row + 1, numcols)
             return self.read(area=area).squeeze()
 
-        #if isinstance(pargs, slice) or pargs is ...:
-        if isinstance(pargs, slice) or pargs is Ellipsis:
-            # Case of jp2[:] or jp2[...], i.e. retrieve the entire image.
-            #
-            # Should have a slice object where start = stop = step = None
+        if pargs is Ellipsis:
+            # Case of jp2[...]
             return self.read()
 
-        if isinstance(pargs, tuple) and any(x is Ellipsis for x in pargs):
-            # Search out and remove any Ellipsis objects.
-            lst = list(pargs)
-            predicate = lambda x: x[1] is not Ellipsis
-            g = filterfalse(predicate, enumerate(pargs))
+        if isinstance(pargs, slice):
+            if pargs.start is None and pargs.stop is None and pargs.step is None:
+                # Case of jp2[:]
+                return self.read()
 
+            # Corner case of jp2[x] where x is a slice object with non-null
+            # members.  Just augment it with an ellipsis and let the code 
+            # below handle it.
+            pargs = (pargs, Ellipsis)
+
+        if isinstance(pargs, tuple) and any(x is Ellipsis for x in pargs):
+            # Remove the first ellipsis we find.
             rows = slice(0, numrows)
             cols = slice(0, numcols)
             bands = slice(0, numbands)
@@ -817,6 +820,7 @@ class Jp2k(Jp2kBox):
                 else:
                     newindex = (pargs[0], cols, pargs[2])
             else:
+                # Assume that we don't have 4D imagery, of course.
                 newindex = (pargs[0], pargs[1], bands)
 
             # Run once again because it is possible that there's another
@@ -828,7 +832,7 @@ class Jp2k(Jp2kBox):
             lst = list(pargs)
             predicate = lambda x: not isinstance(x[1], int)
             g = filterfalse(predicate, enumerate(pargs))
-            idx = list(g)[0][0]
+            idx = next(g)[0]
             lst[idx] = slice(pargs[idx], pargs[idx] + 1)
             newindex = tuple(lst)
 
