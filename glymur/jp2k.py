@@ -13,10 +13,10 @@ import sys
 # pylint: disable=E0611
 if sys.hexversion >= 0x03030000:
     from contextlib import ExitStack
-    from itertools import filterfalse
+    from itertools import compress, filterfalse
 else:
     from contextlib2 import ExitStack
-    from itertools import ifilterfalse as filterfalse
+    from itertools import compress, ifilterfalse as filterfalse
 
 from collections import Counter
 import ctypes
@@ -779,11 +779,15 @@ class Jp2k(Jp2kBox):
         Slicing protocol.
         """
         codestream = self.get_codestream(header_only=True)
+        numrows = codestream.segment[1].ysiz
+        numcols = codestream.segment[1].xsiz
+        numbands = codestream.segment[1].Csiz
+
         if isinstance(pargs, int):
             # Not a very good use of this protocol, but technically legal.
             # This retrieves a single row.
             row = pargs
-            area = (row, 0, row + 1, codestream.segment[1].xsiz)
+            area = (row, 0, row + 1, numcols)
             return self.read(area=area).squeeze()
 
         #if isinstance(pargs, slice) or pargs is ...:
@@ -794,27 +798,33 @@ class Jp2k(Jp2kBox):
             return self.read()
 
         if isinstance(pargs, tuple) and any(x is Ellipsis for x in pargs):
-            nrows = codestream.segment[1].ysiz
-            ncols = codestream.segment[1].xsiz
-            nbands = codestream.segment[1].Csiz
-            # Reformulate without the ellipsis.
+            # Search out and remove any Ellipsis objects.
+            lst = list(pargs)
+            predicate = lambda x: x[1] is not Ellipsis
+            g = filterfalse(predicate, enumerate(pargs))
+
+            rows = slice(0, numrows)
+            cols = slice(0, numcols)
+            bands = slice(0, numbands)
             if pargs[0] is Ellipsis:
                 if len(pargs) == 2:
-                    newindex = (slice(0, nrows), slice(0, ncols), pargs[1])
+                    newindex = (rows, cols, pargs[1])
                 else:
-                    newindex = (slice(0, nrows), pargs[1], pargs[2])
+                    newindex = (rows, pargs[1], pargs[2])
             elif pargs[1] is Ellipsis:
                 if len(pargs) == 2:
-                    newindex = (pargs[0], slice(0, ncols), slice(0, nbands))
+                    newindex = (pargs[0], cols, bands)
                 else:
-                    newindex = (pargs[0], slice(0, ncols), pargs[2])
+                    newindex = (pargs[0], cols, pargs[2])
             else:
-                newindex = (pargs[0], pargs[1], slice(0, nbands))
+                newindex = (pargs[0], pargs[1], bands)
 
+            # Run once again because it is possible that there's another
+            # Ellipsis object in the 2nd or 3rd position.
             return self.__getitem__(newindex)
 
-        if isinstance(pargs, tuple) and not all(isinstance(x, slice) for x in pargs):
-            # Search out any remaining non-slices and turn them into slices.
+        if isinstance(pargs, tuple) and any(isinstance(x, int) for x in pargs):
+            # Replace the first such integer argument, replace it with a slice.
             lst = list(pargs)
             predicate = lambda x: not isinstance(x[1], int)
             g = filterfalse(predicate, enumerate(pargs))
@@ -822,6 +832,8 @@ class Jp2k(Jp2kBox):
             lst[idx] = slice(pargs[idx], pargs[idx] + 1)
             newindex = tuple(lst)
 
+            # Invoke array-based slicing again, as there may be additional
+            # integer argument remaining.
             data = self.__getitem__(newindex)
 
             # Reduce dimensionality in the scalar dimension.
@@ -836,16 +848,8 @@ class Jp2k(Jp2kBox):
         else:
             bands = pargs[2]
 
-        if rows.step is None:
-            rows_step = 1
-        else:
-            rows_step = rows.step
-
-        if cols.step is None:
-            cols_step = 1
-        else:
-            cols_step = cols.step
-
+        rows_step = 1 if rows.step is None else rows.step
+        cols_step = 1 if cols.step is None else cols.step
         if rows_step != cols_step:
             msg = "Row and column strides must be the same."
             raise IndexError(msg)
@@ -860,27 +864,12 @@ class Jp2k(Jp2kBox):
             raise IndexError(msg)
         rlevel = np.int(np.round(np.log2(step)))
 
-        if rows.start is None:
-            rows_start = 0
-        else:
-            rows_start = rows.start
-
-        if rows.stop is None:
-            rows_stop = codestream.segment[1].ysiz
-        else:
-            rows_stop = rows.stop
-        
-        if cols.start is None:
-            cols_start = 0
-        else:
-            cols_start = cols.start
-
-        if cols.stop is None:
-            cols_stop = codestream.segment[1].xsiz
-        else:
-            cols_stop = cols.stop
-        
-        area = (rows_start, cols_start, rows_stop, cols_stop)
+        area = (
+                0 if rows.start is None else rows.start,
+                0 if cols.start is None else cols.start,
+                numrows if rows.stop is None else rows.stop,
+                numcols if cols.stop is None else cols.stop
+                )
         data = self.read(area=area, rlevel=rlevel)
         if len(pargs) == 2:
             return data
