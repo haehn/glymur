@@ -900,3 +900,22 @@ goodstuff_with_full_header = r"""Codestream:
         Step size:  [(0, 8), (0, 9), (0, 9), (0, 10), (0, 9), (0, 9), (0, 10), (0, 9), (0, 9), (0, 10), (0, 9), (0, 9), (0, 10), (0, 9), (0, 9), (0, 10)]
     SOD marker segment @ (164, 0)
     EOC marker segment @ (115218, 0)"""
+
+decompression_parameters_type = """<class 'glymur.lib.openjp2.DecompressionParametersType'>:
+    cp_reduce: 0
+    cp_layer: 0
+    infile: b''
+    outfile: b''
+    decod_format: -1
+    cod_format: -1
+    DA_x0: 0
+    DA_x1: 0
+    DA_y0: 0
+    DA_y1: 0
+    m_verbose: 0
+    tile_index: 0
+    nb_tile_to_decode: 0
+    jpwl_correct: 0
+    jpwl_exp_comps: 0
+    jpwl_max_tiles: 0
+    flags: 0"""

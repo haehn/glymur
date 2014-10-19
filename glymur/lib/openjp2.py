@@ -201,6 +201,13 @@ class DecompressionParametersType(ctypes.Structure):
         # maximum number of tiles
         ("flags",             ctypes.c_uint32)]
 
+    def __str__(self):
+        msg = "{0}:\n".format(self.__class__)
+        for field_name, _ in self._fields_:
+            msg += "    {0}: {1}\n".format(
+                field_name, getattr(self, field_name))
+        return msg
+
 
 class CompressionParametersType(ctypes.Structure):
     """Compression parameters.
