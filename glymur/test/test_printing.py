@@ -618,6 +618,7 @@ class TestPrinting(unittest.TestCase):
 
         self.assertEqual(actual, expected)
 
+@unittest.skipIf(sys.hexversion < 0x03000000, "do not care about 2.7 here")
 @unittest.skipIf(re.match('1|2.0', glymur.version.openjpeg_version),
                  "Requires openjpeg 2.1.0 or higher")
 class TestPrintingOpenjp2(unittest.TestCase):
@@ -636,6 +637,16 @@ class TestPrintingOpenjp2(unittest.TestCase):
             actual = fake_out.getvalue().strip()
         expected = fixtures.decompression_parameters_type
         self.assertEqual(actual, expected)
+
+    def test_progression_order_changes(self):
+        """printing PocType"""
+        ptype = glymur.lib.openjp2.PocType()
+        with patch('sys.stdout', new=StringIO()) as fake_out:
+            print(ptype)
+            actual = fake_out.getvalue().strip()
+        expected = fixtures.default_progression_order_changes_type
+        self.assertEqual(actual, expected)
+
 
 @unittest.skipIf(OPJ_DATA_ROOT is None,
                  "OPJ_DATA_ROOT environment variable not set")

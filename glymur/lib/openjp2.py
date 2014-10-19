@@ -138,6 +138,13 @@ class PocType(ctypes.Structure):
         ("tx0_t",      ctypes.c_uint32),
         ("ty0_t",      ctypes.c_uint32)]
 
+    def __str__(self):
+        msg = "{0}:\n".format(self.__class__)
+        for field_name, _ in self._fields_:
+            msg += "    {0}: {1}\n".format(
+                field_name, getattr(self, field_name))
+        return msg
+
 
 class DecompressionParametersType(ctypes.Structure):
     """Decompression parameters.
