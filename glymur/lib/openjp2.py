@@ -412,7 +412,7 @@ class CompressionParametersType(ctypes.Structure):
         for field_name, _ in self._fields_:
 
             if field_name == 'poc':
-                msg += "    numpocs: {1}\n".format(self.numpocs)
+                msg += "    numpocs: {0}\n".format(self.numpocs)
                 for j in range(self.numpocs):
                     msg += "        [#{0}]:".format(j)
                     msg += "            {0}".format(str(self.poc[j]))
@@ -422,6 +422,24 @@ class CompressionParametersType(ctypes.Structure):
                 lst = []
                 arr = getattr(self, field_name)
                 lst = [arr[j] for j in range(self.tcp_numlayers)]
+                msg += "    {0}: {1}\n".format(field_name, lst)
+
+            elif field_name in ['prcw_init', 'prch_init']:
+                pass
+
+            elif field_name == 'res_spec':
+                prcw_init = [self.prcw_init[j] for j in range(self.res_spec)]
+                prch_init = [self.prch_init[j] for j in range(self.res_spec)]
+                msg += "    res_spec: {0}\n".format(self.res_spec)
+                msg += "    prch_init: {0}\n".format(prch_init)
+                msg += "    prcw_init: {0}\n".format(prcw_init)
+
+            elif field_name in [
+                    'jpwl_hprot_tph_tileno', 'jpwl_hprot_tph',
+                    'jpwl_pprot_tileno', 'jpwl_pprot_packno', 'jpwl_pprot',
+                    'jpwl_sens_tph_tileno', 'jpwl_sens_tph']:
+                arr = getattr(self, field_name)
+                lst = [arr[j] for j in range(JPWL_MAX_NO_TILESPECS)]
                 msg += "    {0}: {1}\n".format(field_name, lst)
 
             else:

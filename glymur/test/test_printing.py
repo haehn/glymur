@@ -618,36 +618,6 @@ class TestPrinting(unittest.TestCase):
 
         self.assertEqual(actual, expected)
 
-@unittest.skipIf(sys.hexversion < 0x03000000, "do not care about 2.7 here")
-@unittest.skipIf(re.match('1|2.0', glymur.version.openjpeg_version),
-                 "Requires openjpeg 2.1.0 or higher")
-class TestPrintingOpenjp2(unittest.TestCase):
-    """Tests for verifying how printing works on openjp2 library structures."""
-    def setUp(self):
-        self.jp2file = glymur.data.nemo()
-
-    def tearDown(self):
-        pass
-
-    def test_decompression_parameters(self):
-        """printing DecompressionParametersType"""
-        dparams = glymur.lib.openjp2.set_default_decoder_parameters()
-        with patch('sys.stdout', new=StringIO()) as fake_out:
-            print(dparams)
-            actual = fake_out.getvalue().strip()
-        expected = fixtures.decompression_parameters_type
-        self.assertEqual(actual, expected)
-
-    def test_progression_order_changes(self):
-        """printing PocType"""
-        ptype = glymur.lib.openjp2.PocType()
-        with patch('sys.stdout', new=StringIO()) as fake_out:
-            print(ptype)
-            actual = fake_out.getvalue().strip()
-        expected = fixtures.default_progression_order_changes_type
-        self.assertEqual(actual, expected)
-
-
 @unittest.skipIf(OPJ_DATA_ROOT is None,
                  "OPJ_DATA_ROOT environment variable not set")
 @unittest.skipIf(os.name == "nt", "Temporary file issue on window.")
