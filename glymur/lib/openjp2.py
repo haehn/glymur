@@ -7,6 +7,7 @@ Wraps individual functions in openjp2 library.
 import ctypes
 import re
 import sys
+import textwrap
 
 from .config import glymur_config
 
@@ -405,6 +406,29 @@ class CompressionParametersType(ctypes.Structure):
         # To be used to combine OPJ_PROFILE_*, OPJ_EXTENSION_* and (sub)levels
         # values.
         _fields_.append(("rsiz",                      ctypes.c_uint16))
+
+    def __str__(self):
+        msg = "{0}:\n".format(self.__class__)
+        for field_name, _ in self._fields_:
+
+            if field_name == 'poc':
+                msg += "    numpocs: {1}\n".format(self.numpocs)
+                for j in range(self.numpocs):
+                    msg += "        [#{0}]:".format(j)
+                    msg += "            {0}".format(str(self.poc[j]))
+                    msg += textwrap.indent(textstr, ' ' * 12)
+
+            elif field_name in ['tcp_rates', 'tcp_distoratio']:
+                lst = []
+                arr = getattr(self, field_name)
+                lst = [arr[j] for j in range(self.tcp_numlayers)]
+                msg += "    {0}: {1}\n".format(field_name, lst)
+
+            else:
+                msg += "    {0}: {1}\n".format(
+                    field_name, getattr(self, field_name))
+        return msg
+
 
 class ImageCompType(ctypes.Structure):
     """Defines a single image component.
