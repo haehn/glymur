@@ -54,4 +54,14 @@ class TestPrintingOpenjp2(unittest.TestCase):
         expected = fixtures.default_compression_parameters_type
         self.assertEqual(actual, expected)
 
+    def test_default_component_parameters(self):
+        """printing default image component parameters"""
+        icpt = glymur.lib.openjp2.ImageComptParmType()
+        with patch('sys.stdout', new=StringIO()) as fake_out:
+            print(icpt)
+            actual = fake_out.getvalue().strip()
+        expected = fixtures.default_image_component_parameters
+        self.assertEqual(actual, expected)
+
+
 

@@ -116,3 +116,14 @@ default_compression_parameters_type = """<class 'glymur.lib.openjp2.CompressionP
     mct_data: None
     max_cs_size: 0
     rsiz: 0"""
+
+default_image_component_parameters = """<class 'glymur.lib.openjp2.ImageComptParmType'>:
+    dx: 0
+    dy: 0
+    w: 0
+    h: 0
+    x0: 0
+    y0: 0
+    prec: 0
+    bpp: 0
+    sgnd: 0"""
