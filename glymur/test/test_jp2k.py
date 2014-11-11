@@ -67,11 +67,13 @@ class SliceProtocolBase(unittest.TestCase):
     def setUpClass(self):
 
         self.jp2 = Jp2k(glymur.data.nemo())
-        self.jp2_data = self.jp2.read()
+        self.jp2_data = self.jp2[:]
+        self.jp2_data_r1 = self.jp2[::2, ::2]
 
         self.j2k = Jp2k(glymur.data.goodstuff())
-        self.j2k_data = self.j2k.read()
+        self.j2k_data = self.j2k[:]
 
+        self.j2k_data_r1 = self.j2k[::2, ::2]
 
 @unittest.skipIf(os.name == "nt", fixtures.WINDOWS_TMP_FILE_MSG)
 class TestSliceProtocolBaseWrite(SliceProtocolBase):
@@ -82,7 +84,7 @@ class TestSliceProtocolBaseWrite(SliceProtocolBase):
         with tempfile.NamedTemporaryFile(suffix='.j2k') as tfile:
             j = Jp2k(tfile.name, 'wb')
             j[...] = self.j2k_data
-            actual = j.read()
+            actual = j[:]
 
         np.testing.assert_array_equal(actual, expected)
 
@@ -92,7 +94,7 @@ class TestSliceProtocolBaseWrite(SliceProtocolBase):
         with tempfile.NamedTemporaryFile(suffix='.j2k') as tfile:
             j = Jp2k(tfile.name, 'wb')
             j[:] = self.j2k_data
-            actual = j.read()
+            actual = j[:]
 
         np.testing.assert_array_equal(actual, expected)
 
@@ -167,9 +169,9 @@ class TestSliceProtocolRead(SliceProtocolBase):
         np.testing.assert_array_equal(actual, expected)
 
     def test_reduce_resolution_and_slice_in_third_dimension(self):
-        d = self.j2k[::2, ::2, 1:3]
-        all = self.j2k.read(rlevel=1)
-        np.testing.assert_array_equal(all[:,:,1:3], d)
+        actual = self.j2k[::2, ::2, 1:3]
+        expected = self.j2k_data_r1[:, :, 1:3]
+        np.testing.assert_array_equal(actual, expected)
 
     def test_retrieve_single_row(self):
         actual = self.jp2[0]
@@ -231,24 +233,24 @@ class TestSliceProtocolRead(SliceProtocolBase):
         expected = self.jp2_data[728:, :]
         np.testing.assert_array_equal(actual, expected)
 
-    def test_region_rlevel1(self):
+    def test_region_rlevel1_odd(self):
         actual = self.jp2[0:201:2, 0:201:2]
-        expected = self.jp2.read(area=(0, 0, 201, 201), rlevel=1)
+        expected = self.jp2_data_r1[:101, :101, :]
+        np.testing.assert_array_equal(actual, expected)
+
+    def test_region_rlevel1_even(self):
+        actual = self.jp2[0:202:2, 0:202:2]
+        expected = self.jp2_data_r1[:101, :101, :]
         np.testing.assert_array_equal(actual, expected)
 
     def test_region_rlevel1_slice_start_is_none(self):
         actual = self.jp2[:201:2, :201:2]
-        expected = self.jp2.read(area=(0, 0, 201, 201), rlevel=1)
+        expected = self.jp2_data_r1[:101, :101, :]
         np.testing.assert_array_equal(actual, expected)
 
     def test_region_rlevel1_slice_stop_is_none(self):
         actual = self.jp2[201::2, 201::2]
-        expected = self.jp2.read(area=(201, 201, 1456, 2592), rlevel=1)
-        np.testing.assert_array_equal(actual, expected)
-
-    def test_region_rlevel1(self):
-        actual = self.jp2[0:202:2, 0:202:2]
-        expected = self.jp2.read(area=(0, 0, 202, 202), rlevel=1)
+        expected = self.jp2_data_r1[101:, 101:, :]
         np.testing.assert_array_equal(actual, expected)
 
     def test_ellipsis_full_read(self):
@@ -476,6 +478,12 @@ class TestJp2k(unittest.TestCase):
     def tearDown(self):
         pass
 
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
+    def test_warn_if_using_read_method(self):
+        """Should warn if read method is called"""
+        with self.assertWarns(DeprecationWarning):
+            Jp2k(self.jp2file).read()
+
     def test_shape_jp2(self):
         """verify shape attribute for JP2 file
         """
@@ -519,7 +527,7 @@ class TestJp2k(unittest.TestCase):
     def test_irreversible(self):
         """Irreversible"""
         j = Jp2k(self.jp2file)
-        expdata = j.read()
+        expdata = j[:]
         with tempfile.NamedTemporaryFile(suffix='.j2k') as tfile:
             j2 = Jp2k(tfile.name, 'wb')
             j2.write(expdata, irreversible=True)
@@ -528,7 +536,7 @@ class TestJp2k(unittest.TestCase):
             self.assertEqual(codestream.segment[2].spcod[8],
                              glymur.core.WAVELET_XFORM_9X7_IRREVERSIBLE)
 
-            actdata = j2.read()
+            actdata = j2[:]
             self.assertTrue(fixtures.mse(actdata[0], expdata[0]) < 0.38)
 
     @unittest.skipIf(re.match('1.[0-4]', openjpeg_version) is not None,
@@ -538,7 +546,7 @@ class TestJp2k(unittest.TestCase):
     def test_no_cxform_pclr_jpx(self):
         """Indices for pclr jpxfile if no color transform"""
         j = Jp2k(self.jpxfile)
-        rgb = j.read()
+        rgb = j[:]
         idx = j.read(ignore_pclr_cmap_cdef=True)
         nr, nc = 1024, 1024
         self.assertEqual(rgb.shape, (nr, nc, 3))

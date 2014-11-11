@@ -60,6 +60,23 @@ class Jp2k(Jp2kBox):
         List of top-level boxes in the file.  Each box may in turn contain
         its own list of boxes.  Will be empty if the file consists only of a
         raw codestream.
+
+    Examples
+    --------
+    >>> import glymur
+    >>> jfile = glymur.data.nemo()
+    >>> jp2 = glymur.Jp2k(jfile)
+    >>> jp2.shape
+    (1456, 2592, 3)
+    >>> image = jp2[:]
+    >>> image.shape
+    (1456, 2592, 3)
+
+    Read a lower resolution thumbnail.
+
+    >>> thumbnail = jp2[::2, ::2]
+    >>> thumbnail.shape
+    (728, 1296, 3)
     """
 
     def __init__(self, filename, mode='rb'):
@@ -957,6 +974,25 @@ class Jp2k(Jp2kBox):
         return data[:, :, bands]
 
 
+    def _read(self):
+        """Read a JPEG 2000 image.
+
+        Returns
+        -------
+        img_array : ndarray
+            The image data.
+
+        Raises
+        ------
+        IOError
+            If the image has differing subsample factors.
+        """
+        if version.openjpeg_version_tuple[0] < 2:
+            img = self._read_openjpeg(**kwargs)
+        else:
+            img = self._read_openjp2(**kwargs)
+        return img
+
     def read(self, **kwargs):
         """Read a JPEG 2000 image.
 
@@ -988,22 +1024,8 @@ class Jp2k(Jp2kBox):
         ------
         IOError
             If the image has differing subsample factors.
-
-        Examples
-        --------
-        >>> import glymur
-        >>> jfile = glymur.data.nemo()
-        >>> jp = glymur.Jp2k(jfile)
-        >>> image = jp.read()
-        >>> image.shape
-        (1456, 2592, 3)
-
-        Read the lowest resolution thumbnail.
-
-        >>> thumbnail = jp.read(rlevel=-1)
-        >>> thumbnail.shape
-        (728, 1296, 3)
         """
+        warnings.warn("Use array-style slicing instead.", DeprecationWarning)
         if version.openjpeg_version_tuple[0] < 2:
             img = self._read_openjpeg(**kwargs)
         else:
