@@ -57,7 +57,7 @@ class TestSuite(unittest.TestCase):
     def test_ETS_C1P0_p0_01_j2k(self):
         jfile = opj_data_file('input/conformance/p0_01.j2k')
         jp2k = Jp2k(jfile)
-        jpdata = jp2k.read(rlevel=0)
+        jpdata = jp2k[:]
 
         pgxfile = opj_data_file('baseline/conformance/c1p0_01_0.pgx')
         pgxdata = read_pgx(pgxfile)
@@ -67,7 +67,7 @@ class TestSuite(unittest.TestCase):
     def test_ETS_C1P0_p0_03_j2k(self):
         jfile = opj_data_file('input/conformance/p0_03.j2k')
         jp2k = Jp2k(jfile)
-        jpdata = jp2k.read(rlevel=0)
+        jpdata = jp2k[:]
 
         pgxfile = opj_data_file('baseline/conformance/c1p0_03_0.pgx')
         pgxdata = read_pgx(pgxfile)
@@ -77,7 +77,7 @@ class TestSuite(unittest.TestCase):
     def test_ETS_C1P0_p0_04_j2k(self):
         jfile = opj_data_file('input/conformance/p0_04.j2k')
         jp2k = Jp2k(jfile)
-        jpdata = jp2k.read(rlevel=0)
+        jpdata = jp2k[:]
 
         pgxfile = opj_data_file('baseline/conformance/c1p0_04_0.pgx')
         pgxdata = read_pgx(pgxfile)
@@ -97,7 +97,7 @@ class TestSuite(unittest.TestCase):
     def test_ETS_C1P0_p0_08_j2k(self):
         jfile = opj_data_file('input/conformance/p0_08.j2k')
         jp2k = Jp2k(jfile)
-        jpdata = jp2k.read(rlevel=1)
+        jpdata = jp2k[::2, ::2]
 
         pgxfile = opj_data_file('baseline/conformance/c1p0_08_0.pgx')
         pgxdata = read_pgx(pgxfile)
@@ -114,7 +114,7 @@ class TestSuite(unittest.TestCase):
     def test_ETS_C1P0_p0_09_j2k(self):
         jfile = opj_data_file('input/conformance/p0_09.j2k')
         jp2k = Jp2k(jfile)
-        jpdata = jp2k.read(rlevel=0)
+        jpdata = jp2k[:]
 
         pgxfile = opj_data_file('baseline/conformance/c1p0_09_0.pgx')
         pgxdata = read_pgx(pgxfile)
@@ -123,7 +123,7 @@ class TestSuite(unittest.TestCase):
     def test_ETS_C1P0_p0_11_j2k(self):
         jfile = opj_data_file('input/conformance/p0_11.j2k')
         jp2k = Jp2k(jfile)
-        jpdata = jp2k.read(rlevel=0)
+        jpdata = jp2k[:]
 
         pgxfile = opj_data_file('baseline/conformance/c1p0_11_0.pgx')
         pgxdata = read_pgx(pgxfile)
@@ -132,7 +132,7 @@ class TestSuite(unittest.TestCase):
     def test_ETS_C1P0_p0_14_j2k(self):
         jfile = opj_data_file('input/conformance/p0_14.j2k')
         jp2k = Jp2k(jfile)
-        jpdata = jp2k.read(rlevel=0)
+        jpdata = jp2k[:]
 
         pgxfile = opj_data_file('baseline/conformance/c1p0_14_0.pgx')
         pgxdata = read_pgx(pgxfile)
@@ -149,7 +149,7 @@ class TestSuite(unittest.TestCase):
     def test_ETS_C1P0_p0_15_j2k(self):
         jfile = opj_data_file('input/conformance/p0_15.j2k')
         jp2k = Jp2k(jfile)
-        jpdata = jp2k.read(rlevel=0)
+        jpdata = jp2k[:]
 
         pgxfile = opj_data_file('baseline/conformance/c1p0_15_0.pgx')
         pgxdata = read_pgx(pgxfile)
@@ -158,7 +158,7 @@ class TestSuite(unittest.TestCase):
     def test_ETS_C1P0_p0_16_j2k(self):
         jfile = opj_data_file('input/conformance/p0_16.j2k')
         jp2k = Jp2k(jfile)
-        jpdata = jp2k.read(rlevel=0)
+        jpdata = jp2k[:]
 
         pgxfile = opj_data_file('baseline/conformance/c1p0_16_0.pgx')
         pgxdata = read_pgx(pgxfile)
@@ -167,7 +167,7 @@ class TestSuite(unittest.TestCase):
     def test_ETS_C1P1_p1_01_j2k(self):
         jfile = opj_data_file('input/conformance/p1_01.j2k')
         jp2k = Jp2k(jfile)
-        jpdata = jp2k.read(rlevel=0)
+        jpdata = jp2k[:]
 
         pgxfile = opj_data_file('baseline/conformance/c1p1_01_0.pgx')
         pgxdata = read_pgx(pgxfile)
@@ -176,7 +176,7 @@ class TestSuite(unittest.TestCase):
     def test_ETS_C1P1_p1_02_j2k(self):
         jfile = opj_data_file('input/conformance/p1_02.j2k')
         jp2k = Jp2k(jfile)
-        jpdata = jp2k.read(rlevel=0)
+        jpdata = jp2k[:]
 
         pgxfile = opj_data_file('baseline/conformance/c1p1_02_0.pgx')
         pgxdata = read_pgx(pgxfile)
@@ -196,7 +196,7 @@ class TestSuite(unittest.TestCase):
     def test_ETS_C1P1_p1_04_j2k(self):
         jfile = opj_data_file('input/conformance/p1_04.j2k')
         jp2k = Jp2k(jfile)
-        jpdata = jp2k.read()
+        jpdata = jp2k[:]
 
         pgxfile = opj_data_file('baseline/conformance/c1p1_04_0.pgx')
         pgxdata = read_pgx(pgxfile)
@@ -206,95 +206,95 @@ class TestSuite(unittest.TestCase):
     def test_NR_DEC_Bretagne2_j2k_1_decode(self):
         jfile = opj_data_file('input/nonregression/Bretagne2.j2k')
         jp2 = Jp2k(jfile)
-        jp2.read()
+        jp2[:]
         self.assertTrue(True)
 
     def test_NR_DEC__00042_j2k_2_decode(self):
         jfile = opj_data_file('input/nonregression/_00042.j2k')
         jp2 = Jp2k(jfile)
-        jp2.read()
+        jp2[:]
         self.assertTrue(True)
 
     def test_NR_DEC_buxI_j2k_9_decode(self):
         jfile = opj_data_file('input/nonregression/buxI.j2k')
-        Jp2k(jfile).read()
+        Jp2k(jfile)[:]
         self.assertTrue(True)
 
     def test_NR_DEC_buxR_j2k_10_decode(self):
         jfile = opj_data_file('input/nonregression/buxR.j2k')
-        Jp2k(jfile).read()
+        Jp2k(jfile)[:]
         self.assertTrue(True)
 
     def test_NR_DEC_Cannotreaddatawithnosizeknown_j2k_11_decode(self):
         relpath = 'input/nonregression/Cannotreaddatawithnosizeknown.j2k'
         jfile = opj_data_file(relpath)
-        Jp2k(jfile).read()
+        Jp2k(jfile)[:]
         self.assertTrue(True)
 
     def test_NR_DEC_cthead1_j2k_12_decode(self):
         jfile = opj_data_file('input/nonregression/cthead1.j2k')
-        Jp2k(jfile).read()
+        Jp2k(jfile)[:]
         self.assertTrue(True)
 
     def test_NR_DEC_CT_Phillips_JPEG2K_Decompr_Problem_j2k_13_decode(self):
         relpath = 'input/nonregression/CT_Phillips_JPEG2K_Decompr_Problem.j2k'
         jfile = opj_data_file(relpath)
-        Jp2k(jfile).read()
+        Jp2k(jfile)[:]
         self.assertTrue(True)
 
     def test_NR_DEC_j2k32_j2k_15_decode(self):
         jfile = opj_data_file('input/nonregression/j2k32.j2k')
-        Jp2k(jfile).read()
+        Jp2k(jfile)[:]
         self.assertTrue(True)
 
     def test_NR_DEC_MarkerIsNotCompliant_j2k_17_decode(self):
         jfile = opj_data_file('input/nonregression/MarkerIsNotCompliant.j2k')
-        Jp2k(jfile).read()
+        Jp2k(jfile)[:]
         self.assertTrue(True)
 
     def test_NR_DEC_Marrin_jp2_18_decode(self):
         jfile = opj_data_file('input/nonregression/Marrin.jp2')
-        Jp2k(jfile).read()
+        Jp2k(jfile)[:]
         self.assertTrue(True)
 
     def test_NR_DEC_movie_00000_j2k_20_decode(self):
         jfile = opj_data_file('input/nonregression/movie_00000.j2k')
-        Jp2k(jfile).read()
+        Jp2k(jfile)[:]
         self.assertTrue(True)
 
     def test_NR_DEC_movie_00001_j2k_21_decode(self):
         jfile = opj_data_file('input/nonregression/movie_00001.j2k')
-        Jp2k(jfile).read()
+        Jp2k(jfile)[:]
         self.assertTrue(True)
 
     def test_NR_DEC_movie_00002_j2k_22_decode(self):
         jfile = opj_data_file('input/nonregression/movie_00002.j2k')
-        Jp2k(jfile).read()
+        Jp2k(jfile)[:]
         self.assertTrue(True)
 
     def test_NR_DEC_orb_blue_lin_j2k_j2k_23_decode(self):
         jfile = opj_data_file('input/nonregression/orb-blue10-lin-j2k.j2k')
-        Jp2k(jfile).read()
+        Jp2k(jfile)[:]
         self.assertTrue(True)
 
     def test_NR_DEC_orb_blue_win_j2k_j2k_24_decode(self):
         jfile = opj_data_file('input/nonregression/orb-blue10-win-j2k.j2k')
-        Jp2k(jfile).read()
+        Jp2k(jfile)[:]
         self.assertTrue(True)
 
     def test_NR_DEC_relax_jp2_27_decode(self):
         jfile = opj_data_file('input/nonregression/relax.jp2')
-        Jp2k(jfile).read()
+        Jp2k(jfile)[:]
         self.assertTrue(True)
 
     def test_NR_DEC_test_lossless_j2k_28_decode(self):
         jfile = opj_data_file('input/nonregression/test_lossless.j2k')
-        Jp2k(jfile).read()
+        Jp2k(jfile)[:]
         self.assertTrue(True)
 
     def test_NR_DEC_pacs_ge_j2k_30_decode(self):
         jfile = opj_data_file('input/nonregression/pacs.ge.j2k')
-        Jp2k(jfile).read()
+        Jp2k(jfile)[:]
         self.assertTrue(True)
 
 
@@ -317,14 +317,14 @@ class TestSuiteWarns(MetadataBase):
         with self.assertWarns(UserWarning):
             # Bad compatibility list item.
             jp2k = Jp2k(jfile)
-        jpdata = jp2k.read()
+        jpdata = jp2k[:]
         self.assertEqual(jpdata.shape, (512, 768, 3))
 
     def test_ETS_JP2_file2(self):
         jfile = opj_data_file('input/conformance/file2.jp2')
         with self.assertWarns(UserWarning):
             jp2k = Jp2k(jfile)
-        jpdata = jp2k.read()
+        jpdata = jp2k[:]
         self.assertEqual(jpdata.shape, (640, 480, 3))
 
     @unittest.skipIf(glymur.version.openjpeg_version_tuple[0] < 2,
@@ -342,7 +342,7 @@ class TestSuiteWarns(MetadataBase):
         jfile = opj_data_file('input/conformance/file4.jp2')
         with self.assertWarns(UserWarning):
             jp2k = Jp2k(jfile)
-        jpdata = jp2k.read()
+        jpdata = jp2k[:]
         self.assertEqual(jpdata.shape, (512, 768))
 
     def test_ETS_JP2_file5(self):
@@ -351,35 +351,35 @@ class TestSuiteWarns(MetadataBase):
             # There's a warning for an unknown compatibility entry.
             # Ignore it here.
             jp2k = Jp2k(jfile)
-        jpdata = jp2k.read()
+        jpdata = jp2k[:]
         self.assertEqual(jpdata.shape, (512, 768, 3))
 
     def test_ETS_JP2_file6(self):
         jfile = opj_data_file('input/conformance/file6.jp2')
         with self.assertWarns(UserWarning):
             jp2k = Jp2k(jfile)
-        jpdata = jp2k.read()
+        jpdata = jp2k[:]
         self.assertEqual(jpdata.shape, (512, 768))
 
     def test_ETS_JP2_file7(self):
         jfile = opj_data_file('input/conformance/file7.jp2')
         with self.assertWarns(UserWarning):
             jp2k = Jp2k(jfile)
-        jpdata = jp2k.read()
+        jpdata = jp2k[:]
         self.assertEqual(jpdata.shape, (640, 480, 3))
 
     def test_ETS_JP2_file8(self):
         jfile = opj_data_file('input/conformance/file8.jp2')
         with self.assertWarns(UserWarning):
             jp2k = Jp2k(jfile)
-        jpdata = jp2k.read()
+        jpdata = jp2k[:]
         self.assertEqual(jpdata.shape, (400, 700))
 
     def test_ETS_JP2_file9(self):
         jfile = opj_data_file('input/conformance/file9.jp2')
         with self.assertWarns(UserWarning):
             jp2k = Jp2k(jfile)
-        jpdata = jp2k.read()
+        jpdata = jp2k[:]
         self.assertEqual(jpdata.shape, (512, 768, 3))
 
     def test_NR_broken_jp2_dump(self):
@@ -469,13 +469,13 @@ class TestSuiteWarns(MetadataBase):
         jfile = opj_data_file('input/nonregression/orb-blue10-lin-jp2.jp2')
         with self.assertWarns(UserWarning):
             # This file has an invalid ICC profile
-            Jp2k(jfile).read()
+            Jp2k(jfile)[:]
         self.assertTrue(True)
 
     def test_NR_DEC_orb_blue_win_jp2_26_decode(self):
         jfile = opj_data_file('input/nonregression/orb-blue10-win-jp2.jp2')
         with self.assertWarns(UserWarning):
-            Jp2k(jfile).read()
+            Jp2k(jfile)[:]
         self.assertTrue(True)
 
 
@@ -590,7 +590,7 @@ class TestSuite2point0(unittest.TestCase):
     def test_ETS_C1P0_p0_10_j2k(self):
         jfile = opj_data_file('input/conformance/p0_10.j2k')
         jp2k = Jp2k(jfile)
-        jpdata = jp2k.read(rlevel=0)
+        jpdata = jp2k[:]
 
         pgxfile = opj_data_file('baseline/conformance/c1p0_10_0.pgx')
         pgxdata = read_pgx(pgxfile)
@@ -611,7 +611,7 @@ class TestSuite2point0(unittest.TestCase):
         with self.assertRaises(IOError):
             with self.assertWarns(UserWarning):
                 # Invalid marker ID.
-                Jp2k(jfile).read()
+                Jp2k(jfile)[:]
         self.assertTrue(True)
 
     @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
@@ -620,7 +620,7 @@ class TestSuite2point0(unittest.TestCase):
         with self.assertRaises(IOError):
             with self.assertWarns(UserWarning):
                 # invalid number of subbands, bad marker ID
-                Jp2k(jfile).read()
+                Jp2k(jfile)[:]
         self.assertTrue(True)
 
     @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
@@ -632,9 +632,9 @@ class TestSuite2point0(unittest.TestCase):
         if glymur.version.openjpeg_version_tuple[0] < 2:
             with self.assertWarns(UserWarning):
                 # Incorrect warning issued about tile parts.
-                Jp2k(jfile).read()
+                Jp2k(jfile)[:]
         else:
-            Jp2k(jfile).read()
+            Jp2k(jfile)[:]
         self.assertTrue(True)
 
 

@@ -74,6 +74,7 @@ class SliceProtocolBase(unittest.TestCase):
         self.j2k_data = self.j2k[:]
 
         self.j2k_data_r1 = self.j2k[::2, ::2]
+        self.j2k_data_r5 = self.j2k[::32, ::32]
 
 @unittest.skipIf(os.name == "nt", fixtures.WINDOWS_TMP_FILE_MSG)
 class TestSliceProtocolBaseWrite(SliceProtocolBase):
@@ -313,7 +314,7 @@ class TestSliceProtocolRead(SliceProtocolBase):
 
     def test_region_rlevel5(self):
         actual = self.j2k[5:533:32, 27:423:32]
-        expected = self.j2k.read(area=(5, 27, 533, 423), rlevel=5)
+        expected = self.j2k_data_r5[1:17, 1:14]
         np.testing.assert_array_equal(actual, expected)
 
 @unittest.skipIf(OPJ_DATA_ROOT is None,
@@ -480,7 +481,7 @@ class TestJp2k(unittest.TestCase):
 
     @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_warn_if_using_read_method(self):
-        """Should warn if read method is called"""
+        """Should warn if deprecated read method is called"""
         with self.assertWarns(DeprecationWarning):
             Jp2k(self.jp2file).read()
 
@@ -575,7 +576,7 @@ class TestJp2k(unittest.TestCase):
         """Verify that rlevel=-1 gets us the lowest resolution image"""
         j = Jp2k(self.j2kfile)
         thumbnail1 = j.read(rlevel=-1)
-        thumbnail2 = j.read(rlevel=5)
+        thumbnail2 = j[::32, ::32]
         np.testing.assert_array_equal(thumbnail1, thumbnail2)
         self.assertEqual(thumbnail1.shape, (25, 15, 3))
 
@@ -734,7 +735,7 @@ class TestJp2k(unittest.TestCase):
         """Just a very basic test that reading a JP2 file does not error out.
         """
         j2k = Jp2k(self.jp2file)
-        j2k.read(rlevel=1)
+        j2k[::2, ::2]
 
     def test_basic_j2k(self):
         """This test is only useful when openjp2 is not available
@@ -742,7 +743,7 @@ class TestJp2k(unittest.TestCase):
         working J2K test.
         """
         j2k = Jp2k(self.j2kfile)
-        j2k.read()
+        j2k[:]
 
     def test_empty_box_with_j2k(self):
         """Verify that the list of boxes in a J2C/J2K file is present, but
@@ -867,7 +868,7 @@ class TestJp2k(unittest.TestCase):
         """Read JPX codestream when jp2-compatible."""
         # The file in question has multiple codestreams.
         jpx = Jp2k(self.jpxfile)
-        data = jpx.read()
+        data = jpx[:]
         self.assertEqual(data.shape, (1024, 1024, 3))
 
     def test_read_bands_without_openjp2(self):
@@ -1021,21 +1022,21 @@ class TestJp2k_write(unittest.TestCase):
     def test_write_with_jp2_in_caps(self):
         """should be able to write with JP2 suffix."""
         j2k = Jp2k(self.j2kfile)
-        expdata = j2k.read()
+        expdata = j2k[:]
         with tempfile.NamedTemporaryFile(suffix='.JP2') as tfile:
             ofile = Jp2k(tfile.name, 'wb')
-            ofile.write(expdata)
-            actdata = ofile.read()
+            ofile[:] = expdata
+            actdata = ofile[:]
             np.testing.assert_array_equal(actdata, expdata)
 
     def test_write_srgb_without_mct(self):
         """should be able to write RGB without specifying mct"""
         j2k = Jp2k(self.j2kfile)
-        expdata = j2k.read()
+        expdata = j2k[:]
         with tempfile.NamedTemporaryFile(suffix='.jp2') as tfile:
             ofile = Jp2k(tfile.name, 'wb')
             ofile.write(expdata, mct=False)
-            actdata = ofile.read()
+            actdata = ofile[:]
             np.testing.assert_array_equal(actdata, expdata)
 
             codestream = ofile.get_codestream()
@@ -1044,7 +1045,7 @@ class TestJp2k_write(unittest.TestCase):
     def test_write_grayscale_with_mct(self):
         """MCT usage makes no sense for grayscale images."""
         j2k = Jp2k(self.j2kfile)
-        expdata = j2k.read()
+        expdata = j2k[:]
         with tempfile.NamedTemporaryFile(suffix='.jp2') as tfile:
             ofile = Jp2k(tfile.name, 'wb')
             with self.assertRaises(IOError):
@@ -1054,11 +1055,11 @@ class TestJp2k_write(unittest.TestCase):
         """Must be able to write a CPRL progression order file"""
         # Issue 17
         j = Jp2k(self.jp2file)
-        expdata = j.read(rlevel=1)
+        expdata = j[::2, ::2]
         with tempfile.NamedTemporaryFile(suffix='.jp2') as tfile:
             ofile = Jp2k(tfile.name, 'wb')
             ofile.write(expdata, prog='CPRL')
-            actdata = ofile.read()
+            actdata = ofile[:]
             np.testing.assert_array_equal(actdata, expdata)
 
             codestream = ofile.get_codestream()
@@ -1145,7 +1146,7 @@ class TestJp2k_2_0(unittest.TestCase):
         """Test asoc and label box"""
         # Construct a fake file with an asoc and a label box, as
         # OpenJPEG doesn't have such a file.
-        data = Jp2k(self.jp2file).read(rlevel=1)
+        data = Jp2k(self.jp2file)[::2, ::2]
         with tempfile.NamedTemporaryFile(suffix='.jp2') as tfile:
             j = Jp2k(tfile.name, 'wb')
             j.write(data)
@@ -1246,11 +1247,9 @@ class TestJp2k_2_1(unittest.TestCase):
                 tfile.write(data[offset+53:offset+55])
                 tfile.write(b'\x00')
                 tfile.write(data[offset+57:offset+59])
-                #tfile.write(data[3184:3186])
                 tfile.write(b'\x00')
 
                 tfile.write(data[offset+59:])
-                #tfile.write(data[3186:])
                 tfile.flush()
                 with warnings.catch_warnings():
                     warnings.simplefilter('ignore')
@@ -1260,10 +1259,10 @@ class TestJp2k_2_1(unittest.TestCase):
                                             :\sdx=1\sdy=0''', re.VERBOSE)
                     if sys.hexversion < 0x03020000:
                         with self.assertRaisesRegexp((IOError, OSError), regexp):
-                            j.read(rlevel=1)
+                            j[::2, ::2]
                     else:
                         with self.assertRaisesRegex((IOError, OSError), regexp):
-                            j.read(rlevel=1)
+                            j[::2, ::2]
 
 @unittest.skipIf(OPJ_DATA_ROOT is None,
                  "OPJ_DATA_ROOT environment variable not set")
@@ -1364,7 +1363,7 @@ class TestJp2kOpjDataRoot(unittest.TestCase):
             self.assertEqual(codestream.segment[2].spcod[8],
                              glymur.core.WAVELET_XFORM_9X7_IRREVERSIBLE)
 
-            actdata = j.read()
+            actdata = j[:]
             self.assertTrue(fixtures.mse(actdata, expdata) < 250)
 
     @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
@@ -1372,9 +1371,9 @@ class TestJp2kOpjDataRoot(unittest.TestCase):
         """Indices for pclr jpxfile if no color transform"""
         filename = opj_data_file('input/conformance/file9.jp2')
         with self.assertWarns(UserWarning):
-            j = Jp2k(filename)
-        rgb = j.read()
-        idx = j.read(ignore_pclr_cmap_cdef=True)
+            jp2 = Jp2k(filename)
+        rgb = jp2[:]
+        idx = jp2.read(ignore_pclr_cmap_cdef=True)
         self.assertEqual(rgb.shape, (512, 768, 3))
         self.assertEqual(idx.shape, (512, 768))
 
@@ -1396,7 +1395,7 @@ class TestJp2kOpjDataRoot(unittest.TestCase):
         filename = opj_data_file('input/conformance/p0_05.j2k')
         j = Jp2k(filename)
         with self.assertRaises(RuntimeError):
-            j.read()
+            j[:]
         
     @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_no_cxform_cmap(self):
@@ -1407,7 +1406,7 @@ class TestJp2kOpjDataRoot(unittest.TestCase):
         with self.assertWarns(UserWarning):
             # The file has a bad compatibility list entry.  Not important here.
             j = Jp2k(filename)
-        ycbcr = j.read()
+        ycbcr = j[:]
         crcby = j.read(ignore_pclr_cmap_cdef=True)
 
         expected = np.zeros(ycbcr.shape, ycbcr.dtype)
