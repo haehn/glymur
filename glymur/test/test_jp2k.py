@@ -1379,7 +1379,7 @@ class TestJp2kOpjDataRoot(unittest.TestCase):
 
         # Should be able to manually reconstruct the RGB image from the palette
         # and indices.
-        palette = j.box[2].box[1].palette
+        palette = jp2.box[2].box[1].palette
         rgb_from_idx = np.zeros(rgb.shape, dtype=np.uint8)
         for r in np.arange(rgb.shape[0]):
             for c in np.arange(rgb.shape[1]):

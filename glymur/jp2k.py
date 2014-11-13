@@ -966,7 +966,7 @@ class Jp2k(Jp2kBox):
                 numrows if rows.stop is None else rows.stop,
                 numcols if cols.stop is None else cols.stop
                 )
-        data = self.read(area=area, rlevel=rlevel)
+        data = self._read(area=area, rlevel=rlevel)
         if len(pargs) == 2:
             return data
 
@@ -974,7 +974,7 @@ class Jp2k(Jp2kBox):
         return data[:, :, bands]
 
 
-    def _read(self):
+    def _read(self, **kwargs):
         """Read a JPEG 2000 image.
 
         Returns
