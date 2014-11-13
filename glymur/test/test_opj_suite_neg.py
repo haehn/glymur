@@ -121,7 +121,7 @@ class TestSuiteNegative(unittest.TestCase):
     def test_precinct_size_not_p2(self):
         """precinct sizes should be powers of two."""
         ifile = Jp2k(self.j2kfile)
-        data = ifile.read(rlevel=2)
+        data = ifile[::4, ::4]
         with tempfile.NamedTemporaryFile(suffix='.jp2') as tfile:
             ofile = Jp2k(tfile.name, 'wb')
             with self.assertRaises(IOError):
@@ -131,7 +131,7 @@ class TestSuiteNegative(unittest.TestCase):
     def test_cblk_size_not_power_of_two(self):
         """code block sizes should be powers of two."""
         ifile = Jp2k(self.j2kfile)
-        data = ifile.read(rlevel=2)
+        data = ifile[::4, ::4]
         with tempfile.NamedTemporaryFile(suffix='.jp2') as tfile:
             ofile = Jp2k(tfile.name, 'wb')
             with self.assertRaises(IOError):
@@ -141,7 +141,7 @@ class TestSuiteNegative(unittest.TestCase):
     def test_cblk_size_precinct_size(self):
         """code block sizes should never exceed half that of precinct size."""
         ifile = Jp2k(self.j2kfile)
-        data = ifile.read(rlevel=2)
+        data = ifile[::4, ::4]
         with tempfile.NamedTemporaryFile(suffix='.jp2') as tfile:
             ofile = Jp2k(tfile.name, 'wb')
             with self.assertRaises(IOError):
