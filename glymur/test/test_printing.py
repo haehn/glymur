@@ -111,7 +111,7 @@ class TestPrinting(unittest.TestCase):
         """verify printing of asoc, label boxes"""
         # Construct a fake file with an asoc and a label box, as
         # OpenJPEG doesn't have such a file.
-        data = glymur.Jp2k(self.jp2file).read(rlevel=1)
+        data = glymur.Jp2k(self.jp2file)[::2, ::2]
         with tempfile.NamedTemporaryFile(suffix='.jp2') as tfile:
             j = glymur.Jp2k(tfile.name, 'wb')
             j.write(data)

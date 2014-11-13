@@ -60,6 +60,11 @@ class Jp2k(Jp2kBox):
         List of top-level boxes in the file.  Each box may in turn contain
         its own list of boxes.  Will be empty if the file consists only of a
         raw codestream.
+    shape : tuple
+        Size of the image.
+    ignore_pclr_cmap_cdef : bool
+        Whether or not to ignore the pclr, cmap, or cdef boxes during any
+        color transformation.  Defaults to False.
 
     Examples
     --------
@@ -95,10 +100,19 @@ class Jp2k(Jp2kBox):
         self._codec_format = None
         self._colorspace = None
         self._shape = None
+        self._ignore_pclr_cmap_cdef = False
 
         # Parse the file for JP2/JPX contents only if we are reading it.
         if mode == 'rb':
             self.parse()
+
+    @property
+    def ignore_pclr_cmap_cdef(self):
+        return self._ignore_pclr_cmap_cdef
+
+    @ignore_pclr_cmap_cdef.setter
+    def ignore_pclr_cmap_cdef(self, ignore_pclr_cmap_cdef):
+        self._ignore_pclr_cmap_cdef = ignore_pclr_cmap_cdef
 
     @property
     def shape(self):
@@ -1009,9 +1023,6 @@ class Jp2k(Jp2kBox):
             (first_row, first_col, last_row, last_col)
         tile : int, optional
             Number of tile to decode.
-        ignore_pclr_cmap_cdef : bool
-            Whether or not to ignore the pclr, cmap, or cdef boxes during any
-            color transformation.  Defaults to False.
         verbose : bool, optional
             Print informational messages produced by the OpenJPEG library.
 
@@ -1025,6 +1036,8 @@ class Jp2k(Jp2kBox):
         IOError
             If the image has differing subsample factors.
         """
+        if 'ignore_pclr_cmap_cdef' in kwargs:
+            self.ignore_pclr_cmap_cdef = kwargs['ignore_pclr_cmap_cdef']
         warnings.warn("Use array-style slicing instead.", DeprecationWarning)
         if version.openjpeg_version_tuple[0] < 2:
             img = self._read_openjpeg(**kwargs)
@@ -1044,8 +1057,7 @@ class Jp2k(Jp2kBox):
             msg += "the read_bands method instead."
             raise RuntimeError(msg)
 
-    def _read_openjpeg(self, rlevel=0, ignore_pclr_cmap_cdef=False,
-                       verbose=False, area=None):
+    def _read_openjpeg(self, rlevel=0, verbose=False, area=None):
         """Read a JPEG 2000 image using libopenjpeg.
 
         Parameters
@@ -1053,9 +1065,6 @@ class Jp2k(Jp2kBox):
         rlevel : int, optional
             Factor by which to rlevel output resolution.  Use -1 to get the
             lowest resolution thumbnail.
-        ignore_pclr_cmap_cdef : bool
-            Whether or not to ignore the pclr, cmap, or cdef boxes during any
-            color transformation.  Defaults to False.
         verbose : bool, optional
             Print informational messages produced by the OpenJPEG library.
         area : tuple, optional
@@ -1074,7 +1083,7 @@ class Jp2k(Jp2kBox):
         """
         self._subsampling_sanity_check()
 
-        self._populate_dparams(rlevel, ignore_pclr_cmap_cdef)
+        self._populate_dparams(rlevel)
 
         with ExitStack() as stack:
             try:
@@ -1127,8 +1136,7 @@ class Jp2k(Jp2kBox):
 
         return data
 
-    def _read_openjp2(self, rlevel=0, layer=0, area=None, tile=None,
-                      verbose=False, ignore_pclr_cmap_cdef=False):
+    def _read_openjp2(self, rlevel=0, layer=0, area=None, tile=None, verbose=False):
         """Read a JPEG 2000 image using libopenjp2.
 
         Parameters
@@ -1158,8 +1166,7 @@ class Jp2k(Jp2kBox):
         """
         self._subsampling_sanity_check()
 
-        self._populate_dparams(rlevel, ignore_pclr_cmap_cdef,
-                               layer=layer, tile=tile, area=area)
+        self._populate_dparams(rlevel, layer=layer, tile=tile, area=area)
 
         with ExitStack() as stack:
             if re.match("2.1", version.openjpeg_version):
@@ -1203,8 +1210,7 @@ class Jp2k(Jp2kBox):
 
         return img_array
 
-    def _populate_dparams(self, rlevel, ignore_pclr_cmap_cdef, tile=None,
-                          layer=None, area=None):
+    def _populate_dparams(self, rlevel, tile=None, layer=None, area=None):
         """Populate decompression structure with appropriate input parameters.
 
         Parameters
@@ -1218,9 +1224,6 @@ class Jp2k(Jp2kBox):
             (first_row, first_col, last_row, last_col)
         tile : int
             Number of tile to decode.
-        ignore_pclr_cmap_cdef : bool
-            Whether or not to ignore the pclr, cmap, or cdef boxes during any
-            color transformation.  Defaults to False.
         """
         if opj2.OPENJP2 is not None:
             dparam = opj2.set_default_decoder_parameters()
@@ -1232,6 +1235,10 @@ class Jp2k(Jp2kBox):
         nelts = opj2.PATH_LEN - len(infile)
         infile += b'0' * nelts
         dparam.infile = infile
+
+        if self.ignore_pclr_cmap_cdef:
+            # Return raw codestream components.
+            dparam.flags |= 1
 
         dparam.decod_format = self._codec_format
 
@@ -1267,7 +1274,7 @@ class Jp2k(Jp2kBox):
             dparam.tile_index = tile
             dparam.nb_tile_to_decode = 1
 
-        if ignore_pclr_cmap_cdef is True:
+        if self.ignore_pclr_cmap_cdef:
             # Return raw codestream components.
             dparam.flags |= 1
 
@@ -1319,8 +1326,8 @@ class Jp2k(Jp2kBox):
                                "OpenJPEG installed before using this "
                                "functionality.")
 
-        self._populate_dparams(rlevel, ignore_pclr_cmap_cdef,
-                               layer=layer, tile=tile, area=area)
+        self.ignore_pclr_cmap_cdef = ignore_pclr_cmap_cdef
+        self._populate_dparams(rlevel, layer=layer, tile=tile, area=area)
 
         with ExitStack() as stack:
             if re.match("2.1", version.openjpeg_version):

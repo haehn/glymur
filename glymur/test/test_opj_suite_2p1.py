@@ -134,7 +134,7 @@ class TestSuite2point1(unittest.TestCase):
         jfile = opj_data_file('input/conformance/p1_04.j2k')
         jp2k = Jp2k(jfile)
         tdata = jp2k.read(tile=63, rlevel=2)  # last tile
-        odata = jp2k.read(rlevel=2)
+        odata = jp2k[::4, ::4]
         np.testing.assert_array_equal(tdata, odata[224:256, 224:256])
 
     def test_NR_DEC_p1_04_j2k_59_decode(self):
@@ -148,7 +148,7 @@ class TestSuite2point1(unittest.TestCase):
         jfile = opj_data_file('input/conformance/p1_04.j2k')
         jp2k = Jp2k(jfile)
         tdata = jp2k.read(tile=12, rlevel=1)  # 2nd row, 5th column
-        odata = jp2k.read(rlevel=1)
+        odata = jp2k[::2, ::2]
         np.testing.assert_array_equal(tdata, odata[64:128, 256:320])
 
     @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)

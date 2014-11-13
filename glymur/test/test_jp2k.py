@@ -548,7 +548,8 @@ class TestJp2k(unittest.TestCase):
         """Indices for pclr jpxfile if no color transform"""
         j = Jp2k(self.jpxfile)
         rgb = j[:]
-        idx = j.read(ignore_pclr_cmap_cdef=True)
+        j.ignore_pclr_cmap_cdef = True
+        idx = j[:]
         nr, nc = 1024, 1024
         self.assertEqual(rgb.shape, (nr, nc, 3))
         self.assertEqual(idx.shape, (nr, nc))
@@ -1373,7 +1374,8 @@ class TestJp2kOpjDataRoot(unittest.TestCase):
         with self.assertWarns(UserWarning):
             jp2 = Jp2k(filename)
         rgb = jp2[:]
-        idx = jp2.read(ignore_pclr_cmap_cdef=True)
+        jp2.ignore_pclr_cmap_cdef = True
+        idx = jp2[:]
         self.assertEqual(rgb.shape, (512, 768, 3))
         self.assertEqual(idx.shape, (512, 768))
 
@@ -1407,7 +1409,8 @@ class TestJp2kOpjDataRoot(unittest.TestCase):
             # The file has a bad compatibility list entry.  Not important here.
             j = Jp2k(filename)
         ycbcr = j[:]
-        crcby = j.read(ignore_pclr_cmap_cdef=True)
+        j.ignore_pclr_cmap_cdef = True
+        crcby = j[:]
 
         expected = np.zeros(ycbcr.shape, ycbcr.dtype)
         for k in range(crcby.shape[2]):
