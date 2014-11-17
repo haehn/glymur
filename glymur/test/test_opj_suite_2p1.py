@@ -30,6 +30,7 @@ suite.
 import re
 import sys
 import unittest
+import warnings
 
 import numpy as np
 
@@ -40,6 +41,24 @@ from .fixtures import OPJ_DATA_ROOT
 from .fixtures import WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG
 from .fixtures import mse, peak_tolerance, read_pgx, opj_data_file
 
+
+@unittest.skipIf(OPJ_DATA_ROOT is None,
+                 "OPJ_DATA_ROOT environment variable not set")
+@unittest.skipIf(re.match(r'''(1|2.0.0)''',
+                          glymur.version.openjpeg_version) is not None,
+                 "Only supported in 2.0.1 or higher")
+#class TestVersion0p7BackwardsCompatibility(unittest.TestSuite):
+class TestBlah(unittest.TestSuite):
+    """
+    Tests for backwards compatibility with version 0.7.
+    """
+
+    def test_blah_NR_DEC_p1_04_j2k_57_decode(self):
+        jfile = opj_data_file('input/conformance/p1_04.j2k')
+        jp2k = Jp2k(jfile)
+        tdata = jp2k.read(tile=63)  # last tile
+        odata = jp2k[:]
+        np.testing.assert_array_equal(tdata, odata[896:1024, 896:1024])
 
 @unittest.skipIf(OPJ_DATA_ROOT is None,
                  "OPJ_DATA_ROOT environment variable not set")
@@ -126,28 +145,61 @@ class TestSuite2point1(unittest.TestCase):
     def test_NR_DEC_p1_04_j2k_57_decode(self):
         jfile = opj_data_file('input/conformance/p1_04.j2k')
         jp2k = Jp2k(jfile)
-        tdata = jp2k.read(tile=63)  # last tile
+        tdata = jp2k[896:1024, 896:1024] # last tile
         odata = jp2k[:]
         np.testing.assert_array_equal(tdata, odata[896:1024, 896:1024])
+
+    def test_NR_DEC_p1_04_j2k_57_decode_0p7_backwards_compatibility(self):
+        """
+        0.7.x usage deprecated
+        """
+        jfile = opj_data_file('input/conformance/p1_04.j2k')
+        jp2k = Jp2k(jfile)
+        if sys.hexversion < 0x03000000:
+            with warnings.catch_warnings():
+                # Suppress a warning due to deprecated syntax
+                warnings.simplefilter("ignore")
+                tdata = jp2k.read(tile=63)  # last tile
+        else:
+            with self.assertWarns(DeprecationWarning):
+                tdata = jp2k.read(tile=63)  # last tile
+        odata = jp2k[:]
+        np.testing.assert_array_equal(tdata, odata[896:1024, 896:1024])
+
+    def test_NR_DEC_p1_04_j2k_58_decode_0p7_backwards_compatibility(self):
+        """
+        0.7.x usage deprecated
+        """
+        jfile = opj_data_file('input/conformance/p1_04.j2k')
+        jp2k = Jp2k(jfile)
+        if sys.hexversion < 0x03000000:
+            with warnings.catch_warnings():
+                # Suppress a warning due to deprecated syntax
+                tdata = jp2k.read(tile=63, rlevel=2)  # last tile
+        else:
+            with self.assertWarns(DeprecationWarning):
+                tdata = jp2k.read(tile=63, rlevel=2)  # last tile
+        odata = jp2k[::4, ::4]
+        np.testing.assert_array_equal(tdata, odata[224:256, 224:256])
 
     def test_NR_DEC_p1_04_j2k_58_decode(self):
         jfile = opj_data_file('input/conformance/p1_04.j2k')
         jp2k = Jp2k(jfile)
-        tdata = jp2k.read(tile=63, rlevel=2)  # last tile
+        tdata = jp2k[896:1024:4, 896:1024:4]  # last tile
         odata = jp2k[::4, ::4]
         np.testing.assert_array_equal(tdata, odata[224:256, 224:256])
 
     def test_NR_DEC_p1_04_j2k_59_decode(self):
         jfile = opj_data_file('input/conformance/p1_04.j2k')
         jp2k = Jp2k(jfile)
-        tdata = jp2k.read(tile=12)  # 2nd row, 5th column
+        tdata = jp2k[128:256, 512:640]  # 2nd row, 5th column
         odata = jp2k[:]
         np.testing.assert_array_equal(tdata, odata[128:256, 512:640])
 
     def test_NR_DEC_p1_04_j2k_60_decode(self):
         jfile = opj_data_file('input/conformance/p1_04.j2k')
         jp2k = Jp2k(jfile)
-        tdata = jp2k.read(tile=12, rlevel=1)  # 2nd row, 5th column
+        tdata = jp2k[128:256:2, 512:640:2]  # 2nd row, 5th column
         odata = jp2k[::2, ::2]
         np.testing.assert_array_equal(tdata, odata[64:128, 256:320])
 
