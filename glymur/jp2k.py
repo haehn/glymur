@@ -894,7 +894,7 @@ class Jp2k(Jp2kBox):
             # This retrieves a single row.
             row = pargs
             area = (row, 0, row + 1, numcols)
-            return self.read(area=area).squeeze()
+            return self._read(area=area).squeeze()
 
         if pargs is Ellipsis:
             # Case of jp2[...]
@@ -903,7 +903,7 @@ class Jp2k(Jp2kBox):
         if isinstance(pargs, slice):
             if pargs.start is None and pargs.stop is None and pargs.step is None:
                 # Case of jp2[:]
-                return self.read()
+                return self._read()
 
             # Corner case of jp2[x] where x is a slice object with non-null
             # members.  Just augment it with an ellipsis and let the code 

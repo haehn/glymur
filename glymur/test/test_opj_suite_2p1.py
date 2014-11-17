@@ -61,27 +61,27 @@ class TestSuite2point1(unittest.TestCase):
         with self.assertWarns(UserWarning):
             # brand is 'jp2 ', but has any icc profile.
             jp2 = Jp2k(jfile)
-        jp2.read()
+        jp2[:]
         self.assertTrue(True)
 
     def test_NR_DEC_kodak_2layers_lrcp_j2c_31_decode(self):
         jfile = opj_data_file('input/nonregression/kodak_2layers_lrcp.j2c')
-        Jp2k(jfile).read()
+        Jp2k(jfile)[:]
         self.assertTrue(True)
 
     def test_NR_DEC_kodak_2layers_lrcp_j2c_32_decode(self):
         jfile = opj_data_file('input/nonregression/kodak_2layers_lrcp.j2c')
-        Jp2k(jfile).read(layer=2)
+        Jp2k(jfile)[::4, ::4]
         self.assertTrue(True)
 
     def test_NR_DEC_issue104_jpxstream_jp2_33_decode(self):
         jfile = opj_data_file('input/nonregression/issue104_jpxstream.jp2')
-        Jp2k(jfile).read()
+        Jp2k(jfile)[:]
         self.assertTrue(True)
 
     def test_NR_DEC_mem_b2b86b74_2753_jp2_35_decode(self):
         jfile = opj_data_file('input/nonregression/mem-b2b86b74-2753.jp2')
-        Jp2k(jfile).read()
+        Jp2k(jfile)[:]
         self.assertTrue(True)
 
     @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
@@ -92,7 +92,7 @@ class TestSuite2point1(unittest.TestCase):
             # Invalid number of resolutions.
             j = Jp2k(jfile)
             with self.assertRaises(IOError):
-                j.read()
+                j[:]
 
     @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_NR_DEC_gdal_fuzzer_check_number_of_tiles_jp2_38_decode(self):
@@ -102,7 +102,7 @@ class TestSuite2point1(unittest.TestCase):
             # Invalid number of tiles.
             j = Jp2k(jfile)
             with self.assertRaises(IOError):
-                j.read()
+                j[:]
 
     @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_NR_DEC_gdal_fuzzer_check_comp_dx_dy_jp2_39_decode(self):
@@ -111,23 +111,23 @@ class TestSuite2point1(unittest.TestCase):
         with self.assertWarns(UserWarning):
             # Invalid subsampling value
             with self.assertRaises(IOError):
-                Jp2k(jfile).read()
+                Jp2k(jfile)[:]
 
     def test_NR_DEC_file_409752_jp2_40_decode(self):
         jfile = opj_data_file('input/nonregression/file409752.jp2')
         with self.assertRaises(RuntimeError):
-            Jp2k(jfile).read()
+            Jp2k(jfile)[:]
 
     def test_NR_DEC_issue206_image_000_jp2_42_decode(self):
         jfile = opj_data_file('input/nonregression/issue206_image-000.jp2')
-        Jp2k(jfile).read()
+        Jp2k(jfile)[:]
         self.assertTrue(True)
 
     def test_NR_DEC_p1_04_j2k_57_decode(self):
         jfile = opj_data_file('input/conformance/p1_04.j2k')
         jp2k = Jp2k(jfile)
         tdata = jp2k.read(tile=63)  # last tile
-        odata = jp2k.read()
+        odata = jp2k[:]
         np.testing.assert_array_equal(tdata, odata[896:1024, 896:1024])
 
     def test_NR_DEC_p1_04_j2k_58_decode(self):
@@ -141,7 +141,7 @@ class TestSuite2point1(unittest.TestCase):
         jfile = opj_data_file('input/conformance/p1_04.j2k')
         jp2k = Jp2k(jfile)
         tdata = jp2k.read(tile=12)  # 2nd row, 5th column
-        odata = jp2k.read()
+        odata = jp2k[:]
         np.testing.assert_array_equal(tdata, odata[128:256, 512:640])
 
     def test_NR_DEC_p1_04_j2k_60_decode(self):
@@ -161,7 +161,7 @@ class TestSuite2point1(unittest.TestCase):
             # Invalid component number.
             j = Jp2k(jfile)
             with self.assertRaises(IOError):
-                j.read()
+                j[:]
 
 @unittest.skipIf(OPJ_DATA_ROOT is None,
                  "OPJ_DATA_ROOT environment variable not set")
@@ -179,164 +179,164 @@ class TestReadArea(unittest.TestCase):
 
         jfile = opj_data_file('input/conformance/p1_04.j2k')
         self.j2k = Jp2k(jfile)
-        self.j2k_data = self.j2k.read()
-        self.j2k_half_data = self.j2k.read(rlevel=1)
-        self.j2k_quarter_data = self.j2k.read(rlevel=2)
+        self.j2k_data = self.j2k[:]
+        self.j2k_half_data = self.j2k[::2, ::2]
+        self.j2k_quarter_data = self.j2k[::4, ::4]
 
         jfile = opj_data_file('input/conformance/p1_06.j2k')
         self.j2k_p1_06 = Jp2k(jfile)
 
     def test_NR_DEC_p1_04_j2k_43_decode(self):
-        actual = self.j2k.read(area=(0, 0, 1024, 1024))
+        actual = self.j2k[:1024, :1024]
         expected = self.j2k_data
         np.testing.assert_array_equal(actual, expected)
 
     def test_NR_DEC_p1_04_j2k_44_decode(self):
-        actual = self.j2k.read(area=(640, 512, 768, 640))
+        actual = self.j2k[640:768, 512:640]
         expected = self.j2k_data[640:768, 512:640]
         np.testing.assert_array_equal(actual, expected)
 
     def test_NR_DEC_p1_04_j2k_45_decode(self):
-        actual = self.j2k.read(area=(896, 896, 1024, 1024))
+        actual = self.j2k[896:1024, 896:1024]
         expected = self.j2k_data[896:1024, 896:1024]
         np.testing.assert_array_equal(actual, expected)
 
     def test_NR_DEC_p1_04_j2k_46_decode(self):
-        actual = self.j2k.read(area=(500, 100, 800, 300))
+        actual = self.j2k[500:800, 100:300]
         expected = self.j2k_data[500:800, 100:300]
         np.testing.assert_array_equal(actual, expected)
 
     def test_NR_DEC_p1_04_j2k_47_decode(self):
-        actual = self.j2k.read(area=(520, 260, 600, 360))
+        actual = self.j2k[520:600, 260:360]
         expected = self.j2k_data[520:600, 260:360]
         np.testing.assert_array_equal(actual, expected)
 
     def test_NR_DEC_p1_04_j2k_48_decode(self):
-        actual = self.j2k.read(area=(520, 260, 660, 360))
+        actual = self.j2k[520:660, 260:360]
         expected = self.j2k_data[520:660, 260:360]
         np.testing.assert_array_equal(actual, expected)
 
     def test_NR_DEC_p1_04_j2k_49_decode(self):
-        actual = self.j2k.read(area=(520, 360, 600, 400))
+        actual = self.j2k[520:600, 360:400]
         expected = self.j2k_data[520:600, 360:400]
         np.testing.assert_array_equal(actual, expected)
 
     def test_NR_DEC_p1_04_j2k_50_decode(self):
-        actual = self.j2k.read(area=(0, 0, 1024, 1024), rlevel=2)
+        actual = self.j2k[:1024:4, :1024:4]
         expected = self.j2k_quarter_data
         np.testing.assert_array_equal(actual, expected)
 
     def test_NR_DEC_p1_04_j2k_51_decode(self):
-        actual = self.j2k.read(area=(640, 512, 768, 640), rlevel=2)
+        actual = self.j2k[640:768:4, 512:640:4]
         expected = self.j2k_quarter_data[160:192, 128:160]
         np.testing.assert_array_equal(actual, expected)
 
     def test_NR_DEC_p1_04_j2k_52_decode(self):
-        actual = self.j2k.read(area=(896, 896, 1024, 1024), rlevel=2)
+        actual = self.j2k[896:1024:4, 896:1024:4]
         expected = self.j2k_quarter_data[224:352, 224:352]
         np.testing.assert_array_equal(actual, expected)
 
     def test_NR_DEC_p1_04_j2k_53_decode(self):
-        actual = self.j2k.read(area=(500, 100, 800, 300), rlevel=2)
+        actual = self.j2k[500:800:4, 100:300:4]
         expected = self.j2k_quarter_data[125:200, 25:75]
         np.testing.assert_array_equal(actual, expected)
 
     def test_NR_DEC_p1_04_j2k_54_decode(self):
-        actual = self.j2k.read(area=(520, 260, 600, 360), rlevel=2)
+        actual = self.j2k[520:600:4, 260:360:4]
         expected = self.j2k_quarter_data[130:150, 65:90]
         np.testing.assert_array_equal(actual, expected)
 
     def test_NR_DEC_p1_04_j2k_55_decode(self):
-        actual = self.j2k.read(area=(520, 260, 660, 360), rlevel=2)
+        actual = self.j2k[520:660:4, 260:360:4]
         expected = self.j2k_quarter_data[130:165, 65:90]
         np.testing.assert_array_equal(actual, expected)
 
     def test_NR_DEC_p1_04_j2k_56_decode(self):
-        actual = self.j2k.read(area=(520, 360, 600, 400), rlevel=2)
+        actual = self.j2k[520:600:4, 360:400:4]
         expected = self.j2k_quarter_data[130:150, 90:100]
         np.testing.assert_array_equal(actual, expected)
 
     def test_NR_DEC_p1_06_j2k_70_decode(self):
-        actual = self.j2k_p1_06.read(area=(9, 9, 12, 12), rlevel=1)
+        actual = self.j2k_p1_06[9:12:2, 9:12:2]
         self.assertEqual(actual.shape, (1, 1, 3))
 
     def test_NR_DEC_p1_06_j2k_71_decode(self):
-        actual = self.j2k_p1_06.read(area=(10, 4, 12, 10), rlevel=1)
+        actual = self.j2k_p1_06[10:12:2, 4:10:2]
         self.assertEqual(actual.shape, (1, 3, 3))
 
     def test_NR_DEC_p1_06_j2k_72_decode(self):
-        ssdata = self.j2k_p1_06.read(area=(3, 3, 9, 9), rlevel=1)
+        ssdata = self.j2k_p1_06[3:9:2, 3:9:2]
         self.assertEqual(ssdata.shape, (3, 3, 3))
 
     def test_NR_DEC_p1_06_j2k_73_decode(self):
-        ssdata = self.j2k_p1_06.read(area=(4, 4, 7, 7), rlevel=1)
+        ssdata = self.j2k_p1_06[4:7:2, 4:7:2]
         self.assertEqual(ssdata.shape, (2, 2, 3))
 
     def test_NR_DEC_p1_06_j2k_74_decode(self):
-        ssdata = self.j2k_p1_06.read(area=(4, 4, 5, 5), rlevel=1)
+        ssdata = self.j2k_p1_06[4:5:2, 4:5:2]
         self.assertEqual(ssdata.shape, (1, 1, 3))
 
     def test_NR_DEC_p1_06_j2k_75_decode(self):
         # Image size would be 0 x 0.
         with self.assertRaises((IOError, OSError)):
-            self.j2k_p1_06.read(area=(9, 9, 12, 12), rlevel=2)
+            self.j2k_p1_06[9:12:4, 9:12:4]
 
     def test_NR_DEC_p0_04_j2k_85_decode(self):
-        actual = self.j2k.read(area=(0, 0, 256, 256))
+        actual = self.j2k[:256, :256]
         expected = self.j2k_data[:256, :256]
         np.testing.assert_array_equal(actual, expected)
 
     def test_NR_DEC_p0_04_j2k_86_decode(self):
-        actual = self.j2k.read(area=(0, 128, 128, 256))
+        actual = self.j2k[:128, 128:256]
         expected = self.j2k_data[:128, 128:256]
         np.testing.assert_array_equal(actual, expected)
 
     def test_NR_DEC_p0_04_j2k_87_decode(self):
-        actual = self.j2k.read(area=(10, 50, 200, 120))
+        actual = self.j2k[10:200, 50:120]
         expected = self.j2k_data[10:200, 50:120]
         np.testing.assert_array_equal(actual, expected)
 
     def test_NR_DEC_p0_04_j2k_88_decode(self):
-        actual = self.j2k.read(area=(150, 10, 210, 190))
+        actual = self.j2k[150:210, 10:190]
         expected = self.j2k_data[150:210, 10:190]
         np.testing.assert_array_equal(actual, expected)
 
     def test_NR_DEC_p0_04_j2k_89_decode(self):
-        actual = self.j2k.read(area=(80, 100, 150, 200))
+        actual = self.j2k[80:150, 100:200]
         expected = self.j2k_data[80:150, 100:200]
         np.testing.assert_array_equal(actual, expected)
 
     def test_NR_DEC_p0_04_j2k_90_decode(self):
-        actual = self.j2k.read(area=(20, 150, 50, 200))
+        actual = self.j2k[20:50, 150:200]
         expected = self.j2k_data[20:50, 150:200]
         np.testing.assert_array_equal(actual, expected)
 
     def test_NR_DEC_p0_04_j2k_91_decode(self):
-        actual = self.j2k.read(area=(0, 0, 256, 256), rlevel=2)
+        actual = self.j2k[:256:4, :256:4]
         expected = self.j2k_quarter_data[0:64, 0:64]
         np.testing.assert_array_equal(actual, expected)
 
     def test_NR_DEC_p0_04_j2k_92_decode(self):
-        actual = self.j2k.read(area=(0, 128, 128, 256), rlevel=2)
+        actual = self.j2k[:128:4, 128:256:4]
         expected = self.j2k_quarter_data[:32, 32:64]
         np.testing.assert_array_equal(actual, expected)
 
     def test_NR_DEC_p0_04_j2k_93_decode(self):
-        actual = self.j2k.read(area=(10, 50, 200, 120), rlevel=2)
+        actual = self.j2k[10:200:4, 50:120:4]
         expected = self.j2k_quarter_data[3:50, 13:30]
         np.testing.assert_array_equal(actual, expected)
 
     def test_NR_DEC_p0_04_j2k_94_decode(self):
-        actual = self.j2k.read(area=(150, 10, 210, 190), rlevel=2)
+        actual = self.j2k[150:210:4, 10:190:4]
         expected = self.j2k_quarter_data[38:53, 3:48]
         np.testing.assert_array_equal(actual, expected)
 
     def test_NR_DEC_p0_04_j2k_95_decode(self):
-        actual = self.j2k.read(area=(80, 100, 150, 200), rlevel=2)
+        actual = self.j2k[80:150:4, 100:200:4]
         expected = self.j2k_quarter_data[20:38, 25:50]
         np.testing.assert_array_equal(actual, expected)
 
     def test_NR_DEC_p0_04_j2k_96_decode(self):
-        actual = self.j2k.read(area=(20, 150, 50, 200), rlevel=2)
+        actual = self.j2k[20:50:4, 150:200:4]
         expected = self.j2k_quarter_data[5:13, 38:50]
         np.testing.assert_array_equal(actual, expected)
