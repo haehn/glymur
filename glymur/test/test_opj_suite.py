@@ -30,6 +30,7 @@ suite.
 import re
 import sys
 import unittest
+import warnings
 
 import numpy as np
 
@@ -727,6 +728,7 @@ class TestSuite2point1(unittest.TestCase):
         odata = jp2k[:]
         np.testing.assert_array_equal(tdata, odata[896:1024, 896:1024])
 
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_NR_DEC_p1_04_j2k_57_decode_0p7_backwards_compatibility(self):
         """
         0.7.x usage deprecated
@@ -744,6 +746,7 @@ class TestSuite2point1(unittest.TestCase):
         odata = jp2k[:]
         np.testing.assert_array_equal(tdata, odata[896:1024, 896:1024])
 
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_NR_DEC_p1_04_j2k_58_decode_0p7_backwards_compatibility(self):
         """
         0.7.x usage deprecated
