@@ -311,6 +311,8 @@ class TestSliceProtocolRead(SliceProtocolBase):
         expected = self.j2k.read(area=(5, 27, 533, 423), rlevel=5)
         np.testing.assert_array_equal(actual, expected)
 
+@unittest.skipIf(fixtures.OPENJPEG_NOT_AVAILABLE,
+                 fixtures.OPENJPEG_NOT_AVAILABLE_MSG)
 @unittest.skipIf(OPJ_DATA_ROOT is None,
                  "OPJ_DATA_ROOT environment variable not set")
 class TestSliceProtocolOpjData(unittest.TestCase):
@@ -1296,6 +1298,8 @@ class TestJp2kOpjDataRoot(unittest.TestCase):
                 rgb_from_idx[r, c] = palette[idx[r, c]]
         np.testing.assert_array_equal(rgb, rgb_from_idx)
 
+    @unittest.skipIf(fixtures.OPENJPEG_NOT_AVAILABLE,
+                     fixtures.OPENJPEG_NOT_AVAILABLE_MSG)
     def test_read_differing_subsamples(self):
         """should error out with read used on differently subsampled images"""
         # Verify that we error out appropriately if we use the read method
