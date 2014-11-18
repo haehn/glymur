@@ -54,6 +54,8 @@ class TestDataEntryURL(unittest.TestCase):
     def setUp(self):
         self.jp2file = glymur.data.nemo()
 
+    @unittest.skipIf(re.match("1.5|2", glymur.version.openjpeg_version) is None,
+                     "Must have openjpeg 1.5 or higher to run")
     def test_wrap_greyscale(self):
         """A single component should be wrapped as GREYSCALE."""
         j = Jp2k(self.jp2file)

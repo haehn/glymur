@@ -76,6 +76,8 @@ class SliceProtocolBase(unittest.TestCase):
         self.j2k_data_r1 = self.j2k[::2, ::2]
         self.j2k_data_r5 = self.j2k[::32, ::32]
 
+@unittest.skipIf(re.match("1.5|2", glymur.version.openjpeg_version) is None,
+                 "Must have openjpeg 1.5 or higher to run")
 @unittest.skipIf(os.name == "nt", fixtures.WINDOWS_TMP_FILE_MSG)
 class TestSliceProtocolBaseWrite(SliceProtocolBase):
 
@@ -524,6 +526,8 @@ class TestJp2k(unittest.TestCase):
         jpx = Jp2k(self.jpxfile)
         self.assertEqual(jpx.shape, (1024, 1024, 3))
 
+    @unittest.skipIf(re.match("1.5|2", glymur.version.openjpeg_version) is None,
+                     "Must have openjpeg 1.5 or higher to run")
     @unittest.skipIf(os.name == "nt", "Unexplained failure on windows")
     def test_irreversible(self):
         """Irreversible"""
