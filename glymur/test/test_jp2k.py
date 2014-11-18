@@ -54,6 +54,8 @@ def load_tests(loader, tests, ignore):
     return tests
 
 
+@unittest.skipIf(fixtures.OPENJPEG_NOT_AVAILABLE,
+                 fixtures.OPENJPEG_NOT_AVAILABLE_MSG)
 class SliceProtocolBase(unittest.TestCase):
     """
     Test slice protocol, i.e. when using [ ] to read image data.
@@ -460,6 +462,8 @@ class TestSliceProtocolOpjData(unittest.TestCase):
         expected = self.j2k_quarter_data[5:13, 38:50]
         np.testing.assert_array_equal(actual, expected)
 
+@unittest.skipIf(fixtures.OPENJPEG_NOT_AVAILABLE,
+                 fixtures.OPENJPEG_NOT_AVAILABLE_MSG)
 class TestJp2k(unittest.TestCase):
     """These tests should be run by just about all configuration."""
 
@@ -966,6 +970,8 @@ class TestJp2k_write(unittest.TestCase):
             self.assertEqual(codestream.segment[2].spcod[0], glymur.core.CPRL)
 
 
+@unittest.skipIf(fixtures.OPENJPEG_NOT_AVAILABLE,
+                 fixtures.OPENJPEG_NOT_AVAILABLE_MSG)
 @unittest.skipIf(glymur.version.openjpeg_version_tuple[0] >= 2,
                  "Negative tests only for version 1.x")
 class TestJp2k_1_x(unittest.TestCase):
