@@ -494,7 +494,7 @@ class TestJp2k(unittest.TestCase):
             actdata = j2.read()
             self.assertTrue(fixtures.mse(actdata[0], expdata[0]) < 0.38)
 
-    @unittest.skipIf(re.match('1.[0-4]', openjpeg_version) is not None,
+    @unittest.skipIf(re.match('0|1.[0-4]', openjpeg_version) is not None,
                      "Not supported with OpenJPEG {0}".format(openjpeg_version))
     @unittest.skipIf(re.match('1.5.(1|2)', openjpeg_version) is not None,
                      "Mysteriously fails in 1.5.1 and 1.5.2")
@@ -826,7 +826,7 @@ class TestJp2k(unittest.TestCase):
         self.assertEqual(data.shape, (1024, 1024, 3))
 
 
-@unittest.skipIf(re.match('1.[0-4]', openjpeg_version) is not None,
+@unittest.skipIf(re.match('0|1.[0-4]', openjpeg_version) is not None,
                  "Not supported with OpenJPEG {0}".format(openjpeg_version))
 @unittest.skipIf(os.name == "nt", "NamedTemporaryFile issue on windows")
 class TestJp2k_write(unittest.TestCase):
@@ -1100,7 +1100,7 @@ class TestJp2k_2_0(unittest.TestCase):
                 self.assertEqual(jasoc.box[3].box[1].box_id, 'xml ')
 
 
-@unittest.skipIf(re.match(r'''(1|2.0.0)''',
+@unittest.skipIf(re.match(r'''0|1|2.0.0''',
                           glymur.version.openjpeg_version) is not None,
                  "Not to be run until unless 2.0.1 or higher is present")
 class TestJp2k_2_1(unittest.TestCase):
