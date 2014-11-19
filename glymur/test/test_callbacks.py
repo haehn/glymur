@@ -60,10 +60,8 @@ class TestCallbacks(unittest.TestCase):
         j = glymur.Jp2k(self.jp2file)
         tiledata = j[:]
         with tempfile.NamedTemporaryFile(suffix='.jp2') as tfile:
-            jp2 = glymur.Jp2k(tfile.name, 'wb')
             with patch('sys.stdout', new=StringIO()) as fake_out:
-                jp2.verbose = True
-                jp2[:] = tiledata
+                jp2 = glymur.Jp2k(tfile.name, data=tiledata, verbose=True)
                 actual = fake_out.getvalue().strip()
         expected = '[INFO] tile number 1 / 1'
         self.assertEqual(actual, expected)

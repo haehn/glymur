@@ -97,9 +97,8 @@ class TestSuiteNegativeWrite(unittest.TestCase):
         infile = opj_data_file(relfile)
         data = skimage.io.imread(infile)
         with tempfile.NamedTemporaryFile(suffix='.j2k') as tfile:
-            j = Jp2k(tfile.name, 'wb')
             with self.assertRaises(IOError):
-                j.write(data, cinema2k=36)
+                j = Jp2k(tfile.name, data=data, cinema2k=36)
 
 
     @unittest.skipIf(NO_READ_BACKEND, NO_READ_BACKEND_MSG)
@@ -109,9 +108,9 @@ class TestSuiteNegativeWrite(unittest.TestCase):
         infile = opj_data_file('input/nonregression/Bretagne1.ppm')
         data = read_image(infile)
         with tempfile.NamedTemporaryFile(suffix='.j2k') as tfile:
-            j = Jp2k(tfile.name, 'wb')
             with self.assertRaises(IOError):
-                j.write(data, psnr=[30, 35, 40], cratios=[2, 3, 4])
+                j = Jp2k(tfile.name, 
+                        data=data, psnr=[30, 35, 40], cratios=[2, 3, 4])
 
     def test_code_block_dimensions(self):
         """don't allow extreme codeblock sizes"""
@@ -119,44 +118,38 @@ class TestSuiteNegativeWrite(unittest.TestCase):
         # to be too small or too big, so neither will we.
         data = np.zeros((256, 256), dtype=np.uint8)
         with tempfile.NamedTemporaryFile(suffix='.j2k') as tfile:
-            j = Jp2k(tfile.name, 'wb')
-
             # opj_compress doesn't allow code block area to exceed 4096.
             with self.assertRaises(IOError):
-                j.write(data, cbsize=(256, 256))
+                j = Jp2k(tfile.name, data=data, cbsize=(256, 256))
 
             # opj_compress doesn't allow either dimension to be less than 4.
             with self.assertRaises(IOError):
-                j.write(data, cbsize=(2048, 2))
+                j = Jp2k(tfile.name, data=data, cbsize=(2048, 2))
             with self.assertRaises(IOError):
-                j.write(data, cbsize=(2, 2048))
+                j = Jp2k(tfile.name, data=data, cbsize=(2, 2048))
 
     def test_precinct_size_not_p2(self):
         """precinct sizes should be powers of two."""
         ifile = Jp2k(self.j2kfile)
         data = ifile[::4, ::4]
         with tempfile.NamedTemporaryFile(suffix='.jp2') as tfile:
-            ofile = Jp2k(tfile.name, 'wb')
             with self.assertRaises(IOError):
-                ofile.write(data, psizes=[(13, 13)])
+                ofile = Jp2k(tfile.name, data=data, psizes=[(13, 13)])
 
     def test_cblk_size_not_power_of_two(self):
         """code block sizes should be powers of two."""
         ifile = Jp2k(self.j2kfile)
         data = ifile[::4, ::4]
         with tempfile.NamedTemporaryFile(suffix='.jp2') as tfile:
-            ofile = Jp2k(tfile.name, 'wb')
             with self.assertRaises(IOError):
-                ofile.write(data, cbsize=(13, 12))
+                ofile = Jp2k(tfile.name, data=data, cbsize=(13, 12))
 
     def test_cblk_size_precinct_size(self):
         """code block sizes should never exceed half that of precinct size."""
         ifile = Jp2k(self.j2kfile)
         data = ifile[::4, ::4]
         with tempfile.NamedTemporaryFile(suffix='.jp2') as tfile:
-            ofile = Jp2k(tfile.name, 'wb')
             with self.assertRaises(IOError):
-                ofile.write(data,
-                            cbsize=(64, 64),
-                            psizes=[(64, 64)])
+                ofile = Jp2k(tfile.name, 
+                        data=data, cbsize=(64, 64), psizes=[(64, 64)])
 
