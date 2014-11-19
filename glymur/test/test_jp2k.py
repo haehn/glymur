@@ -191,71 +191,6 @@ class TestSliceProtocolRead(SliceProtocolBase):
         expected = self.jp2_data[20, 20, 2]
         np.testing.assert_array_equal(actual, expected)
 
-    def test_full_resolution_slicing_by_quarters_upper_left(self):
-        actual = self.jp2[:728, :1296]
-        expected = self.jp2_data[:728, :1296]
-        np.testing.assert_array_equal(actual, expected)
-
-    def test_full_resolution_slicing_by_quarters_lower_left(self):
-        actual = self.jp2[728:, :1296]
-        expected = self.jp2_data[728:, :1296]
-        np.testing.assert_array_equal(actual, expected)
-
-    def test_full_resolution_slicing_by_quarters_upper_right(self):
-        actual = self.jp2[:728, 1296:]
-        expected = self.jp2_data[:728, 1296:]
-        np.testing.assert_array_equal(actual, expected)
-
-    def test_full_resolution_slicing_by_quarters_lower_right(self):
-        actual = self.jp2[728:, 1296:]
-        expected = self.jp2_data[728:, 1296:]
-        np.testing.assert_array_equal(actual, expected)
-
-    def test_full_resolution_slicing_by_quarters_center(self):
-        actual = self.jp2[364:1092, 648:1942]
-        expected = self.jp2_data[364:1092, 648:1942]
-        np.testing.assert_array_equal(actual, expected)
-
-    def test_full_resolution_slicing_by_halves_left(self):
-        actual = self.jp2[:, :1296]
-        expected = self.jp2_data[:, :1296]
-        np.testing.assert_array_equal(actual, expected)
-
-    def test_full_resolution_slicing_by_right_half(self):
-        actual = self.jp2[:, 1296:]
-        expected = self.jp2_data[:, 1296:]
-        np.testing.assert_array_equal(actual, expected)
-
-    def test_full_resolution_slicing_by_top_half(self):
-        actual = self.jp2[:728, :]
-        expected = self.jp2_data[:728, :]
-        np.testing.assert_array_equal(actual, expected)
-
-    def test_full_resolution_slicing_by_bottom_half(self):
-        actual = self.jp2[728:, :]
-        expected = self.jp2_data[728:, :]
-        np.testing.assert_array_equal(actual, expected)
-
-    def test_region_rlevel1_odd(self):
-        actual = self.jp2[0:201:2, 0:201:2]
-        expected = self.jp2_data_r1[:101, :101, :]
-        np.testing.assert_array_equal(actual, expected)
-
-    def test_region_rlevel1_even(self):
-        actual = self.jp2[0:202:2, 0:202:2]
-        expected = self.jp2_data_r1[:101, :101, :]
-        np.testing.assert_array_equal(actual, expected)
-
-    def test_region_rlevel1_slice_start_is_none(self):
-        actual = self.jp2[:201:2, :201:2]
-        expected = self.jp2_data_r1[:101, :101, :]
-        np.testing.assert_array_equal(actual, expected)
-
-    def test_region_rlevel1_slice_stop_is_none(self):
-        actual = self.jp2[201::2, 201::2]
-        expected = self.jp2_data_r1[101:, 101:, :]
-        np.testing.assert_array_equal(actual, expected)
-
     def test_ellipsis_full_read(self):
         actual = self.j2k[...]
         expected = self.j2k_data
@@ -292,182 +227,9 @@ class TestSliceProtocolRead(SliceProtocolBase):
         expected = self.j2k_data[3:8, :,:]
         np.testing.assert_array_equal(actual, expected)
 
-    def test_slice_protocol_2d_reduce_resolution(self):
-        d = self.j2k[:]
-        self.assertEqual(d.shape, (800, 480, 3))
-
-        d = self.j2k[::1, ::1]
-        self.assertEqual(d.shape, (800, 480, 3))
-
-        d = self.j2k[::2, ::2]
-        self.assertEqual(d.shape, (400, 240, 3))
-
-        d = self.j2k[::4, ::4]
-        self.assertEqual(d.shape, (200, 120, 3))
-
-        d = self.j2k[::8, ::8]
-        self.assertEqual(d.shape, (100, 60, 3))
-
-        d = self.j2k[::16, ::16]
-        self.assertEqual(d.shape, (50, 30, 3))
-
-        d = self.j2k[::32, ::32]
-        self.assertEqual(d.shape, (25, 15, 3))
-
     def test_region_rlevel5(self):
         actual = self.j2k[5:533:32, 27:423:32]
         expected = self.j2k_data_r5[1:17, 1:14]
-        np.testing.assert_array_equal(actual, expected)
-
-@unittest.skipIf(OPJ_DATA_ROOT is None,
-                 "OPJ_DATA_ROOT environment variable not set")
-class TestSliceProtocolOpjData(unittest.TestCase):
-    """
-    Test slice protocol, i.e. when using [ ] to read image data.
-    These correspond to tests for the read method with the area parameter.
-    """
-    @classmethod
-    def setUpClass(self):
-
-        jfile = opj_data_file('input/conformance/p1_04.j2k')
-        self.j2k = Jp2k(jfile)
-        self.j2k_data = self.j2k.read()
-        self.j2k_half_data = self.j2k.read(rlevel=1)
-        self.j2k_quarter_data = self.j2k.read(rlevel=2)
-
-    def test_NR_DEC_p1_04_j2k_43_decode(self):
-        actual = self.j2k[:1024, :1024]
-        expected = self.j2k_data
-        np.testing.assert_array_equal(actual, expected)
-
-    def test_NR_DEC_p1_04_j2k_44_decode(self):
-        actual = self.j2k[640:768, 512:640]
-        expected = self.j2k_data[640:768, 512:640]
-        np.testing.assert_array_equal(actual, expected)
-
-    def test_NR_DEC_p1_04_j2k_45_decode(self):
-        actual = self.j2k[896:1024, 896:1024]
-        expected = self.j2k_data[896:1024, 896:1024]
-        np.testing.assert_array_equal(actual, expected)
-
-    def test_NR_DEC_p1_04_j2k_46_decode(self):
-        actual = self.j2k[500:800, 100:300]
-        expected = self.j2k_data[500:800, 100:300]
-        np.testing.assert_array_equal(actual, expected)
-
-    def test_NR_DEC_p1_04_j2k_47_decode(self):
-        actual = self.j2k[520:600, 260:360]
-        expected = self.j2k_data[520:600, 260:360]
-        np.testing.assert_array_equal(actual, expected)
-
-    def test_NR_DEC_p1_04_j2k_48_decode(self):
-        actual = self.j2k[520:660, 260:360]
-        expected = self.j2k_data[520:660, 260:360]
-        np.testing.assert_array_equal(actual, expected)
-
-    def test_NR_DEC_p1_04_j2k_49_decode(self):
-        actual = self.j2k[520:600, 360:400]
-        expected = self.j2k_data[520:600, 360:400]
-        np.testing.assert_array_equal(actual, expected)
-
-    def test_NR_DEC_p1_04_j2k_50_decode(self):
-        actual = self.j2k[:1024:4, :1024:4]
-        expected = self.j2k_quarter_data[:256, :256]
-        np.testing.assert_array_equal(actual, expected)
-
-    def test_NR_DEC_p1_04_j2k_51_decode(self):
-        actual = self.j2k[640:768:4, 512:640:4]
-        expected = self.j2k_quarter_data[160:192, 128:160]
-        np.testing.assert_array_equal(actual, expected)
-
-    def test_NR_DEC_p1_04_j2k_52_decode(self):
-        actual = self.j2k[896:1024:4, 896:1024:4]
-        expected = self.j2k_quarter_data[224:352, 224:352]
-        np.testing.assert_array_equal(actual, expected)
-
-    def test_NR_DEC_p1_04_j2k_53_decode(self):
-        actual = self.j2k[500:800:4, 100:300:4]
-        expected = self.j2k_quarter_data[125:200, 25:75]
-        np.testing.assert_array_equal(actual, expected)
-
-    def test_NR_DEC_p1_04_j2k_54_decode(self):
-        actual = self.j2k[520:600:4, 260:360:4]
-        expected = self.j2k_quarter_data[130:150, 65:90]
-        np.testing.assert_array_equal(actual, expected)
-
-    def test_NR_DEC_p1_04_j2k_55_decode(self):
-        actual = self.j2k[520:660:4, 260:360:4]
-        expected = self.j2k_quarter_data[130:165, 65:90]
-        np.testing.assert_array_equal(actual, expected)
-
-    def test_NR_DEC_p1_04_j2k_56_decode(self):
-        actual = self.j2k[520:600:4, 360:400:4]
-        expected = self.j2k_quarter_data[130:150, 90:100]
-        np.testing.assert_array_equal(actual, expected)
-
-    def test_NR_DEC_p1_06_j2k_75_decode(self):
-        # Image size would be 0 x 0.
-        with self.assertRaises((IOError, OSError)):
-            self.j2k[9:12:4, 9:12:4]
-
-    def test_NR_DEC_p0_04_j2k_85_decode(self):
-        actual = self.j2k[:256, :256]
-        expected = self.j2k_data[:256, :256]
-        np.testing.assert_array_equal(actual, expected)
-
-    def test_NR_DEC_p0_04_j2k_86_decode(self):
-        actual = self.j2k[:128, 128:256]
-        expected = self.j2k_data[:128, 128:256]
-        np.testing.assert_array_equal(actual, expected)
-
-    def test_NR_DEC_p0_04_j2k_87_decode(self):
-        actual = self.j2k[10:200, 50:120]
-        expected = self.j2k_data[10:200, 50:120]
-        np.testing.assert_array_equal(actual, expected)
-
-    def test_NR_DEC_p0_04_j2k_88_decode(self):
-        actual = self.j2k[150:210, 10:190]
-        expected = self.j2k_data[150:210, 10:190]
-        np.testing.assert_array_equal(actual, expected)
-
-    def test_NR_DEC_p0_04_j2k_89_decode(self):
-        actual = self.j2k[80:150, 100:200]
-        expected = self.j2k_data[80:150, 100:200]
-        np.testing.assert_array_equal(actual, expected)
-
-    def test_NR_DEC_p0_04_j2k_90_decode(self):
-        actual = self.j2k[20:50, 150:200]
-        expected = self.j2k_data[20:50, 150:200]
-        np.testing.assert_array_equal(actual, expected)
-
-    def test_NR_DEC_p0_04_j2k_91_decode(self):
-        actual = self.j2k[:256:4, :256:4]
-        expected = self.j2k_quarter_data[0:64, 0:64]
-        np.testing.assert_array_equal(actual, expected)
-
-    def test_NR_DEC_p0_04_j2k_92_decode(self):
-        actual = self.j2k[:128:4, 128:256:4]
-        expected = self.j2k_quarter_data[:32, 32:64]
-        np.testing.assert_array_equal(actual, expected)
-
-    def test_NR_DEC_p0_04_j2k_93_decode(self):
-        actual = self.j2k[10:200:4, 50:120:4]
-        expected = self.j2k_quarter_data[3:50, 13:30]
-        np.testing.assert_array_equal(actual, expected)
-
-    def test_NR_DEC_p0_04_j2k_94_decode(self):
-        actual = self.j2k[150:210:4, 10:190:4]
-        expected = self.j2k_quarter_data[38:53, 3:48]
-        np.testing.assert_array_equal(actual, expected)
-
-    def test_NR_DEC_p0_04_j2k_95_decode(self):
-        actual = self.j2k[80:150:4, 100:200:4]
-        expected = self.j2k_quarter_data[20:38, 25:50]
-        np.testing.assert_array_equal(actual, expected)
-
-    def test_NR_DEC_p0_04_j2k_96_decode(self):
-        actual = self.j2k[20:50:4, 150:200:4]
-        expected = self.j2k_quarter_data[5:13, 38:50]
         np.testing.assert_array_equal(actual, expected)
 
 class TestJp2k(unittest.TestCase):
@@ -1423,6 +1185,259 @@ class TestJp2kOpjDataRoot(unittest.TestCase):
         np.testing.assert_array_equal(ycbcr, expected)
 
 
+class TestCodestream(unittest.TestCase):
+    """Test suite for unusual codestream cases."""
 
-if __name__ == "__main__":
-    unittest.main()
+    def setUp(self):
+        self.jp2file = glymur.data.nemo()
+
+    def tearDown(self):
+        pass
+
+    def test_siz_segment_ssiz_unsigned(self):
+        """ssiz attribute to be removed in future release"""
+        j = Jp2k(self.jp2file)
+        codestream = j.get_codestream()
+
+        # The ssiz attribute was simply a tuple of raw bytes.
+        # The first 7 bits are interpreted as the bitdepth, the MSB determines
+        # whether or not it is signed.
+        self.assertEqual(codestream.segment[1].ssiz, (7, 7, 7))
+
+
+@unittest.skipIf(OPJ_DATA_ROOT is None,
+                 "OPJ_DATA_ROOT environment variable not set")
+class TestCodestreamOpjData(unittest.TestCase):
+    """Test suite for unusual codestream cases.  Uses OPJ_DATA_ROOT"""
+
+    def setUp(self):
+        self.jp2file = glymur.data.nemo()
+
+    def tearDown(self):
+        pass
+
+    @unittest.skipIf(os.name == "nt", "Temporary file issue on window.")
+    def test_reserved_marker_segment(self):
+        """Reserved marker segments are ok."""
+
+        # Some marker segments were reserved in FCD15444-1.  Since that
+        # standard is old, some of them may have come into use.
+        #
+        # Let's inject a reserved marker segment into a file that
+        # we know something about to make sure we can still parse it.
+        filename = os.path.join(OPJ_DATA_ROOT, 'input/conformance/p0_01.j2k')
+        with tempfile.NamedTemporaryFile(suffix='.j2k') as tfile:
+            with open(filename, 'rb') as ifile:
+                # Everything up until the first QCD marker.
+                read_buffer = ifile.read(45)
+                tfile.write(read_buffer)
+
+                # Write the new marker segment, 0xff6f = 65391
+                read_buffer = struct.pack('>HHB', int(65391), int(3), int(0))
+                tfile.write(read_buffer)
+
+                # Get the rest of the input file.
+                read_buffer = ifile.read()
+                tfile.write(read_buffer)
+                tfile.flush()
+
+            codestream = Jp2k(tfile.name).get_codestream()
+
+            self.assertEqual(codestream.segment[2].marker_id, '0xff6f')
+            self.assertEqual(codestream.segment[2].length, 3)
+            self.assertEqual(codestream.segment[2].data, b'\x00')
+
+    def test_psot_is_zero(self):
+        """Psot=0 in SOT is perfectly legal.  Issue #78."""
+        filename = os.path.join(OPJ_DATA_ROOT,
+                                'input/nonregression/123.j2c')
+        j = Jp2k(filename)
+        codestream = j.get_codestream(header_only=False)
+
+        # The codestream is valid, so we should be able to get the entire
+        # codestream, so the last one is EOC.
+        self.assertEqual(codestream.segment[-1].marker_id, 'EOC')
+
+
+    def test_siz_segment_ssiz_signed(self):
+        """ssiz attribute to be removed in future release"""
+        filename = os.path.join(OPJ_DATA_ROOT, 'input/conformance/p0_03.j2k')
+        j = Jp2k(filename)
+        codestream = j.get_codestream()
+
+        # The ssiz attribute was simply a tuple of raw bytes.
+        # The first 7 bits are interpreted as the bitdepth, the MSB determines
+        # whether or not it is signed.
+        self.assertEqual(codestream.segment[1].ssiz, (131,))
+
+
+class TestCodestreamRepr(unittest.TestCase):
+
+    def setUp(self):
+        self.jp2file = glymur.data.nemo()
+
+    def tearDown(self):
+        pass
+
+    def test_soc(self):
+        """Test SOC segment repr"""
+        segment = glymur.codestream.SOCsegment()
+        newseg = eval(repr(segment))
+        self.assertEqual(newseg.marker_id, 'SOC')
+
+    def test_siz(self):
+        """Test SIZ segment repr"""
+        kwargs = {'rsiz': 0,
+                  'xysiz': (2592, 1456),
+                  'xyosiz': (0, 0),
+                  'xytsiz': (2592, 1456),
+                  'xytosiz': (0, 0),
+                  'Csiz': 3,
+                  'bitdepth': (8, 8, 8),
+                  'signed':  (False, False, False),
+                  'xyrsiz': ((1, 1, 1), (1, 1, 1))}
+        segment = glymur.codestream.SIZsegment(**kwargs)
+        newseg = eval(repr(segment))
+        self.assertEqual(newseg.marker_id, 'SIZ')
+        self.assertEqual(newseg.xsiz, 2592)
+        self.assertEqual(newseg.ysiz, 1456)
+        self.assertEqual(newseg.xosiz, 0)
+        self.assertEqual(newseg.yosiz, 0)
+        self.assertEqual(newseg.xtsiz, 2592)
+        self.assertEqual(newseg.ytsiz, 1456)
+        self.assertEqual(newseg.xtosiz, 0)
+        self.assertEqual(newseg.ytosiz, 0)
+
+        self.assertEqual(newseg.xrsiz, (1, 1, 1))
+        self.assertEqual(newseg.yrsiz, (1, 1, 1))
+        self.assertEqual(newseg.bitdepth, (8, 8, 8))
+        self.assertEqual(newseg.signed, (False, False, False))
+
+
+class TestCodestream(unittest.TestCase):
+    """Test suite for unusual codestream cases."""
+
+    def setUp(self):
+        self.jp2file = glymur.data.nemo()
+
+    def tearDown(self):
+        pass
+
+    def test_siz_segment_ssiz_unsigned(self):
+        """ssiz attribute to be removed in future release"""
+        j = Jp2k(self.jp2file)
+        codestream = j.get_codestream()
+
+        # The ssiz attribute was simply a tuple of raw bytes.
+        # The first 7 bits are interpreted as the bitdepth, the MSB determines
+        # whether or not it is signed.
+        self.assertEqual(codestream.segment[1].ssiz, (7, 7, 7))
+
+
+@unittest.skipIf(OPJ_DATA_ROOT is None,
+                 "OPJ_DATA_ROOT environment variable not set")
+class TestCodestreamOpjData(unittest.TestCase):
+    """Test suite for unusual codestream cases.  Uses OPJ_DATA_ROOT"""
+
+    def setUp(self):
+        self.jp2file = glymur.data.nemo()
+
+    def tearDown(self):
+        pass
+
+    @unittest.skipIf(os.name == "nt", "Temporary file issue on window.")
+    def test_reserved_marker_segment(self):
+        """Reserved marker segments are ok."""
+
+        # Some marker segments were reserved in FCD15444-1.  Since that
+        # standard is old, some of them may have come into use.
+        #
+        # Let's inject a reserved marker segment into a file that
+        # we know something about to make sure we can still parse it.
+        filename = os.path.join(OPJ_DATA_ROOT, 'input/conformance/p0_01.j2k')
+        with tempfile.NamedTemporaryFile(suffix='.j2k') as tfile:
+            with open(filename, 'rb') as ifile:
+                # Everything up until the first QCD marker.
+                read_buffer = ifile.read(45)
+                tfile.write(read_buffer)
+
+                # Write the new marker segment, 0xff6f = 65391
+                read_buffer = struct.pack('>HHB', int(65391), int(3), int(0))
+                tfile.write(read_buffer)
+
+                # Get the rest of the input file.
+                read_buffer = ifile.read()
+                tfile.write(read_buffer)
+                tfile.flush()
+
+            codestream = Jp2k(tfile.name).get_codestream()
+
+            self.assertEqual(codestream.segment[2].marker_id, '0xff6f')
+            self.assertEqual(codestream.segment[2].length, 3)
+            self.assertEqual(codestream.segment[2].data, b'\x00')
+
+    def test_psot_is_zero(self):
+        """Psot=0 in SOT is perfectly legal.  Issue #78."""
+        filename = os.path.join(OPJ_DATA_ROOT,
+                                'input/nonregression/123.j2c')
+        j = Jp2k(filename)
+        codestream = j.get_codestream(header_only=False)
+
+        # The codestream is valid, so we should be able to get the entire
+        # codestream, so the last one is EOC.
+        self.assertEqual(codestream.segment[-1].marker_id, 'EOC')
+
+
+    def test_siz_segment_ssiz_signed(self):
+        """ssiz attribute to be removed in future release"""
+        filename = os.path.join(OPJ_DATA_ROOT, 'input/conformance/p0_03.j2k')
+        j = Jp2k(filename)
+        codestream = j.get_codestream()
+
+        # The ssiz attribute was simply a tuple of raw bytes.
+        # The first 7 bits are interpreted as the bitdepth, the MSB determines
+        # whether or not it is signed.
+        self.assertEqual(codestream.segment[1].ssiz, (131,))
+
+
+class TestCodestreamRepr(unittest.TestCase):
+
+    def setUp(self):
+        self.jp2file = glymur.data.nemo()
+
+    def tearDown(self):
+        pass
+
+    def test_soc(self):
+        """Test SOC segment repr"""
+        segment = glymur.codestream.SOCsegment()
+        newseg = eval(repr(segment))
+        self.assertEqual(newseg.marker_id, 'SOC')
+
+    def test_siz(self):
+        """Test SIZ segment repr"""
+        kwargs = {'rsiz': 0,
+                  'xysiz': (2592, 1456),
+                  'xyosiz': (0, 0),
+                  'xytsiz': (2592, 1456),
+                  'xytosiz': (0, 0),
+                  'Csiz': 3,
+                  'bitdepth': (8, 8, 8),
+                  'signed':  (False, False, False),
+                  'xyrsiz': ((1, 1, 1), (1, 1, 1))}
+        segment = glymur.codestream.SIZsegment(**kwargs)
+        newseg = eval(repr(segment))
+        self.assertEqual(newseg.marker_id, 'SIZ')
+        self.assertEqual(newseg.xsiz, 2592)
+        self.assertEqual(newseg.ysiz, 1456)
+        self.assertEqual(newseg.xosiz, 0)
+        self.assertEqual(newseg.yosiz, 0)
+        self.assertEqual(newseg.xtsiz, 2592)
+        self.assertEqual(newseg.ytsiz, 1456)
+        self.assertEqual(newseg.xtosiz, 0)
+        self.assertEqual(newseg.ytosiz, 0)
+
+        self.assertEqual(newseg.xrsiz, (1, 1, 1))
+        self.assertEqual(newseg.yrsiz, (1, 1, 1))
+        self.assertEqual(newseg.bitdepth, (8, 8, 8))
+        self.assertEqual(newseg.signed, (False, False, False))
