@@ -1094,8 +1094,8 @@ class TestJp2k_1_x(unittest.TestCase):
         """
         with patch('glymur.version.openjpeg_version_tuple', new=(1, 5, 0)):
             j2k = Jp2k(self.j2kfile)
-            with self.assertRaises(TypeError):
-                j2k.read(layer=1)
+            with self.assertRaises(RuntimeError):
+                j2k.layer = 1
 
 
 @unittest.skipIf(os.name == "nt", fixtures.WINDOWS_TMP_FILE_MSG)

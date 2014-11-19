@@ -68,6 +68,8 @@ class Jp2k(Jp2kBox):
     ignore_pclr_cmap_cdef : bool
         whether or not to ignore the pclr, cmap, or cdef boxes during any
         color transformation, defaults to False.
+    layer : int
+        zero-based number of quality layer to decode
     verbose : bool
         whether or not to print informational messages produced by the
         OpenJPEG library, defaults to false
@@ -106,6 +108,7 @@ class Jp2k(Jp2kBox):
         self._codec_format = None
         self._colorspace = None
         self._shape = None
+        self._layer = 0
 
         self._ignore_pclr_cmap_cdef = False
         self._verbose = False
@@ -121,6 +124,18 @@ class Jp2k(Jp2kBox):
     @ignore_pclr_cmap_cdef.setter
     def ignore_pclr_cmap_cdef(self, ignore_pclr_cmap_cdef):
         self._ignore_pclr_cmap_cdef = ignore_pclr_cmap_cdef
+
+    @property
+    def layer(self):
+        return self._layer
+
+    @layer.setter
+    def layer(self, layer):
+        if version.openjpeg_version_tuple[0] < 2:
+            msg = "Layer property not supported unless the version of OpenJPEG "
+            msg += "is 2.0 or higher."
+            raise RuntimeError(msg)
+        self._layer = layer
 
     @property
     def verbose(self):
@@ -1156,7 +1171,7 @@ class Jp2k(Jp2kBox):
 
         return data
 
-    def _read_openjp2(self, rlevel=0, layer=0, area=None, tile=None, verbose=False):
+    def _read_openjp2(self, rlevel=0, layer=None, area=None, tile=None, verbose=False):
         """Read a JPEG 2000 image using libopenjp2.
 
         Parameters
@@ -1184,9 +1199,12 @@ class Jp2k(Jp2kBox):
         RuntimeError
             If the image has differing subsample factors.
         """
+        if layer is not None:
+            self._layer = layer
+
         self._subsampling_sanity_check()
 
-        self._populate_dparams(rlevel, layer=layer, tile=tile, area=area)
+        self._populate_dparams(rlevel, tile=tile, area=area)
 
         with ExitStack() as stack:
             if re.match("2.1", version.openjpeg_version):
@@ -1231,13 +1249,11 @@ class Jp2k(Jp2kBox):
 
         return img_array
 
-    def _populate_dparams(self, rlevel, tile=None, layer=None, area=None):
+    def _populate_dparams(self, rlevel, tile=None, area=None):
         """Populate decompression structure with appropriate input parameters.
 
         Parameters
         ----------
-        layer : int
-            Number of quality layer to decode.
         rlevel : int
             Factor by which to rlevel output resolution.
         area : tuple
@@ -1263,8 +1279,7 @@ class Jp2k(Jp2kBox):
 
         dparam.decod_format = self._codec_format
 
-        if layer is not None:
-            dparam.cp_layer = layer
+        dparam.cp_layer = self._layer
 
         # Must check the specified rlevel against the maximum.
         if rlevel != 0:
@@ -1301,7 +1316,7 @@ class Jp2k(Jp2kBox):
 
         self._dparams = dparam
 
-    def read_bands(self, rlevel=0, layer=0, area=None, tile=None,
+    def read_bands(self, rlevel=0, layer=None, area=None, tile=None,
                    verbose=False, ignore_pclr_cmap_cdef=False):
         """Read a JPEG 2000 image.
 
@@ -1348,7 +1363,9 @@ class Jp2k(Jp2kBox):
                                "functionality.")
 
         self.ignore_pclr_cmap_cdef = ignore_pclr_cmap_cdef
-        self._populate_dparams(rlevel, layer=layer, tile=tile, area=area)
+        if layer is not None:
+            self._layer = layer
+        self._populate_dparams(rlevel, tile=tile, area=area)
 
         with ExitStack() as stack:
             if re.match("2.1", version.openjpeg_version):
