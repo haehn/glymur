@@ -62,9 +62,15 @@ class Jp2k(Jp2kBox):
         raw codestream.
     shape : tuple
         Size of the image.
+
+    Properties
+    ----------
     ignore_pclr_cmap_cdef : bool
-        Whether or not to ignore the pclr, cmap, or cdef boxes during any
-        color transformation.  Defaults to False.
+        whether or not to ignore the pclr, cmap, or cdef boxes during any
+        color transformation, defaults to False.
+    verbose : bool
+        whether or not to print informational messages produced by the
+        OpenJPEG library, defaults to false
 
     Examples
     --------
@@ -100,7 +106,9 @@ class Jp2k(Jp2kBox):
         self._codec_format = None
         self._colorspace = None
         self._shape = None
+
         self._ignore_pclr_cmap_cdef = False
+        self._verbose = False
 
         # Parse the file for JP2/JPX contents only if we are reading it.
         if mode == 'rb':
@@ -113,6 +121,14 @@ class Jp2k(Jp2kBox):
     @ignore_pclr_cmap_cdef.setter
     def ignore_pclr_cmap_cdef(self, ignore_pclr_cmap_cdef):
         self._ignore_pclr_cmap_cdef = ignore_pclr_cmap_cdef
+
+    @property
+    def verbose(self):
+        return self._verbose
+
+    @verbose.setter
+    def verbose(self, verbose):
+        self._verbose = verbose
 
     @property
     def shape(self):
@@ -671,7 +687,11 @@ class Jp2k(Jp2kBox):
             codec = opj2.create_compress(self._cparams.codec_fmt)
             stack.callback(opj2.destroy_codec, codec)
 
-            info_handler = _INFO_CALLBACK if verbose else None
+            if self._verbose or verbose:
+                info_handler = _INFO_CALLBACK
+            else:
+                info_handler = None
+
             opj2.set_info_handler(codec, info_handler)
             opj2.set_warning_handler(codec, _WARNING_CALLBACK)
             opj2.set_error_handler(codec, _ERROR_CALLBACK)
@@ -1183,7 +1203,8 @@ class Jp2k(Jp2kBox):
 
             opj2.set_error_handler(codec, _ERROR_CALLBACK)
             opj2.set_warning_handler(codec, _WARNING_CALLBACK)
-            if verbose:
+
+            if self._verbose or verbose:
                 opj2.set_info_handler(codec, _INFO_CALLBACK)
             else:
                 opj2.set_info_handler(codec, None)
