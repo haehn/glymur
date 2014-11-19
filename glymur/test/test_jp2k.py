@@ -340,6 +340,7 @@ class TestJp2k(unittest.TestCase):
         self.assertEqual(newjp2.mode, 'rb')
         self.assertEqual(len(newjp2.box), 0)
 
+    @unittest.skip("see issue 302")
     def test_rlevel_max(self):
         """Verify that rlevel=-1 gets us the lowest resolution image"""
         j = Jp2k(self.j2kfile)
@@ -352,7 +353,7 @@ class TestJp2k(unittest.TestCase):
         """Should error out appropriately if reduce level too high"""
         j = Jp2k(self.jp2file)
         with self.assertRaises(IOError):
-            j.read(rlevel=6)
+            j[::64, ::64]
 
     def test_not_jpeg2000(self):
         """Should error out appropriately if not given a JPEG 2000 file."""
@@ -849,8 +850,11 @@ class TestJp2k_1_x(unittest.TestCase):
         """
         with patch('glymur.version.openjpeg_version_tuple', new=(1, 5, 0)):
             j2k = Jp2k(self.j2kfile)
-            with self.assertRaises(TypeError):
-                j2k.read(tile=0)
+            with warnings.catch_warnings():
+                # The tile keyword is deprecated, so suppress the warning.
+                warnings.simplefilter('ignore')
+                with self.assertRaises(TypeError):
+                    j2k.read(tile=0)
 
     def test_layer(self):
         """layer option not allowed for 1.x.
