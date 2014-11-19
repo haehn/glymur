@@ -1128,7 +1128,10 @@ class Jp2k(Jp2kBox):
 
                 event_mgr = opj.EventMgrType()
                 info_handler = ctypes.cast(_INFO_CALLBACK, ctypes.c_void_p)
-                event_mgr.info_handler = info_handler if verbose else None
+                if verbose or self._verbose:
+                    event_mgr.info_handler = info_handler
+                else:
+                    event_mgr.info_handler = None
                 event_mgr.warning_handler = ctypes.cast(_WARNING_CALLBACK,
                                                         ctypes.c_void_p)
                 event_mgr.error_handler = ctypes.cast(_ERROR_CALLBACK,

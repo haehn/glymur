@@ -227,6 +227,7 @@ class TestSliceProtocolRead(SliceProtocolBase):
         expected = self.j2k_data[3:8, :,:]
         np.testing.assert_array_equal(actual, expected)
 
+    @unittest.skip('see issue 301')
     def test_region_rlevel5(self):
         actual = self.j2k[5:533:32, 27:423:32]
         expected = self.j2k_data_r5[1:17, 1:14]
@@ -288,7 +289,7 @@ class TestJp2k(unittest.TestCase):
         jpx = Jp2k(self.jpxfile)
         self.assertEqual(jpx.shape, (1024, 1024, 3))
 
-    @unittest.skipIf(re.match("1.5|2", glymur.version.openjpeg_version) is None,
+    @unittest.skipIf(re.match("0|1.[0-4]", glymur.version.openjpeg_version),
                      "Must have openjpeg 1.5 or higher to run")
     @unittest.skipIf(os.name == "nt", "Unexplained failure on windows")
     def test_irreversible(self):
@@ -1116,6 +1117,8 @@ class TestJp2kOpjDataRootWarnings(unittest.TestCase):
 class TestJp2kOpjDataRoot(unittest.TestCase):
     """These tests should be run by just about all configuration."""
 
+    @unittest.skipIf(re.match("0|1.[0-4]", glymur.version.openjpeg_version),
+                     "Must have openjpeg 1.5 or higher to run")
     @unittest.skipIf(os.name == "nt", fixtures.WINDOWS_TMP_FILE_MSG)
     def test_irreversible(self):
         """Irreversible"""
