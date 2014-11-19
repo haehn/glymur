@@ -221,9 +221,8 @@ class TestNegative2pointzero(unittest.TestCase):
         for version in versions:
             with patch('glymur.version.openjpeg_version', new=version):
                 with tempfile.NamedTemporaryFile(suffix='.j2k') as tfile:
-                    j = Jp2k(tfile.name, 'wb')
                     with self.assertRaises(IOError):
-                        j.write(data, cinema2k=48)
+                        j = Jp2k(tfile.name, data=data, cinema2k=48)
 
 
 @unittest.skipIf(re.match(r'''1.[0-4]''', openjpeg_version) is not None,

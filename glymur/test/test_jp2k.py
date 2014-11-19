@@ -81,6 +81,7 @@ class SliceProtocolBase(unittest.TestCase):
 @unittest.skipIf(os.name == "nt", fixtures.WINDOWS_TMP_FILE_MSG)
 class TestSliceProtocolBaseWrite(SliceProtocolBase):
 
+    @unittest.skip('requires shape implementation')
     def test_write_ellipsis(self):
         expected = self.j2k_data
 
@@ -95,12 +96,12 @@ class TestSliceProtocolBaseWrite(SliceProtocolBase):
         expected = self.j2k_data
 
         with tempfile.NamedTemporaryFile(suffix='.j2k') as tfile:
-            j = Jp2k(tfile.name, 'wb')
-            j[:] = self.j2k_data
+            j = Jp2k(tfile.name, data=self.j2k_data)
             actual = j[:]
 
         np.testing.assert_array_equal(actual, expected)
 
+    @unittest.skip('requires shape implementation')
     def test_cannot_write_with_non_default_single_slice(self):
         with tempfile.NamedTemporaryFile(suffix='.j2k') as tfile:
             j = Jp2k(tfile.name, 'wb')
@@ -113,30 +114,35 @@ class TestSliceProtocolBaseWrite(SliceProtocolBase):
             with self.assertRaises(TypeError):
                 j[slice(0, 640)] = self.j2k_data
 
+    @unittest.skip('requires shape implementation')
     def test_cannot_write_a_row(self):
         with tempfile.NamedTemporaryFile(suffix='.j2k') as tfile:
             j = Jp2k(tfile.name, 'wb')
             with self.assertRaises(TypeError):
                 j[5] = self.j2k_data
 
+    @unittest.skip('requires shape implementation')
     def test_cannot_write_a_pixel(self):
         with tempfile.NamedTemporaryFile(suffix='.j2k') as tfile:
             j = Jp2k(tfile.name, 'wb')
             with self.assertRaises(TypeError):
                 j[25, 35] = self.j2k_data[25, 35]
 
+    @unittest.skip('requires shape implementation')
     def test_cannot_write_a_column(self):
         with tempfile.NamedTemporaryFile(suffix='.j2k') as tfile:
             j = Jp2k(tfile.name, 'wb')
             with self.assertRaises(TypeError):
                 j[:, 25, :] = self.j2k_data[:, :25, :]
 
+    @unittest.skip('requires shape implementation')
     def test_cannot_write_a_band(self):
         with tempfile.NamedTemporaryFile(suffix='.j2k') as tfile:
             j = Jp2k(tfile.name, 'wb')
             with self.assertRaises(TypeError):
                 j[:, :, 0] = self.j2k_data[:, :, 0]
 
+    @unittest.skip('requires shape implementation')
     def test_cannot_write_a_subarray(self):
         with tempfile.NamedTemporaryFile(suffix='.j2k') as tfile:
             j = Jp2k(tfile.name, 'wb')
@@ -297,8 +303,7 @@ class TestJp2k(unittest.TestCase):
         j = Jp2k(self.jp2file)
         expdata = j[:]
         with tempfile.NamedTemporaryFile(suffix='.j2k') as tfile:
-            j2 = Jp2k(tfile.name, 'wb')
-            j2.write(expdata, irreversible=True)
+            j2 = Jp2k(tfile.name, data=expdata, irreversible=True)
 
             codestream = j2.get_codestream()
             self.assertEqual(codestream.segment[2].spcod[8],
@@ -337,7 +342,6 @@ class TestJp2k(unittest.TestCase):
         newjp2 = eval(repr(j))
 
         self.assertEqual(newjp2.filename, self.j2kfile)
-        self.assertEqual(newjp2.mode, 'rb')
         self.assertEqual(len(newjp2.box), 0)
 
     @unittest.skip("see issue 302")
@@ -664,32 +668,30 @@ class TestJp2k_write(unittest.TestCase):
         data = np.zeros((640, 480), dtype=np.uint8)
         with tempfile.NamedTemporaryFile(suffix='.j2k') as tfile:
             with self.assertRaises(IOError):
-                j = Jp2k(tfile.name, 'wb')
-                j.write(data, cbsize=(16, 16), psizes=[(16, 16)])
+                j = Jp2k(tfile.name, data=data,
+                        cbsize=(16, 16), psizes=[(16, 16)])
 
     def test_precinct_size_not_power_of_two(self):
         """must be power of two"""
         data = np.zeros((640, 480), dtype=np.uint8)
         with tempfile.NamedTemporaryFile(suffix='.j2k') as tfile:
             with self.assertRaises(IOError):
-                j = Jp2k(tfile.name, 'wb')
-                j.write(data, cbsize=(16, 16), psizes=[(48, 48)])
+                j = Jp2k(tfile.name, data=data,
+                        cbsize=(16, 16), psizes=[(48, 48)])
 
     def test_unsupported_int32(self):
         """Should raise a runtime error if trying to write int32"""
         data = np.zeros((128, 128), dtype=np.int32)
         with tempfile.NamedTemporaryFile(suffix='.j2k') as tfile:
             with self.assertRaises(RuntimeError):
-                j = Jp2k(tfile.name, 'wb')
-                j.write(data)
+                j = Jp2k(tfile.name, data=data)
 
     def test_unsupported_uint32(self):
         """Should raise a runtime error if trying to write uint32"""
         data = np.zeros((128, 128), dtype=np.uint32)
         with tempfile.NamedTemporaryFile(suffix='.j2k') as tfile:
             with self.assertRaises(RuntimeError):
-                j = Jp2k(tfile.name, 'wb')
-                j.write(data)
+                j = Jp2k(tfile.name, data=data)
 
     def test_write_with_version_too_early(self):
         """Should raise a runtime error if trying to write with version 1.3"""
@@ -699,8 +701,7 @@ class TestJp2k_write(unittest.TestCase):
             with patch('glymur.version.openjpeg_version', new=version):
                 with tempfile.NamedTemporaryFile(suffix='.j2k') as tfile:
                     with self.assertRaises(RuntimeError):
-                        j = Jp2k(tfile.name, 'wb')
-                        j.write(data)
+                        j = Jp2k(tfile.name, data=data)
 
     def test_cblkh_different_than_width(self):
         """Verify that we can set a code block size where height does not equal
@@ -708,11 +709,8 @@ class TestJp2k_write(unittest.TestCase):
         """
         data = np.zeros((128, 128), dtype=np.uint8)
         with tempfile.NamedTemporaryFile(suffix='.j2k') as tfile:
-            j = Jp2k(tfile.name, 'wb')
-
             # The code block dimensions are given as rows x columns.
-            j.write(data, cbsize=(16, 32))
-
+            j = Jp2k(tfile.name, data=data, cbsize=(16, 32))
             codestream = j.get_codestream()
 
             # Code block size is reported as XY in the codestream.
@@ -721,59 +719,55 @@ class TestJp2k_write(unittest.TestCase):
     def test_too_many_dimensions(self):
         """OpenJP2 only allows 2D or 3D images."""
         with tempfile.NamedTemporaryFile(suffix='.j2k') as tfile:
-            j = Jp2k(tfile.name, 'wb')
             with self.assertRaises(IOError):
-                data = np.zeros((128, 128, 2, 2), dtype=np.uint8)
-                j.write(data)
+                j = Jp2k(tfile.name,
+                        data=np.zeros((128, 128, 2, 2), dtype=np.uint8))
 
     def test_2d_rgb(self):
         """RGB must have at least 3 components."""
         with tempfile.NamedTemporaryFile(suffix='.jp2') as tfile:
-            j = Jp2k(tfile.name, 'wb')
             with self.assertRaises(IOError):
-                data = np.zeros((128, 128, 2), dtype=np.uint8)
-                j.write(data, colorspace='rgb')
+                j = Jp2k(tfile.name,
+                    data=np.zeros((128, 128, 2), dtype=np.uint8),
+                    colorspace='rgb')
 
     def test_colorspace_with_j2k(self):
         """Specifying a colorspace with J2K does not make sense"""
         with tempfile.NamedTemporaryFile(suffix='.j2k') as tfile:
-            j = Jp2k(tfile.name, 'wb')
             with self.assertRaises(IOError):
-                data = np.zeros((128, 128, 3), dtype=np.uint8)
-                j.write(data, colorspace='rgb')
+                j = Jp2k(tfile.name,
+                    data=np.zeros((128, 128, 3), dtype=np.uint8),
+                    colorspace='rgb')
 
     def test_specify_rgb(self):
         """specify RGB explicitly"""
         with tempfile.NamedTemporaryFile(suffix='.jp2') as tfile:
-            j = Jp2k(tfile.name, 'wb')
-            data = np.zeros((128, 128, 3), dtype=np.uint8)
-            j.write(data, colorspace='rgb')
+            j = Jp2k(tfile.name,
+                data=np.zeros((128, 128, 3), dtype=np.uint8),
+                colorspace='rgb')
             self.assertEqual(j.box[2].box[1].colorspace, glymur.core.SRGB)
 
     def test_specify_gray(self):
         """test gray explicitly specified (that's GRAY, not GREY)"""
         with tempfile.NamedTemporaryFile(suffix='.jp2') as tfile:
-            j = Jp2k(tfile.name, 'wb')
             data = np.zeros((128, 128), dtype=np.uint8)
-            j.write(data, colorspace='gray')
+            j = Jp2k(tfile.name, data=data, colorspace='gray')
             self.assertEqual(j.box[2].box[1].colorspace,
                              glymur.core.GREYSCALE)
 
     def test_specify_grey(self):
         """test grey explicitly specified"""
         with tempfile.NamedTemporaryFile(suffix='.jp2') as tfile:
-            j = Jp2k(tfile.name, 'wb')
             data = np.zeros((128, 128), dtype=np.uint8)
-            j.write(data, colorspace='grey')
+            j = Jp2k(tfile.name, data=data, colorspace='grey')
             self.assertEqual(j.box[2].box[1].colorspace,
                              glymur.core.GREYSCALE)
 
     def test_grey_with_two_extra_comps(self):
         """should be able to write gray + two extra components"""
         with tempfile.NamedTemporaryFile(suffix='.jp2') as tfile:
-            j = Jp2k(tfile.name, 'wb')
             data = np.zeros((128, 128, 3), dtype=np.uint8)
-            j.write(data, colorspace='gray')
+            j = Jp2k(tfile.name, data=data, colorspace='gray')
             self.assertEqual(j.box[2].box[0].height, 128)
             self.assertEqual(j.box[2].box[0].width, 128)
             self.assertEqual(j.box[2].box[0].num_components, 3)
@@ -783,18 +777,16 @@ class TestJp2k_write(unittest.TestCase):
     def test_specify_ycc(self):
         """Should reject YCC"""
         with tempfile.NamedTemporaryFile(suffix='.jp2') as tfile:
-            j = Jp2k(tfile.name, 'wb')
             with self.assertRaises(IOError):
                 data = np.zeros((128, 128, 3), dtype=np.uint8)
-                j.write(data, colorspace='ycc')
+                j = Jp2k(tfile.name, data=data, colorspace='ycc')
 
     def test_write_with_jp2_in_caps(self):
         """should be able to write with JP2 suffix."""
         j2k = Jp2k(self.j2kfile)
         expdata = j2k[:]
         with tempfile.NamedTemporaryFile(suffix='.JP2') as tfile:
-            ofile = Jp2k(tfile.name, 'wb')
-            ofile[:] = expdata
+            ofile = Jp2k(tfile.name, data=expdata)
             actdata = ofile[:]
             np.testing.assert_array_equal(actdata, expdata)
 
@@ -803,8 +795,7 @@ class TestJp2k_write(unittest.TestCase):
         j2k = Jp2k(self.j2kfile)
         expdata = j2k[:]
         with tempfile.NamedTemporaryFile(suffix='.jp2') as tfile:
-            ofile = Jp2k(tfile.name, 'wb')
-            ofile.write(expdata, mct=False)
+            ofile = Jp2k(tfile.name, data=expdata, mct=False)
             actdata = ofile[:]
             np.testing.assert_array_equal(actdata, expdata)
 
@@ -816,9 +807,8 @@ class TestJp2k_write(unittest.TestCase):
         j2k = Jp2k(self.j2kfile)
         expdata = j2k[:]
         with tempfile.NamedTemporaryFile(suffix='.jp2') as tfile:
-            ofile = Jp2k(tfile.name, 'wb')
             with self.assertRaises(IOError):
-                ofile.write(expdata[:, :, 0], mct=True)
+                ofile = Jp2k(tfile.name, data=expdata[:, :, 0], mct=True)
 
     def test_write_cprl(self):
         """Must be able to write a CPRL progression order file"""
@@ -826,8 +816,7 @@ class TestJp2k_write(unittest.TestCase):
         j = Jp2k(self.jp2file)
         expdata = j[::2, ::2]
         with tempfile.NamedTemporaryFile(suffix='.jp2') as tfile:
-            ofile = Jp2k(tfile.name, 'wb')
-            ofile.write(expdata, prog='CPRL')
+            ofile = Jp2k(tfile.name, data=expdata, prog='CPRL')
             actdata = ofile[:]
             np.testing.assert_array_equal(actdata, expdata)
 
@@ -873,10 +862,9 @@ class Test_2p0_official(unittest.TestCase):
         """Can only write 4 components on 2.0+, should error out otherwise."""
         with patch('glymur.version.openjpeg_version', new="2.0.0"):
             with tempfile.NamedTemporaryFile(suffix='.jp2') as tfile:
-                j = Jp2k(tfile.name, 'wb')
                 data = np.zeros((128, 128, 4), dtype=np.uint8)
                 with self.assertRaises(IOError):
-                    j.write(data)
+                    Jp2k(tfile.name, data=data)
 
 
 @unittest.skipIf(glymur.version.openjpeg_version_tuple[0] < 2,
@@ -908,10 +896,9 @@ class TestJp2k_2_0(unittest.TestCase):
     def test_unrecognized_jp2_clrspace(self):
         """We only allow RGB and GRAYSCALE.  Should error out with others"""
         with tempfile.NamedTemporaryFile(suffix='.jp2') as tfile:
-            j = Jp2k(tfile.name, 'wb')
+            data = np.zeros((128, 128, 3), dtype=np.uint8)
             with self.assertRaises(IOError):
-                data = np.zeros((128, 128, 3), dtype=np.uint8)
-                j.write(data, colorspace='cmyk')
+                j = Jp2k(tfile.name, data=data, colorspace='cmyk')
 
     @unittest.skipIf(os.name == "nt", fixtures.WINDOWS_TMP_FILE_MSG)
     def test_asoc_label_box(self):
@@ -920,8 +907,7 @@ class TestJp2k_2_0(unittest.TestCase):
         # OpenJPEG doesn't have such a file.
         data = Jp2k(self.jp2file)[::2, ::2]
         with tempfile.NamedTemporaryFile(suffix='.jp2') as tfile:
-            j = Jp2k(tfile.name, 'wb')
-            j.write(data)
+            j = Jp2k(tfile.name, data=data)
 
             with tempfile.NamedTemporaryFile(suffix='.jp2') as tfile2:
 
@@ -979,9 +965,8 @@ class TestJp2k_2_1(unittest.TestCase):
     def test_grey_with_extra_component(self):
         """version 2.0 cannot write gray + extra"""
         with tempfile.NamedTemporaryFile(suffix='.jp2') as tfile:
-            j = Jp2k(tfile.name, 'wb')
             data = np.zeros((128, 128, 2), dtype=np.uint8)
-            j.write(data)
+            j = Jp2k(tfile.name, data=data)
             self.assertEqual(j.box[2].box[0].height, 128)
             self.assertEqual(j.box[2].box[0].width, 128)
             self.assertEqual(j.box[2].box[0].num_components, 2)
@@ -992,9 +977,8 @@ class TestJp2k_2_1(unittest.TestCase):
     def test_rgb_with_extra_component(self):
         """v2.0+ should be able to write extra components"""
         with tempfile.NamedTemporaryFile(suffix='.jp2') as tfile:
-            j = Jp2k(tfile.name, 'wb')
             data = np.zeros((128, 128, 4), dtype=np.uint8)
-            j.write(data)
+            j = Jp2k(tfile.name, data=data)
             self.assertEqual(j.box[2].box[0].height, 128)
             self.assertEqual(j.box[2].box[0].width, 128)
             self.assertEqual(j.box[2].box[0].num_components, 4)
@@ -1130,8 +1114,7 @@ class TestJp2kOpjDataRoot(unittest.TestCase):
         expdata = np.fromfile(filename, dtype=np.uint16)
         expdata.resize((2816, 2048))
         with tempfile.NamedTemporaryFile(suffix='.j2k') as tfile:
-            j = Jp2k(tfile.name, 'wb')
-            j.write(expdata, irreversible=True)
+            j = Jp2k(tfile.name, data=expdata, irreversible=True)
 
             codestream = j.get_codestream()
             self.assertEqual(codestream.segment[2].spcod[8],

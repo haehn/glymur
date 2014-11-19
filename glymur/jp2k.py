@@ -37,16 +37,6 @@ from .jp2box import (
 )
 from .lib import openjpeg as opj, openjp2 as opj2, c as libc
 
-JP2_IDS = ['colr', 'cdef', 'cmap', 'jp2c', 'ftyp', 'ihdr', 'jp2h', 'jP  ',
-           'pclr', 'res ', 'resc', 'resd', 'xml ', 'ulst', 'uinf', 'url ',
-           'uuid']
-JPX_IDS = ['asoc', 'nlst']
-
-_COLORSPACE_MAP = {'rgb': opj2.CLRSPC_SRGB,
-                   'gray': opj2.CLRSPC_GRAY,
-                   'grey': opj2.CLRSPC_GRAY,
-                   'ycc': opj2.CLRSPC_YCC}
-
 class Jp2k(Jp2kBox):
     """JPEG 2000 file.
 
@@ -54,8 +44,6 @@ class Jp2k(Jp2kBox):
     ----------
     filename : str
         The path to the JPEG 2000 file.
-    mode : str
-        The mode used to open the file.
     box : sequence
         List of top-level boxes in the file.  Each box may in turn contain
         its own list of boxes.  Will be empty if the file consists only of a
@@ -92,18 +80,16 @@ class Jp2k(Jp2kBox):
     (728, 1296, 3)
     """
 
-    def __init__(self, filename, mode='rb'):
+    def __init__(self, filename, data=None, shape=None, **kwargs):
         """
         Parameters
         ----------
         filename : str or file
             The path to JPEG 2000 file.
-        mode : str, optional
-            The mode used to open the file.
         """
         Jp2kBox.__init__(self)
         self.filename = filename
-        self.mode = mode
+
         self.box = []
         self._codec_format = None
         self._colorspace = None
@@ -114,8 +100,10 @@ class Jp2k(Jp2kBox):
         self._verbose = False
 
         # Parse the file for JP2/JPX contents only if we are reading it.
-        if mode == 'rb':
+        if data is None and shape is None:
             self.parse()
+        else:
+            self._write(data, **kwargs)
 
     @property
     def ignore_pclr_cmap_cdef(self):
@@ -433,6 +421,77 @@ class Jp2k(Jp2kBox):
 
         self._cparams = cparams
 
+    def _write(self, img_array, verbose=False, **kwargs):
+        """Write image data to a JP2/JPX/J2k file.  Intended usage of the
+        various parameters follows that of OpenJPEG's opj_compress utility.
+
+        This method can only be used to create JPEG 2000 images that can fit
+        in memory.
+
+        Parameters
+        ----------
+        img_array : ndarray
+            Image data to be written to file.
+        cbsize : tuple, optional
+            Code block size (DY, DX).
+        cinema2k : int, optional
+            frames per second, either 24 or 48
+        cinema4k : bool, optional
+            Set to True to specify Cinema4K mode, defaults to false.
+        colorspace : str, optional
+            Either 'rgb' or 'gray'.
+        cratios : iterable
+            Compression ratios for successive layers.
+        eph : bool, optional
+            If true, write SOP marker after each header packet.
+        grid_offset : tuple, optional
+            Offset (DY, DX) of the origin of the image in the reference grid.
+        irreversible : bool, optional
+            If true, use the irreversible DWT 9-7 transform. 
+        mct : bool, optional
+            Specifies usage of the multi component transform.  If not
+            specified, defaults to True if the colorspace is RGB.
+        modesw : int, optional
+            Mode switch.
+                1 = BYPASS(LAZY)
+                2 = RESET
+                4 = RESTART(TERMALL)
+                8 = VSC
+                16 = ERTERM(SEGTERM)
+                32 = SEGMARK(SEGSYM)
+        numres : int, optional
+            Number of resolutions.
+        prog : str, optional
+            Progression order, one of "LRCP" "RLCP", "RPCL", "PCRL", "CPRL".
+        psnr : iterable, optional
+            Different PSNR for successive layers.
+        psizes : list, optional
+            List of precinct sizes.  Each precinct size tuple is defined in
+            (height x width).
+        sop : bool, optional
+            If true, write SOP marker before each packet.
+        subsam : tuple, optional
+            Subsampling factors (dy, dx).
+        tilesize : tuple, optional
+            Numeric tuple specifying tile size in terms of (numrows, numcols),
+            not (X, Y).
+        verbose : bool, optional
+            Print informational messages produced by the OpenJPEG library.
+
+        """
+        if re.match("1.[0-4]", version.openjpeg_version) is not None:
+            raise RuntimeError("You must have at least version 1.5 of OpenJPEG "
+                               "in order to write images.")
+
+        self._shape = img_array.shape
+        self._determine_colorspace(**kwargs)
+        self._populate_cparams(img_array, **kwargs)
+
+        if opj2.OPENJP2 is not None:
+            self._write_openjp2(img_array, verbose=verbose)
+        else:
+            self._write_openjpeg(img_array, verbose=verbose)
+
     def write(self, img_array, verbose=False, **kwargs):
         """Write image data to a JP2/JPX/J2k file.  Intended usage of the
         various parameters follows that of OpenJPEG's opj_compress utility.
@@ -490,16 +549,6 @@ class Jp2k(Jp2kBox):
         verbose : bool, optional
             Print informational messages produced by the OpenJPEG library.
 
-        Examples
-        --------
-        >>> import glymur
-        >>> jfile = glymur.data.nemo()
-        >>> jp2 = glymur.Jp2k(jfile)
-        >>> data = jp2.read(rlevel=1)
-        >>> from tempfile import NamedTemporaryFile
-        >>> tfile = NamedTemporaryFile(suffix='.jp2', delete=False)
-        >>> j = Jp2k(tfile.name, mode='wb')
-        >>> j.write(data.astype(np.uint8))
         """
         if re.match("1.[0-4]", version.openjpeg_version) is not None:
             raise RuntimeError("You must have at least version 1.5 of OpenJPEG "
@@ -679,7 +728,12 @@ class Jp2k(Jp2kBox):
     
             # Turn the colorspace from a string to the enumerated value that
             # the library expects.
-            self._colorspace = _COLORSPACE_MAP[colorspace.lower()]
+            COLORSPACE_MAP = {'rgb': opj2.CLRSPC_SRGB,
+                              'gray': opj2.CLRSPC_GRAY,
+                              'grey': opj2.CLRSPC_GRAY,
+                              'ycc': opj2.CLRSPC_YCC}
+
+            self._colorspace = COLORSPACE_MAP[colorspace.lower()]
     
     
     def _write_openjp2(self, img_array, verbose=False):
@@ -1779,6 +1833,8 @@ def _validate_singletons(boxes):
     multiples = [box_id for box_id, bcount in count.items() if bcount > 1]
     if 'dtbl' in multiples:
         raise IOError('There can only be one dtbl box in a file.')
+
+JPX_IDS = ['asoc', 'nlst']
 
 def _validate_jpx_brand(boxes, brand):
     """
