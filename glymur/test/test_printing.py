@@ -115,8 +115,7 @@ class TestPrinting(unittest.TestCase):
         # OpenJPEG doesn't have such a file.
         data = glymur.Jp2k(self.jp2file)[::2, ::2]
         with tempfile.NamedTemporaryFile(suffix='.jp2') as tfile:
-            j = glymur.Jp2k(tfile.name, 'wb')
-            j.write(data)
+            j = glymur.Jp2k(tfile.name, data=data)
 
             with tempfile.NamedTemporaryFile(suffix='.jp2') as tfile2:
 
