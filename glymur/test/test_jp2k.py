@@ -226,8 +226,16 @@ class TestSliceProtocolRead(SliceProtocolBase):
         expected = self.j2k_data[3:8, :,:]
         np.testing.assert_array_equal(actual, expected)
 
-    @unittest.skip('see issue 301')
+    @unittest.skipIf(re.match("0|1", glymur.version.openjpeg_version),
+                     "Must have openjpeg 2 or higher to run")
     def test_region_rlevel5(self):
+        """
+        maximim rlevel
+
+        There seems to be a difference between version of openjpeg, as 
+        openjp2 produces an image of size (16, 13, 3) and openjpeg produced
+        (17, 12, 3).
+        """
         actual = self.j2k[5:533:32, 27:423:32]
         expected = self.j2k_data_r5[1:17, 1:14]
         np.testing.assert_array_equal(actual, expected)
