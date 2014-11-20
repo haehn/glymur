@@ -123,10 +123,9 @@ class WriteCinemaWarns(CinemaBase):
         infile = opj_data_file(relfile)
         data = skimage.io.imread(infile)
         with tempfile.NamedTemporaryFile(suffix='.j2k') as tfile:
-            j = Jp2k(tfile.name, 'wb')
             regex = 'OpenJPEG library warning:.*'
             with self.assertWarnsRegex(UserWarning, re.compile(regex)):
-                j.write(data, cinema4k=True)
+                j = Jp2k(tfile.name, data=data, cinema4k=True)
 
             codestream = j.get_codestream()
             self.check_cinema4k_codestream(codestream, (4096, 2160))
@@ -136,9 +135,8 @@ class WriteCinemaWarns(CinemaBase):
         infile = opj_data_file(relfile)
         data = skimage.io.imread(infile)
         with tempfile.NamedTemporaryFile(suffix='.j2k') as tfile:
-            j = Jp2k(tfile.name, 'wb')
             with self.assertWarnsRegex(UserWarning, 'OpenJPEG library warning'):
-                j.write(data, cinema2k=48)
+                j = Jp2k(tfile.name, data=data, cinema2k=48)
 
             codestream = j.get_codestream()
             self.check_cinema2k_codestream(codestream, (2048, 857))
@@ -148,9 +146,8 @@ class WriteCinemaWarns(CinemaBase):
         infile = opj_data_file(relfile)
         data = skimage.io.imread(infile)
         with tempfile.NamedTemporaryFile(suffix='.j2k') as tfile:
-            j = Jp2k(tfile.name, 'wb')
             with self.assertWarnsRegex(UserWarning, 'OpenJPEG library warning'):
-                j.write(data, cinema2k=48)
+                j = Jp2k(tfile.name, data=data, cinema2k=48)
 
             codestream = j.get_codestream()
             self.check_cinema2k_codestream(codestream, (2048, 1080))
@@ -160,9 +157,8 @@ class WriteCinemaWarns(CinemaBase):
         infile = opj_data_file(relfile)
         data = skimage.io.imread(infile)
         with tempfile.NamedTemporaryFile(suffix='.j2k') as tfile:
-            j = Jp2k(tfile.name, 'wb')
             with self.assertWarnsRegex(UserWarning, 'OpenJPEG library warning'):
-                j.write(data, cinema2k=24)
+                j = Jp2k(tfile.name, data=data, cinema2k=24)
 
             codestream = j.get_codestream()
             self.check_cinema2k_codestream(codestream, (2048, 1080))
@@ -172,11 +168,10 @@ class WriteCinemaWarns(CinemaBase):
         infile = opj_data_file(relfile)
         data = skimage.io.imread(infile)
         with tempfile.NamedTemporaryFile(suffix='.j2k') as tfile:
-            j = Jp2k(tfile.name, 'wb')
             with self.assertWarnsRegex(UserWarning, 'OpenJPEG library warning'):
                 # OpenJPEG library warning:  The desired maximum codestream
                 # size has limited at least one of the desired quality layers
-                j.write(data, cinema2k=24)
+                j = Jp2k(tfile.name, data=data, cinema2k=24)
 
             codestream = j.get_codestream()
             self.check_cinema2k_codestream(codestream, (2048, 857))
@@ -186,12 +181,11 @@ class WriteCinemaWarns(CinemaBase):
         infile = opj_data_file(relfile)
         data = skimage.io.imread(infile)
         with tempfile.NamedTemporaryFile(suffix='.j2k') as tfile:
-            j = Jp2k(tfile.name, 'wb')
             regex = 'OpenJPEG library warning'
             with self.assertWarnsRegex(UserWarning, regex):
                 # OpenJPEG library warning:  The desired maximum codestream
                 # size has limited at least one of the desired quality layers
-                j.write(data, cinema2k=48)
+                j = Jp2k(tfile.name, data=data, cinema2k=48)
 
             codestream = j.get_codestream()
             self.check_cinema2k_codestream(codestream, (1998, 1080))

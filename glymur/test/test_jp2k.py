@@ -81,13 +81,12 @@ class SliceProtocolBase(unittest.TestCase):
 @unittest.skipIf(os.name == "nt", fixtures.WINDOWS_TMP_FILE_MSG)
 class TestSliceProtocolBaseWrite(SliceProtocolBase):
 
-    @unittest.skip('requires shape implementation')
     def test_write_ellipsis(self):
         expected = self.j2k_data
 
         with tempfile.NamedTemporaryFile(suffix='.j2k') as tfile:
-            j = Jp2k(tfile.name, 'wb')
-            j[...] = self.j2k_data
+            j = Jp2k(tfile.name, shape=expected.shape)
+            j[...] = expected
             actual = j[:]
 
         np.testing.assert_array_equal(actual, expected)
@@ -101,10 +100,9 @@ class TestSliceProtocolBaseWrite(SliceProtocolBase):
 
         np.testing.assert_array_equal(actual, expected)
 
-    @unittest.skip('requires shape implementation')
     def test_cannot_write_with_non_default_single_slice(self):
         with tempfile.NamedTemporaryFile(suffix='.j2k') as tfile:
-            j = Jp2k(tfile.name, 'wb')
+            j = Jp2k(tfile.name, shape=self.j2k_data.shape)
             with self.assertRaises(TypeError):
                 j[slice(None, 0)] = self.j2k_data
             with self.assertRaises(TypeError):
@@ -114,38 +112,33 @@ class TestSliceProtocolBaseWrite(SliceProtocolBase):
             with self.assertRaises(TypeError):
                 j[slice(0, 640)] = self.j2k_data
 
-    @unittest.skip('requires shape implementation')
     def test_cannot_write_a_row(self):
         with tempfile.NamedTemporaryFile(suffix='.j2k') as tfile:
-            j = Jp2k(tfile.name, 'wb')
+            j = Jp2k(tfile.name, shape=self.j2k_data.shape)
             with self.assertRaises(TypeError):
                 j[5] = self.j2k_data
 
-    @unittest.skip('requires shape implementation')
     def test_cannot_write_a_pixel(self):
         with tempfile.NamedTemporaryFile(suffix='.j2k') as tfile:
-            j = Jp2k(tfile.name, 'wb')
+            j = Jp2k(tfile.name, shape=self.j2k_data.shape)
             with self.assertRaises(TypeError):
                 j[25, 35] = self.j2k_data[25, 35]
 
-    @unittest.skip('requires shape implementation')
     def test_cannot_write_a_column(self):
         with tempfile.NamedTemporaryFile(suffix='.j2k') as tfile:
-            j = Jp2k(tfile.name, 'wb')
+            j = Jp2k(tfile.name, shape=self.j2k_data.shape)
             with self.assertRaises(TypeError):
                 j[:, 25, :] = self.j2k_data[:, :25, :]
 
-    @unittest.skip('requires shape implementation')
     def test_cannot_write_a_band(self):
         with tempfile.NamedTemporaryFile(suffix='.j2k') as tfile:
-            j = Jp2k(tfile.name, 'wb')
+            j = Jp2k(tfile.name, shape=self.j2k_data.shape)
             with self.assertRaises(TypeError):
                 j[:, :, 0] = self.j2k_data[:, :, 0]
 
-    @unittest.skip('requires shape implementation')
     def test_cannot_write_a_subarray(self):
         with tempfile.NamedTemporaryFile(suffix='.j2k') as tfile:
-            j = Jp2k(tfile.name, 'wb')
+            j = Jp2k(tfile.name, shape=self.j2k_data.shape)
             with self.assertRaises(TypeError):
                 j[:25, :45, :] = self.j2k_data[:25, :25, :]
 
@@ -884,13 +877,13 @@ class TestJp2k_2_0(unittest.TestCase):
         j = Jp2k(self.jp2file)
         with self.assertRaises(IOError):
             # Start corner must be >= 0
-            j.read(area=(-1, -1, 1, 1))
+            j[-1:1, -1:1]
         with self.assertRaises(IOError):
             # End corner must be > 0
-            j.read(area=(10, 10, 0, 0))
+            j[10:0, 10:0]
         with self.assertRaises(IOError):
             # End corner must be >= start corner
-            j.read(area=(10, 10, 8, 8))
+            j[10:8, 10:8]
 
     @unittest.skipIf(os.name == "nt", fixtures.WINDOWS_TMP_FILE_MSG)
     def test_unrecognized_jp2_clrspace(self):
@@ -1043,7 +1036,6 @@ class TestParsing(unittest.TestCase):
         with self.assertWarnsRegex(UserWarning, 'Invalid profile'):
             jp2 = Jp2k(filename)
 
-    #@unittest.skip('trouble is a brewing...')
     def test_main_header(self):
         """Verify that the main header is not loaded when parsing turned off."""
         # The hidden _main_header attribute should show up after accessing it.
