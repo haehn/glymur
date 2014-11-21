@@ -14,14 +14,11 @@ retrieve a full resolution and first lower-resolution image ::
     >>> jp2file = glymur.data.nemo() # just a path to a JPEG2000 file
     >>> jp2 = glymur.Jp2k(jp2file)
     >>> fullres = jp2[:]
-    >>> print(fullres.shape)
+    >>> fullres.shape
     (1456, 2592, 3)
     >>> thumbnail = jp2[::2, ::2]
-    >>> print(thumbnail.shape)
+    >>> thumbnail.shape
     (728, 1296, 3)
-
-The :py:meth:`read` method exposes many more options for other JPEG 2000
-features such as quality layers.
 
 ... write images?
 =================

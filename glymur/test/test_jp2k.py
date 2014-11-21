@@ -345,11 +345,24 @@ class TestJp2k(unittest.TestCase):
         self.assertEqual(newjp2.filename, self.j2kfile)
         self.assertEqual(len(newjp2.box), 0)
 
-    @unittest.skip("see issue 302")
-    def test_rlevel_max(self):
-        """Verify that rlevel=-1 gets us the lowest resolution image"""
+    @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
+    def test_rlevel_max_backwards_compatibility(self):
+        """
+        Verify that rlevel=-1 gets us the lowest resolution image
+
+        This is an old option only available via the read method, not via
+        array-style slicing.
+        """
         j = Jp2k(self.j2kfile)
-        thumbnail1 = j.read(rlevel=-1)
+        if sys.hexversion < 0x03000000:
+            with warnings.catch_warnings():
+                # Suppress a warning due to deprecated syntax
+                # Not as easy to verify the warning under python2.
+                warnings.simplefilter("ignore")
+                thumbnail1 = j.read(rlevel=-1)
+        else:
+            with self.assertWarns(DeprecationWarning):
+                thumbnail1 = j.read(rlevel=-1)
         thumbnail2 = j[::32, ::32]
         np.testing.assert_array_equal(thumbnail1, thumbnail2)
         self.assertEqual(thumbnail1.shape, (25, 15, 3))
