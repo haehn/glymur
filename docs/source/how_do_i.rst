@@ -249,8 +249,11 @@ The :py:meth:`append` method can add an XML box as shown below::
     >>> jp2.append(xmlbox)
     >>> print(jp2)
 
-... add metadata in a more general fashion?
-===========================================
+... perform even more advanced maneuvers, like ...?
+===================================================
+
+... edit JP2 boxes?
+-------------------
 An existing raw codestream (or JP2 file) can be wrapped (re-wrapped) in a 
 user-defined set of JP2 boxes.  To get just a minimal JP2 jacket on the 
 codestream provided by `goodstuff.j2k` (a file consisting of a raw codestream),
@@ -334,7 +337,7 @@ produces a new JP2 file, while :py:meth:`append` modifies an existing file and
 is currently limited to XML and UUID boxes.
 
 ... create an image with an alpha layer?
-========================================
+----------------------------------------
 
 OpenJPEG can create JP2 files with more than 3 components (use version 2.1.0+ 
 for this), but by default, any extra components are not described
@@ -395,7 +398,7 @@ Here's how the Preview application on the mac shows the RGBA image.
 
     
 ... work with XMP UUIDs?
-========================
+------------------------
 `Wikipedia <http://en.wikipedia.org/wiki/Extensible_Metadata_Platform>`_ states
 that "The Extensible Metadata Platform (XMP) is an ISO standard,
 originally created by Adobe Systems Inc., for the creation, processing
@@ -603,4 +606,21 @@ We can then append the XMP in a UUID box just as before::
             </rdf:Description>
           </rdf:RDF>
         </ns0:xmpmeta>
+
+... turn on OpenJPEG callbacks?
+-------------------------------
+The OpenJPEG info callback handler mechanism can be controlled with a Jp2k 
+property ::
+
+    >>> jp2file = glymur.data.nemo()
+    >>> jp2 = glymur.Jp2k(jp2file)
+    >>> jp2.verbose = True
+    >>> data = jp2[:]
+    [INFO] Start to read j2k main header (3231).
+    [INFO] Main header has been correctly decoded.
+    [INFO] No decoded area parameters, set the decoded area to the whole image
+    [INFO] Header of tile 0 / 0 has been read.
+    [INFO] Tile 1/1 has been decoded.
+    [INFO] Image data has been updated with tile 1.
+    [INFO] Stream reached its end !
 
