@@ -254,6 +254,7 @@ class TestJp2k(unittest.TestCase):
     def tearDown(self):
         pass
 
+    @unittest.skipIf(OPENJPEG_NOT_AVAILABLE, OPENJPEG_NOT_AVAILABLE_MSG)
     @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_warn_if_using_read_method(self):
         """Should warn if deprecated read method is called"""
@@ -349,6 +350,7 @@ class TestJp2k(unittest.TestCase):
         self.assertEqual(newjp2.filename, self.j2kfile)
         self.assertEqual(len(newjp2.box), 0)
 
+    @unittest.skipIf(OPENJPEG_NOT_AVAILABLE, OPENJPEG_NOT_AVAILABLE_MSG)
     @unittest.skipIf(WARNING_INFRASTRUCTURE_ISSUE, WARNING_INFRASTRUCTURE_MSG)
     def test_rlevel_max_backwards_compatibility(self):
         """
