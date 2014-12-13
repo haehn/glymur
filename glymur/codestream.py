@@ -31,16 +31,12 @@ from .core import (LRCP, RLCP, RPCL, PCRL, CPRL,
 from .lib import openjp2 as opj2
 
 _factory = lambda x:  '{0} (invalid)'.format(x)
-_PROGRESSION_ORDER_DISPLAY = _Keydefaultdict(_factory,
-        { LRCP: 'LRCP',
-          RLCP: 'RLCP',
-          RPCL: 'RPCL',
-          PCRL: 'PCRL',
-          CPRL: 'CPRL'})
+_x = {LRCP: 'LRCP', RLCP: 'RLCP', RPCL: 'RPCL', PCRL: 'PCRL', CPRL: 'CPRL'}
+_PROGRESSION_ORDER_DISPLAY = _Keydefaultdict(_factory, _x)
 
-_WAVELET_TRANSFORM_DISPLAY = _Keydefaultdict(_factory,
-        { WAVELET_XFORM_9X7_IRREVERSIBLE: '9-7 irreversible',
-          WAVELET_XFORM_5X3_REVERSIBLE: '5-3 reversible'})
+_x = {WAVELET_XFORM_9X7_IRREVERSIBLE: '9-7 irreversible',
+      WAVELET_XFORM_5X3_REVERSIBLE: '5-3 reversible'}
+_WAVELET_TRANSFORM_DISPLAY = _Keydefaultdict(_factory, _x)
 
 _NO_PROFILE = 0
 _PROFILE_0 = 1
@@ -51,12 +47,12 @@ _PROFILE_4 = 4
 _KNOWN_PROFILES = [_NO_PROFILE, _PROFILE_0, _PROFILE_1, _PROFILE_3, _PROFILE_4]
 
 # How to display the codestream profile.
-_CAPABILITIES_DISPLAY = _Keydefaultdict(_factory,
-        { _NO_PROFILE: 'no profile',
-          _PROFILE_0: '0',
-          _PROFILE_1: '1',
-          _PROFILE_3: 'Cinema 2K',
-          _PROFILE_4: 'Cinema 4K'})
+_x = {_NO_PROFILE: 'no profile',
+      _PROFILE_0: '0',
+      _PROFILE_1: '1',
+      _PROFILE_3: 'Cinema 2K',
+      _PROFILE_4: 'Cinema 4K'}
+_CAPABILITIES_DISPLAY = _Keydefaultdict(_factory, _x)
 
 # Need a catch-all list of valid markers.
 # See table A-1 in ISO/IEC FCD15444-1.
@@ -694,7 +690,7 @@ class Codestream(object):
         try:
             num_tiles_x = (xysiz[0] - xyosiz[0]) / (xytsiz[0] - xytosiz[0])
             num_tiles_y = (xysiz[1] - xyosiz[1]) / (xytsiz[1] - xytosiz[1])
-        except ZeroDivisionError as err:
+        except ZeroDivisionError:
             warnings.warn("Invalid tile dimensions.")
         else:
             numtiles = math.ceil(num_tiles_x) * math.ceil(num_tiles_y)
