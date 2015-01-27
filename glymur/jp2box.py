@@ -356,35 +356,45 @@ class ColourSpecificationBox(Jp2kBox):
         return msg
 
     def __str__(self):
-        msg = Jp2kBox.__str__(self)
+        title = Jp2kBox.__str__(self)
         if _printoptions['short'] is True:
-            return msg
+            return title
 
-        msg += '\n    Method:  {0}'.format(_METHOD_DISPLAY[self.method])
-        msg += '\n    Precedence:  {0}'.format(self.precedence)
+        lst = []
+        text = 'Method:  {0}'.format(_METHOD_DISPLAY[self.method])
+        lst.append(text)
+        text = 'Precedence:  {0}'.format(self.precedence)
+        lst.append(text)
 
         if self.approximation is not 0:
             dispvalue = _APPROX_DISPLAY[self.approximation]
-            msg += '\n    Approximation:  {0}'.format(dispvalue)
+            text = 'Approximation:  {0}'.format(dispvalue)
+            lst.append(text)
 
         if self.colorspace is not None:
             dispvalue = _COLORSPACE_MAP_DISPLAY[self.colorspace]
-            msg += '\n    Colorspace:  {0}'.format(dispvalue)
+            text = 'Colorspace:  {0}'.format(dispvalue)
         else:
             # 2.7 has trouble pretty-printing ordered dicts so we just have
             # to print as a regular dict in this case.
             if self.icc_profile is None:
-                msg += '\n    ICC Profile:  None'
+                text = 'ICC Profile:  None'
             else:
                 if sys.hexversion < 0x03000000:
                     icc_profile = dict(self.icc_profile)
                 else:
                     icc_profile = self.icc_profile
-                dispvalue = pprint.pformat(icc_profile)
-                lines = [' ' * 8 + y for y in dispvalue.split('\n')]
-                msg += '\n    ICC Profile:\n{0}'.format('\n'.join(lines))
+                text = pprint.pformat(icc_profile)
+                text = self._indent(text)
+                text = '\n'.join(['ICC Profile:', text])
 
-        return msg
+        lst.append(text)
+
+        text = '\n'.join(lst)
+
+        text = '\n'.join([title, self._indent(text)])
+
+        return text
 
     def write(self, fptr):
         """Write an Colour Specification box to file.
