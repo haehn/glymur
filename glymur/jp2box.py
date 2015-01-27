@@ -946,19 +946,26 @@ class ComponentMappingBox(Jp2kBox):
         return msg
 
     def __str__(self):
-        msg = Jp2kBox.__str__(self)
+        title = Jp2kBox.__str__(self)
         if _printoptions['short'] is True:
-            return msg
+            return title
 
+        lst = []
         for k in range(len(self.component_index)):
             if self.mapping_type[k] == 1:
-                msg += '\n    Component {0} ==> palette column {1}'
-                msg = msg.format(self.component_index[k],
-                                 self.palette_index[k])
+                text = 'Component {0} ==> palette column {1}'
+                text = text.format(self.component_index[k],
+                                   self.palette_index[k])
             else:
-                msg += '\n    Component {0} ==> {1}'
-                msg = msg.format(self.component_index[k], k)
-        return msg
+                text = 'Component {0} ==> {1}'
+                text = text.format(self.component_index[k], k)
+            lst.append(text)
+
+        text = '\n'.join(lst)
+        text = self._indent(text)
+        text = '\n'.join([title, text])
+
+        return text
 
     def write(self, fptr):
         """Write a Component Mapping box to file.
