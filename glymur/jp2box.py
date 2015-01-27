@@ -1065,16 +1065,20 @@ class ContiguousCodestreamBox(Jp2kBox):
         return msg.format(repr(self.codestream))
 
     def __str__(self):
-        msg = Jp2kBox.__str__(self)
+        title = Jp2kBox.__str__(self)
         if _printoptions['short'] is True:
-            return msg
+            return title
         if _printoptions['codestream'] is False:
-            return msg
+            return title
 
+        lst = []
         for segment in self.codestream.segment:
-            msg += '\n' + self._indent(str(segment), indent_level=4)
+            lst.append(str(segment))
 
-        return msg
+        text = '\n'.join(lst)
+        text = self._indent(text)
+        text = '\n'.join([title, text])
+        return text
 
     @classmethod
     def parse(cls, fptr, offset=0, length=0):
@@ -1173,13 +1177,18 @@ class DataReferenceBox(Jp2kBox):
         fptr.seek(end_pos)
 
     def __str__(self):
-        msg = Jp2kBox.__str__(self)
+        title = Jp2kBox.__str__(self)
         if _printoptions['short'] is True:
-            return msg
+            return title
 
+        lst = []
         for box in self.DR:
-            msg += '\n    ' + str(box)
-        return msg
+            lst.append(str(box))
+        text = '\n'.join(lst)
+        text = self._indent(text)
+
+        text = '\n'.join([title, text])
+        return text
 
     def __repr__(self):
         msg = 'glymur.jp2box.DataReferenceBox()'
@@ -1276,17 +1285,22 @@ class FileTypeBox(Jp2kBox):
         return msg
 
     def __str__(self):
-        msg = Jp2kBox.__str__(self)
+        title = Jp2kBox.__str__(self)
         if _printoptions['short'] is True:
-            return msg
+            return title
 
-        lst = [msg,
-               '    Brand:  {0}',
-               '    Compatibility:  {1}']
-        msg = '\n'.join(lst)
-        msg = msg.format(self.brand, self.compatibility_list)
+        lst = []
+        text = 'Brand:  {0}'.format(self.brand)
+        lst.append(text)
+        text = 'Compatibility:  {0}'.format(self.compatibility_list)
+        lst.append(text)
 
-        return msg
+        text = '\n'.join(lst)
+        text = self._indent(text)
+
+        text = '\n'.join([title, text])
+
+        return text
 
     def _validate(self, writing=False):
         """Validate the box before writing to file."""
@@ -1408,19 +1422,24 @@ class FragmentListBox(Jp2kBox):
         return msg
 
     def __str__(self):
-        msg = Jp2kBox.__str__(self)
+        title = Jp2kBox.__str__(self)
         if _printoptions['short'] is True:
-            return msg
+            return title
 
+        lst = []
         for j in range(len(self.fragment_offset)):
-            msg += "\n    Offset {0}:  {1}"
-            msg += "\n    Fragment Length {2}:  {3}"
-            msg += "\n    Data Reference {4}:  {5}"
-            msg = msg.format(j, self.fragment_offset[j],
-                             j, self.fragment_length[j],
-                             j, self.data_reference[j])
+            text = "Offset {0}:  {1}".format(j, self.fragment_offset[j])
+            lst.append(text)
+            text = "Fragment Length {0}:  {1}".format(j,
+                                                      self.fragment_length[j])
+            lst.append(text)
+            text = "Data Reference {0}:  {1}".format(j, self.data_reference[j])
+            lst.append(text)
 
-        return msg
+        text = '\n'.join(lst)
+        text = self._indent(text)
+        text = '\n'.join([title, text])
+        return text
 
     def write(self, fptr):
         """Write a fragment list box to file.
@@ -1570,11 +1589,7 @@ class FreeBox(Jp2kBox):
         return msg
 
     def __str__(self):
-        msg = Jp2kBox.__str__(self)
-        if _printoptions['short'] is True:
-            return msg
-
-        return msg
+        return Jp2kBox.__str__(self)
 
     @classmethod
     def parse(cls, fptr, offset, length):
@@ -1666,23 +1681,34 @@ class ImageHeaderBox(Jp2kBox):
         return msg
 
     def __str__(self):
-        msg = Jp2kBox.__str__(self)
+        title = Jp2kBox.__str__(self)
         if _printoptions['short'] is True:
-            return msg
+            return title
 
-        msg = "{0}"
-        msg += '\n    Size:  [{1} {2} {3}]'
-        msg += '\n    Bitdepth:  {4}'
-        msg += '\n    Signed:  {5}'
-        msg += '\n    Compression:  {6}'
-        msg += '\n    Colorspace Unknown:  {7}'
-        msg = msg.format(Jp2kBox.__str__(self),
-                         self.height, self.width, self.num_components,
-                         self.bits_per_component,
-                         self.signed,
-                         'wavelet' if self.compression == 7 else 'unknown',
-                         self.colorspace_unknown)
-        return msg
+        lst = []
+
+        text = 'Size:  [{0} {1} {2}]'
+        text = text.format(self.height, self.width, self.num_components)
+        lst.append(text)
+
+        text = 'Bitdepth:  {0}'.format(self.bits_per_component)
+        lst.append(text)
+
+        text = 'Signed:  {0}'.format(self.signed)
+        lst.append(text)
+
+        text = 'Compression:  {0}'
+        text = text.format('wavelet' if self.compression == 7 else 'unknown')
+        lst.append(text)
+
+        text = 'Colorspace Unknown:  {0}'.format(self.colorspace_unknown)
+        lst.append(text)
+
+        text = '\n'.join(lst)
+        text = self._indent(text)
+        text = '\n'.join([title, text])
+
+        return text
 
     def write(self, fptr):
         """Write an Image Header box to file.
@@ -1897,14 +1923,16 @@ class JPEG2000SignatureBox(Jp2kBox):
         return 'glymur.jp2box.JPEG2000SignatureBox()'
 
     def __str__(self):
-        msg = Jp2kBox.__str__(self)
+        title = Jp2kBox.__str__(self)
         if _printoptions['short'] is True:
-            return msg
+            return title
 
-        msg += '\n    Signature:  {0:02x}{1:02x}{2:02x}{3:02x}'
-        msg = msg.format(self.signature[0], self.signature[1],
-                         self.signature[2], self.signature[3])
-        return msg
+        body = 'Signature:  {0:02x}{1:02x}{2:02x}{3:02x}'
+        body = body.format(self.signature[0], self.signature[1],
+                           self.signature[2], self.signature[3])
+        body = self._indent(body)
+        text = '\n'.join([title, body])
+        return text
 
     def write(self, fptr):
         """Write a JPEG 2000 Signature box to file.
@@ -1986,12 +2014,15 @@ class PaletteBox(Jp2kBox):
         return msg
 
     def __str__(self):
-        msg = Jp2kBox.__str__(self)
+        title = Jp2kBox.__str__(self)
         if _printoptions['short'] is True:
-            return msg
+            return title
 
-        msg += '\n    Size:  ({0} x {1})'.format(*self.palette.shape)
-        return msg
+        body = 'Size:  ({0} x {1})'.format(*self.palette.shape)
+        body = self._indent(body)
+
+        text = '\n'.join([title, body])
+        return text
 
     def write(self, fptr):
         """Write a Palette box to file.
@@ -2235,25 +2266,47 @@ class ReaderRequirementsBox(Jp2kBox):
         return msg
 
     def __str__(self):
-        msg = Jp2kBox.__str__(self)
+        title = Jp2kBox.__str__(self)
         if _printoptions['short'] is True:
-            return msg
+            return title
 
-        msg += '\n    Fully Understands Aspect Mask:  0x{0:x}'
-        msg = msg.format(self.fuam)
-        msg += '\n    Display Completely Mask:  0x{0:x}'.format(self.dcm)
+        lst = []
 
-        msg += '\n    Standard Features and Masks:'
+        text = 'Fully Understands Aspect Mask:  0x{0:x}'.format(self.fuam)
+        lst.append(text)
+
+        text = 'Display Completely Mask:  0x{0:x}'.format(self.dcm)
+        lst.append(text)
+
+        text = 'Standard Features and Masks:'
+        lst.append(text)
+
+        lst2 = []
         for j in range(len(self.standard_flag)):
             args = (self.standard_flag[j], self.standard_mask[j],
                     _READER_REQUIREMENTS_DISPLAY[self.standard_flag[j]])
-            msg += '\n        Feature {0:03d}:  0x{1:x} {2}'.format(*args)
+            text = 'Feature {0:03d}:  0x{1:x} {2}'.format(*args)
+            lst2.append(text)
+        text = '\n'.join(lst2)
+        text = self._indent(text)
+        lst.append(text)
 
-        msg += '\n    Vendor Features:'
+        text = 'Vendor Features:'
+        lst.append(text)
+
+        lst2 = []
         for j in range(len(self.vendor_feature)):
-            msg += '\n        UUID {0}'.format(self.vendor_feature[j])
+            text = 'UUID {0}'.format(self.vendor_feature[j])
+            lst2.append(text)
+        text = '\n'.join(lst2)
+        text = self._indent(text)
+        lst.append(text)
 
-        return msg
+        text = '\n'.join(lst)
+        text = self._indent(text)
+        text = '\n'.join([title, text])
+
+        return text
 
     @classmethod
     def parse(cls, fptr, offset, length):
