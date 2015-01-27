@@ -630,19 +630,26 @@ class ChannelDefinitionBox(Jp2kBox):
             self._dispatch_validation_error(msg, writing=writing)
 
     def __str__(self):
-        msg = Jp2kBox.__str__(self)
+        title = Jp2kBox.__str__(self)
         if _printoptions['short'] is True:
-            return msg
+            return title
 
+        lst = []
         for j in range(len(self.association)):
             color_type_string = _COLOR_TYPE_MAP_DISPLAY[self.channel_type[j]]
             if self.association[j] == 0:
                 assn = 'whole image'
             else:
                 assn = str(self.association[j])
-            msg += '\n    Channel {0} ({1}) ==> ({2})'
-            msg = msg.format(self.index[j], color_type_string, assn)
-        return msg
+            text = 'Channel {0} ({1}) ==> ({2})'.format(self.index[j],
+                                                        color_type_string,
+                                                        assn)
+            lst.append(text)
+
+        text = '\n'.join(lst)
+        text = self._indent(text)
+        text = '\n'.join([title, text])
+        return text
 
     def __repr__(self):
         msg = "glymur.jp2box.ChannelDefinitionBox("
