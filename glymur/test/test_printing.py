@@ -1125,6 +1125,7 @@ class TestJp2dump(unittest.TestCase):
 
     def test_suppress_xml(self):
         """Verify dumping with -x, suppress XML."""
+        self.maxDiff = None
         actual = self.run_jp2dump(['', '-x', self.jp2file])
 
         # shave off the XML and non-main-header segments

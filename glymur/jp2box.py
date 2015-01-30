@@ -2577,13 +2577,21 @@ class CaptureResolutionBox(Jp2kBox):
         return msg
 
     def __str__(self):
-        msg = Jp2kBox.__str__(self)
+        title = Jp2kBox.__str__(self)
         if _printoptions['short'] is True:
-            return msg
+            return title
 
-        msg += '\n    VCR:  {0}'.format(self.vertical_resolution)
-        msg += '\n    HCR:  {0}'.format(self.horizontal_resolution)
-        return msg
+        lst = []
+        text = 'VCR:  {0}'.format(self.vertical_resolution)
+        lst.append(text)
+        text = 'HCR:  {0}'.format(self.horizontal_resolution)
+        lst.append(text)
+
+        text = '\n'.join(lst)
+        body = self._indent(text)
+
+        text = '\n'.join([title, body])
+        return text
 
     @classmethod
     def parse(cls, fptr, offset, length):
@@ -2643,13 +2651,21 @@ class DisplayResolutionBox(Jp2kBox):
         return msg
 
     def __str__(self):
-        msg = Jp2kBox.__str__(self)
+        title = Jp2kBox.__str__(self)
         if _printoptions['short'] is True:
-            return msg
+            return title
 
-        msg += '\n    VDR:  {0}'.format(self.vertical_resolution)
-        msg += '\n    HDR:  {0}'.format(self.horizontal_resolution)
-        return msg
+        lst = []
+        text = 'VDR:  {0}'.format(self.vertical_resolution)
+        lst.append(text)
+        text = 'HDR:  {0}'.format(self.horizontal_resolution)
+        lst.append(text)
+
+        text = '\n'.join(lst)
+        body = self._indent(text)
+
+        text = '\n'.join([title, body])
+        return text
 
     @classmethod
     def parse(cls, fptr, offset, length):
@@ -2703,12 +2719,15 @@ class LabelBox(Jp2kBox):
         self.offset = offset
 
     def __str__(self):
-        msg = Jp2kBox.__str__(self)
+        title = Jp2kBox.__str__(self)
         if _printoptions['short'] is True:
-            return msg
+            return title
 
-        msg += '\n    Label:  {0}'.format(self.label)
-        return msg
+        text = 'Label:  {0}'.format(self.label)
+        body = self._indent(text)
+
+        text = '\n'.join([title, body])
+        return text
 
     def __repr__(self):
         msg = 'glymur.jp2box.LabelBox("{0}")'.format(self.label)
@@ -2771,25 +2790,30 @@ class NumberListBox(Jp2kBox):
         self.offset = offset
 
     def __str__(self):
-        msg = Jp2kBox.__str__(self)
+        title = Jp2kBox.__str__(self)
         if _printoptions['short'] is True:
-            return msg
+            return title
 
+        lst = []
         for j, association in enumerate(self.associations):
-            msg += '\n    Association[{0}]:  '.format(j)
+            text = 'Association[{0}]:  '.format(j)
             if association == 0:
-                msg += 'the rendered result'
+                text += 'the rendered result'
             elif (association >> 24) == 1:
                 idx = association & 0x00FFFFFF
-                msg += 'codestream {0}'
-                msg = msg.format(idx)
+                text += 'codestream {0}'.format(idx)
             elif (association >> 24) == 2:
                 idx = association & 0x00FFFFFF
-                msg += 'compositing layer {0}'
-                msg = msg.format(idx)
+                text += 'compositing layer {0}'.format(idx)
             else:
-                msg += 'unrecognized'
-        return msg
+                text += 'unrecognized'
+            lst.append(text)
+
+        body = '\n'.join(lst)
+        body = self._indent(body)
+
+        text = '\n'.join([title, body])
+        return text
 
     def __repr__(self):
         msg = 'glymur.jp2box.NumberListBox(associations={0})'
@@ -2874,21 +2898,22 @@ class XMLBox(Jp2kBox):
         return "glymur.jp2box.XMLBox(xml={0})".format(self.xml)
 
     def __str__(self):
-        msg = Jp2kBox.__str__(self)
+        title = Jp2kBox.__str__(self)
         if _printoptions['short'] is True:
-            return msg
+            return title
         if _printoptions['xml'] is False:
-            return msg
+            return title
 
-        msg += '\n'
         if self.xml is not None:
-            xmlstring = ET.tostring(self.xml,
-                                    encoding='utf-8',
-                                    pretty_print=True).decode('utf-8')
+            body = ET.tostring(self.xml,
+                               encoding='utf-8',
+                               pretty_print=True).decode('utf-8')
         else:
-            xmlstring = 'None'
-        msg += self._indent(xmlstring)
-        return msg
+            body = 'None'
+        body = self._indent(body)
+
+        text = '\n'.join([title, body])
+        return text
 
     def write(self, fptr):
         """Write an XML box to file.
@@ -2995,13 +3020,19 @@ class UUIDListBox(Jp2kBox):
         return msg
 
     def __str__(self):
-        msg = Jp2kBox.__str__(self)
+        title = Jp2kBox.__str__(self)
         if _printoptions['short'] is True:
-            return msg
+            return title
 
+        lst = []
         for j, uuid_item in enumerate(self.ulst):
-            msg += '\n    UUID[{0}]:  {1}'.format(j, uuid_item)
-        return msg
+            text = 'UUID[{0}]:  {1}'.format(j, uuid_item)
+            lst.append(text)
+        body = '\n'.join(lst)
+        body = self._indent(body)
+
+        text = '\n'.join([title, body])
+        return text
 
     @classmethod
     def parse(cls, fptr, offset, length):
@@ -3147,20 +3178,21 @@ class DataEntryURLBox(Jp2kBox):
         return msg
 
     def __str__(self):
-        msg = Jp2kBox.__str__(self)
+        title = Jp2kBox.__str__(self)
         if _printoptions['short'] is True:
-            return msg
+            return title
 
-        msg += '\n    '
+        lst = ['Version:  {0}',
+               'Flag:  {1} {2} {3}',
+               'URL:  "{4}"']
+        body = '\n'.join(lst)
+        body = body.format(self.version,
+                           self.flag[0], self.flag[1], self.flag[2],
+                           self.url)
+        body = self._indent(body)
 
-        lines = ['Version:  {0}',
-                 'Flag:  {1} {2} {3}',
-                 'URL:  "{4}"']
-        msg += '\n    '.join(lines)
-        msg = msg.format(self.version,
-                         self.flag[0], self.flag[1], self.flag[2],
-                         self.url)
-        return msg
+        text = '\n'.join([title, body])
+        return text
 
     @classmethod
     def parse(cls, fptr, offset, length):
@@ -3299,38 +3331,44 @@ class UUIDBox(Jp2kBox):
         return msg.format(repr(self.uuid), len(self.raw_data))
 
     def __str__(self):
-        msg = Jp2kBox.__str__(self)
+        title = Jp2kBox.__str__(self)
         if _printoptions['short'] is True:
-            return msg
+            return title
 
-        msg = '{0}\n    UUID:  {1}'.format(msg, self.uuid)
+        text = 'UUID:  {0}'.format(self.uuid)
         if self.uuid == UUID('be7acfcb-97a9-42e8-9c71-999491e3afac'):
-            msg += ' (XMP)'
+            text += ' (XMP)'
         elif self.uuid.bytes == b'JpgTiffExif->JP2':
-            msg += ' (EXIF)'
+            text += ' (EXIF)'
         else:
-            msg += ' (unknown)'
+            text += ' (unknown)'
+
+        lst = [text]
 
         if (((_printoptions['xml'] is False) and
              (self.uuid == UUID('be7acfcb-97a9-42e8-9c71-999491e3afac')))):
             # If it's an XMP UUID, don't print the XML contents.
-            return msg
+            pass
 
-        if self.uuid == UUID('be7acfcb-97a9-42e8-9c71-999491e3afac'):
-            line = '\n    UUID Data:\n{0}'
+        elif self.uuid == UUID('be7acfcb-97a9-42e8-9c71-999491e3afac'):
+            line = 'UUID Data:\n{0}'
             xmlstring = ET.tostring(self.data,
                                     encoding='utf-8',
                                     pretty_print=True).decode('utf-8')
-            # indent it a bit
-            xmlstring = self._indent(xmlstring.rstrip())
-            msg += line.format(xmlstring)
+            text = line.format(xmlstring)
+            lst.append(text)
         elif self.uuid.bytes == b'JpgTiffExif->JP2':
-            msg += '\n    UUID Data:  {0}'.format(str(self.data))
+            text = 'UUID Data:  {0}'.format(str(self.data))
+            lst.append(text)
         else:
-            line = '\n    UUID Data:  {0} bytes'
-            msg += line.format(len(self.raw_data))
+            text = 'UUID Data:  {0} bytes'.format(len(self.raw_data))
+            lst.append(text)
 
-        return msg
+        body = '\n'.join(lst)
+        body = self._indent(body)
+
+        text = '\n'.join([title, body])
+        return text
 
     def write(self, fptr):
         """Write a UUID box to file.
