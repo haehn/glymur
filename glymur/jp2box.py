@@ -3355,6 +3355,8 @@ class UUIDBox(Jp2kBox):
             xmlstring = ET.tostring(self.data,
                                     encoding='utf-8',
                                     pretty_print=True).decode('utf-8')
+            # Remove any trailing newline
+            xmlstring = xmlstring.rstrip()
             text = line.format(xmlstring)
             lst.append(text)
         elif self.uuid.bytes == b'JpgTiffExif->JP2':
